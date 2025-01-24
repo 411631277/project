@@ -1,10 +1,30 @@
 import 'package:doctor_2/main.screen.dart';
 import 'package:doctor_2/success.dart';
 import 'package:flutter/material.dart';
-// 引入 main_screen.dart 文件
 
-class RegisterWidget extends StatelessWidget {
+class RegisterWidget extends StatefulWidget {
   const RegisterWidget({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _RegisterWidgetState createState() => _RegisterWidgetState();
+}
+
+class _RegisterWidgetState extends State<RegisterWidget> {
+  // 問題的答案狀態
+  Map<String, bool?> answers = {
+    "是否會喝酒?": null,
+    "是否會吸菸?": null,
+    "是否會嚼食檳榔": null,
+    "有無慢性病": null,
+  };
+
+  // 聯絡偏好設定狀態
+  bool isEmailPreferred = false;
+  bool isPhonePreferred = false;
+
+  // 單獨管理「是否為新手媽媽」
+  bool? isNewMom;
 
   @override
   Widget build(BuildContext context) {
@@ -88,31 +108,68 @@ class RegisterWidget extends StatelessWidget {
               _buildLabel('聯絡偏好設定'),
               Row(
                 children: [
-                  _buildCheckbox('E-Mail'),
-                  const SizedBox(width: 20),
-                  _buildCheckbox('電話'),
+                  Expanded(
+                    child: CheckboxListTile(
+                      title: const Text("E-Mail"),
+                      value: isEmailPreferred,
+                      onChanged: (value) {
+                        setState(() {
+                          isEmailPreferred = value ?? false;
+                        });
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: CheckboxListTile(
+                      title: const Text("電話"),
+                      value: isPhonePreferred,
+                      onChanged: (value) {
+                        setState(() {
+                          isPhonePreferred = value ?? false;
+                        });
+                      },
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
-              // 是否問題
-              _buildYesNoRow('是否會喝酒?'),
-              _buildYesNoRow('是否會吸菸?'),
-              _buildYesNoRow('是否會嚼食檳榔'),
-              _buildYesNoRow('有無慢性病'),
+              // 勾選題
+              ...answers.keys.map((question) => _buildYesNoRow(question)),
               const SizedBox(height: 20),
               // 下拉選單與婚姻狀況
               _buildLabel('目前婚姻狀況'),
               const SizedBox(height: 10),
               _buildDropdown(['--', '結婚', '未婚', '離婚', '喪偶']),
               const SizedBox(height: 20),
+              // 是否為新手媽媽
               _buildLabel('是否為新手媽媽'),
               Row(
                 children: [
-                  _buildCheckbox('是'),
-                  const SizedBox(width: 20),
-                  _buildCheckbox('否'),
+                  Expanded(
+                    child: CheckboxListTile(
+                      title: const Text("是"),
+                      value: isNewMom == true,
+                      onChanged: (value) {
+                        setState(() {
+                          isNewMom = true;
+                        });
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: CheckboxListTile(
+                      title: const Text("否"),
+                      value: isNewMom == false,
+                      onChanged: (value) {
+                        setState(() {
+                          isNewMom = false;
+                        });
+                      },
+                    ),
+                  ),
                 ],
               ),
+              const Divider(),
               const SizedBox(height: 20),
               // 按鈕
               Row(
@@ -197,29 +254,38 @@ class RegisterWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildCheckbox(String label) {
-    return Row(
+  Widget _buildYesNoRow(String question) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Checkbox(value: false, onChanged: (value) {}),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color.fromRGBO(147, 129, 108, 1),
-            fontSize: 16,
-          ),
+        _buildLabel(question),
+        Row(
+          children: [
+            Expanded(
+              child: CheckboxListTile(
+                title: const Text("是"),
+                value: answers[question] == true,
+                onChanged: (value) {
+                  setState(() {
+                    answers[question] = true;
+                  });
+                },
+              ),
+            ),
+            Expanded(
+              child: CheckboxListTile(
+                title: const Text("否"),
+                value: answers[question] == false,
+                onChanged: (value) {
+                  setState(() {
+                    answers[question] = false;
+                  });
+                },
+              ),
+            ),
+          ],
         ),
-      ],
-    );
-  }
-
-  Widget _buildYesNoRow(String label) {
-    return Row(
-      children: [
-        _buildLabel(label),
-        const SizedBox(width: 20),
-        _buildCheckbox('是'),
-        const SizedBox(width: 20),
-        _buildCheckbox('否'),
+        const Divider(),
       ],
     );
   }

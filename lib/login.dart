@@ -1,3 +1,4 @@
+import 'package:doctor_2/forget.dart';
 import 'package:flutter/material.dart';
 
 class LoginWidget extends StatelessWidget {
@@ -150,12 +151,20 @@ class LoginWidget extends StatelessWidget {
                   onPressed: () {
                     // 忘記密碼功能
                   },
-                  child: const Text(
-                    '忘記密碼',
-                    style: TextStyle(
-                      color: Color.fromRGBO(0, 0, 0, 0.54),
-                      fontSize: 24,
-                    ),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ForgetWidget(),
+                        ),
+                      );
+                    },
+                    child: const Text('忘記密碼',
+                        style: TextStyle(
+                          color: Color.fromRGBO(0, 0, 0, 0.54),
+                          fontSize: 24,
+                        )),
                   ),
                 ),
               ),

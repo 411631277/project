@@ -1,3 +1,4 @@
+import 'package:doctor_2/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -17,15 +18,15 @@ class SuccessWidget extends StatelessWidget {
           children: <Widget>[
             // 標題文字
             const Positioned(
-              top: 183,
-              left: 56,
+              top: 200,
+              left: 18,
               child: Text(
                 '帳號創建成功!!!\n為了理解使用者目前狀況\n請填寫以下問卷',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color.fromRGBO(0, 0, 0, 1),
                   fontFamily: 'Inter',
-                  fontSize: 40,
+                  fontSize: 30,
                   fontWeight: FontWeight.normal,
                   height: 1.5, // 調整行高
                 ),
@@ -45,18 +46,26 @@ class SuccessWidget extends StatelessWidget {
               ),
             ),
             // 下一步文字
-            const Positioned(
-              top: 526,
-              left: 177,
-              child: Text(
-                '下一步',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 24,
-                  fontWeight: FontWeight.normal,
-                ),
+            Positioned(
+              top: 518,
+              left: 167,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Home_screenWidget(),
+                    ),
+                  );
+                },
+                child: Text('下一步',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      color: Color.fromRGBO(147, 129, 108, 1),
+                      fontFamily: 'Inter',
+                      fontSize: 24,
+                      fontWeight: FontWeight.normal,
+                    )),
               ),
             ),
             // 返回按鈕的圖示(最後發布時拿除)
