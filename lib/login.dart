@@ -8,7 +8,7 @@ class LoginWidget extends StatelessWidget {
     return Scaffold(
       body: Container(
         width: 412,
-        height: 881,
+        height: 917,
         decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),

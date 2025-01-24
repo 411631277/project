@@ -1,251 +1,162 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-// ignore: use_key_in_widget_constructors
 class PhoneWidget extends StatelessWidget {
+  const PhoneWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
-    // Figma Flutter Generator PhoneWidget - FRAME
     return Container(
-        width: 412,
-        height: 917,
-        decoration: BoxDecoration(
-          color: Color.fromRGBO(233, 227, 213, 1),
-        ),
-        child: Stack(children: <Widget>[
+      width: 412,
+      height: 917,
+      decoration: const BoxDecoration(
+        color: Color.fromRGBO(233, 227, 213, 1),
+      ),
+      child: Stack(
+        children: <Widget>[
+          // 標題 "院內電話查詢"
+          const Positioned(
+            top: 103,
+            left: 132,
+            child: Text(
+              '院內電話查詢',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color.fromRGBO(147, 129, 108, 1),
+                fontFamily: 'Inter',
+                fontSize: 30,
+                fontWeight: FontWeight.normal,
+                height: 1,
+              ),
+            ),
+          ),
+          // "語音預約掛號"
+          const Positioned(
+            top: 205,
+            left: 146,
+            child: Text(
+              '語音預約掛號',
+              style: TextStyle(
+                color: Color.fromRGBO(147, 129, 108, 1),
+                fontFamily: 'Inter',
+                fontSize: 20,
+                fontWeight: FontWeight.normal,
+                height: 1,
+              ),
+            ),
+          ),
+          const Positioned(
+            top: 245, // 高度差 40
+            left: 139,
+            child: Text(
+              '(02)87927111',
+              style: TextStyle(
+                color: Color.fromRGBO(147, 129, 108, 1),
+                fontFamily: 'Inter',
+                fontSize: 20,
+                fontWeight: FontWeight.normal,
+                height: 1,
+              ),
+            ),
+          ),
+          // "人工預約掛號"
+          const Positioned(
+            top: 325, // 隔 80
+            left: 146,
+            child: Text(
+              '人工預約掛號',
+              style: TextStyle(
+                color: Color.fromRGBO(147, 129, 108, 1),
+                fontFamily: 'Inter',
+                fontSize: 20,
+                fontWeight: FontWeight.normal,
+                height: 1,
+              ),
+            ),
+          ),
+          const Positioned(
+            top: 365, // 高度差 40
+            left: 139,
+            child: Text(
+              '(02)87927222',
+              style: TextStyle(
+                color: Color.fromRGBO(147, 129, 108, 1),
+                fontFamily: 'Inter',
+                fontSize: 20,
+                fontWeight: FontWeight.normal,
+                height: 1,
+              ),
+            ),
+          ),
+          // "三總產後病房電話"
+          const Positioned(
+            top: 445, // 隔 80
+            left: 123,
+            child: Text(
+              '三總產後病房電話',
+              style: TextStyle(
+                color: Color.fromRGBO(147, 129, 108, 1),
+                fontFamily: 'Inter',
+                fontSize: 20,
+                fontWeight: FontWeight.normal,
+                height: 1,
+              ),
+            ),
+          ),
+          const Positioned(
+            top: 485, // 高度差 40
+            left: 100,
+            child: Text(
+              '(02)8792-3100#55000',
+              style: TextStyle(
+                color: Color.fromRGBO(147, 129, 108, 1),
+                fontFamily: 'Inter',
+                fontSize: 20,
+                fontWeight: FontWeight.normal,
+                height: 1,
+              ),
+            ),
+          ),
+          // 圖示 (電話圖案)
           Positioned(
-              top: 103,
-              left: 132,
-              child: Text(
-                '院內電話查詢',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: Color.fromRGBO(147, 129, 108, 1),
-                    fontFamily: 'Inter',
-                    fontSize: 30,
-                    letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
-                    fontWeight: FontWeight.normal,
-                    height: 1),
-              )),
+            top: 97,
+            left: 49,
+            child: Container(
+              width: 42,
+              height: 48,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/phone.png'),
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+            ),
+          ),
+          // 返回按鈕
           Positioned(
-              top: 163,
-              left: 65,
-              child: Container(
-                  width: 247,
-                  height: 513,
-                  decoration: BoxDecoration(),
-                  child: Stack(children: <Widget>[
-                    Positioned(
-                        top: 25,
-                        left: 57,
-                        child: Text(
-                          '民診處辦公室',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 335,
-                        left: 55,
-                        child: Text(
-                          '語音預約掛號',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 417,
-                        left: 55,
-                        child: Text(
-                          '人工預約掛號',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 86,
-                        left: 67,
-                        child: Text(
-                          '稽核作業組',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 146,
-                        left: 67,
-                        child: Text(
-                          '營運成本組',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 206,
-                        left: 67,
-                        child: Text(
-                          '保險作業組',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 56,
-                        left: 20,
-                        child: Text(
-                          '(02)87923311#88006 ',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 116,
-                        left: 20,
-                        child: Text(
-                          '(02)87923311#88207',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 176,
-                        left: 20,
-                        child: Text(
-                          '(02)87923311#88006 ',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 236,
-                        left: 19,
-                        child: Text(
-                          ' (02)87923311#88172 ',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 376,
-                        left: 51,
-                        child: Text(
-                          '(02)87927111',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 458,
-                        left: 51,
-                        child: Text(
-                          '(02)87927222',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                  ]))),
-          Positioned(
-              top: 97,
-              left: 49,
-              child: Container(
-                  width: 42,
-                  height: 48,
-                  decoration: BoxDecoration(
+            top: 733,
+            left: 109,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context); // 返回上一頁
+              },
+              child: Transform.rotate(
+                angle: -178.41630656524814 * (math.pi / 180),
+                child: Container(
+                  width: 58.74,
+                  height: 62.83,
+                  decoration: const BoxDecoration(
                     image: DecorationImage(
-                        image: AssetImage('assets/images/3.png'),
-                        fit: BoxFit.fitWidth),
-                  ))),
-          Positioned(
-              top: 733,
-              left: 109,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context); // 返回上一頁
-                },
-                child: Transform.rotate(
-                    angle: -178.41630656524814 * (math.pi / 180),
-                    child: Container(
-                      width: 58.7400016784668,
-                      height: 62.838134765625,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage('assets/images/7.png'),
-                              fit: BoxFit.fitWidth)),
-                    )),
-              )),
-        ]));
+                      image: AssetImage('assets/images/back.png'),
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

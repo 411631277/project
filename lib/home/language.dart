@@ -24,7 +24,7 @@ class LanguageWidget extends StatelessWidget {
                 height: 98,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/images/1.png'),
+                    image: AssetImage('assets/images/language.png'),
                     fit: BoxFit.fitWidth,
                   ),
                 ),
@@ -85,7 +85,7 @@ class LanguageWidget extends StatelessWidget {
                     height: 50,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage('assets/images/7.png'),
+                        image: AssetImage('assets/images/back.png'),
                         fit: BoxFit.contain,
                       ),
                     ),

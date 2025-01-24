@@ -24,7 +24,7 @@ class DetaWidget extends StatelessWidget {
                 height: 84,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/images/5.png'),
+                    image: AssetImage('assets/images/data.png'),
                     fit: BoxFit.fitWidth,
                   ),
                 ),
@@ -348,7 +348,7 @@ class DetaWidget extends StatelessWidget {
                     height: 61,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage('assets/images/7.png'),
+                        image: AssetImage('assets/images/back.png'),
                         fit: BoxFit.fitWidth,
                       ),
                     ),

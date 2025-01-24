@@ -1,4 +1,4 @@
-import 'package:doctor_2/home/home_screen.dart';
+import 'package:doctor_2/main.screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.brown, // 主題顏色
       ),
-      home: Home_screenWidget(), // 首頁設置為 SettingWidget
+      home: Main_screenWidget(), // 首頁設置為 SettingWidget
     );
   }
 }

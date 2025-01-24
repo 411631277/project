@@ -1,3 +1,4 @@
+import 'package:doctor_2/iam.dart';
 import 'package:doctor_2/login.dart';
 import 'package:flutter/material.dart';
 
@@ -33,18 +34,28 @@ class Main_screenWidget extends StatelessWidget {
           Positioned(
               top: 680.14453125,
               left: 163.74359130859375,
-              child: Text(
-                '註冊',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                    color: Color.fromRGBO(255, 255, 255, 1),
-                    fontFamily: 'Inter',
-                    fontSize: 40,
-                    letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
-                    fontWeight: FontWeight.normal,
-                    height: 1),
-              )),
+              child: GestureDetector(
+                  onTap: () {
+                    // 點擊跳轉到  IamWidget
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => IamWidget(),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    '註冊',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                        color: Color.fromRGBO(255, 255, 255, 1),
+                        fontFamily: 'Inter',
+                        fontSize: 40,
+                        letterSpacing:
+                            0 /*percentages not used in flutter. defaulting to zero*/,
+                        fontWeight: FontWeight.normal,
+                        height: 1),
+                  ))),
           Positioned(
               top: 496.5272521972656,
               left: 92.96410369873047,

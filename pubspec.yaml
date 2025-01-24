@@ -57,19 +57,20 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    -  assets/images/1.png
-    -  assets/images/2.png
-    -  assets/images/3.png
-    -  assets/images/4.png
-    -  assets/images/5.png
-    -  assets/images/6.png
-    -  assets/images/7.png
+    -  assets/images/back.png
+    -  assets/images/data.png
+    -  assets/images/language.png
+    -  assets/images/notify.png
+    -  assets/images/phone.png
+    -  assets/images/privacy.png
+    -  assets/images/signout.png
     -  assets/images/Question.png
     -  assets/images/Picture.png
     -  assets/images/Setting.png
     -  assets/images/Baby.png
     -  assets/images/Robot.png
     -  assets/images/Main.png
+    -  assets/images/pregnancy.png
    
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -32,7 +32,7 @@ class _NotifyWidgetState extends State<NotifyWidget> {
                 height: 49,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/images/2.png'),
+                    image: AssetImage('assets/images/notify.png'),
                     fit: BoxFit.fitWidth,
                   ),
                 ),
@@ -109,7 +109,7 @@ class _NotifyWidgetState extends State<NotifyWidget> {
                     height: 64.76126861572266,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage('assets/images/7.png'),
+                        image: AssetImage('assets/images/back.png'),
                         fit: BoxFit.fitWidth,
                       ),
                     ),

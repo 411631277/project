@@ -1,3 +1,4 @@
+import 'package:doctor_2/home/mate.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'language.dart'; // 導入 LanguageWidget
@@ -23,7 +24,7 @@ class SettingWidget extends StatelessWidget {
           children: <Widget>[
             // 語言按鈕
             Positioned(
-              top: 90,
+              top: 75,
               left: 180,
               child: GestureDetector(
                 onTap: () {
@@ -50,14 +51,14 @@ class SettingWidget extends StatelessWidget {
               ),
             ),
             Positioned(
-              top: 90,
+              top: 75,
               left: 45,
               child: Container(
                 width: 42,
                 height: 49,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/images/1.png'),
+                    image: AssetImage('assets/images/language.png'),
                     fit: BoxFit.fitWidth,
                   ),
                 ),
@@ -65,7 +66,7 @@ class SettingWidget extends StatelessWidget {
             ),
             //通知按鈕
             Positioned(
-              top: 190,
+              top: 165,
               left: 180,
               child: GestureDetector(
                 onTap: () {
@@ -92,14 +93,14 @@ class SettingWidget extends StatelessWidget {
               ),
             ),
             Positioned(
-              top: 190,
+              top: 165,
               left: 45,
               child: Container(
                 width: 42,
                 height: 49,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/images/2.png'),
+                    image: AssetImage('assets/images/notify.png'),
                     fit: BoxFit.fitWidth,
                   ),
                 ),
@@ -107,7 +108,7 @@ class SettingWidget extends StatelessWidget {
             ),
             //基本資料修改按鈕
             Positioned(
-                top: 290,
+                top: 255,
                 left: 180,
                 child: GestureDetector(
                     onTap: () {
@@ -131,19 +132,19 @@ class SettingWidget extends StatelessWidget {
                           height: 1),
                     ))),
             Positioned(
-                top: 290,
+                top: 255,
                 left: 45,
                 child: Container(
                     width: 42,
                     height: 49,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage('assets/images/5.png'),
+                          image: AssetImage('assets/images/data.png'),
                           fit: BoxFit.fitWidth),
                     ))),
             //院內電話查詢按鈕
             Positioned(
-                top: 390,
+                top: 345,
                 left: 180,
                 child: GestureDetector(
                     onTap: () {
@@ -167,19 +168,55 @@ class SettingWidget extends StatelessWidget {
                           height: 1),
                     ))),
             Positioned(
-                top: 390,
+                top: 345,
                 left: 45,
                 child: Container(
                     width: 42,
                     height: 49,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage('assets/images/3.png'),
+                          image: AssetImage('assets/images/phone.png'),
+                          fit: BoxFit.fitWidth),
+                    ))),
+            //配偶分享碼按鈕
+            Positioned(
+                top: 435,
+                left: 180,
+                child: GestureDetector(
+                    onTap: () {
+                      // 點擊跳轉到配偶分享碼畫面
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MateWidget(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      '配偶分享碼',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontFamily: 'Inter',
+                          fontSize: 32,
+                          letterSpacing: 0,
+                          fontWeight: FontWeight.normal,
+                          height: 1),
+                    ))),
+            Positioned(
+                top: 385,
+                left: 33,
+                child: Container(
+                    width: 75,
+                    height: 147,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage('assets/images/pregnancy.png'),
                           fit: BoxFit.fitWidth),
                     ))),
             //隱私權政策按鈕
             Positioned(
-                top: 490,
+                top: 525,
                 left: 180,
                 child: GestureDetector(
                     onTap: () {
@@ -203,19 +240,19 @@ class SettingWidget extends StatelessWidget {
                           height: 1),
                     ))),
             Positioned(
-                top: 490,
+                top: 525,
                 left: 45,
                 child: Container(
                     width: 42,
                     height: 49,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage('assets/images/6.png'),
+                          image: AssetImage('assets/images/privacy.png'),
                           fit: BoxFit.fitWidth),
                     ))),
             //登出按鈕
             Positioned(
-                top: 590,
+                top: 610,
                 left: 180,
                 child: GestureDetector(
                   onTap: () {
@@ -238,14 +275,14 @@ class SettingWidget extends StatelessWidget {
                           height: 1)),
                 )),
             Positioned(
-                top: 590,
+                top: 610,
                 left: 45,
                 child: Container(
                     width: 42,
                     height: 49,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage('assets/images/4.png'),
+                          image: AssetImage('assets/images/signout.png'),
                           fit: BoxFit.fitWidth),
                     ))),
             //返回上一頁
@@ -263,7 +300,7 @@ class SettingWidget extends StatelessWidget {
                     height: 80.32401275634766,
                     decoration: const BoxDecoration(
                         image: DecorationImage(
-                      image: AssetImage('assets/images/7.png'),
+                      image: AssetImage('assets/images/back.png'),
                       fit: BoxFit.fitWidth,
                     )),
                   ),
