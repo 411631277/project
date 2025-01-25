@@ -1,9 +1,9 @@
-import 'package:doctor_2/login.dart';
+import 'package:doctor_2/login/login.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-class ForgetPhoneWidget extends StatelessWidget {
-  const ForgetPhoneWidget({super.key});
+class ForgetEmailWidget extends StatelessWidget {
+  const ForgetEmailWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class ForgetPhoneWidget extends StatelessWidget {
               top: 339,
               left: 85,
               child: Text(
-                '已傳送更改密碼的簡訊到\n當初預設的手機號碼請查收',
+                '已傳送更改密碼的簡訊到\n當初預設的email信箱請查收',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color.fromRGBO(255, 255, 255, 1),

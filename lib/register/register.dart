@@ -1,5 +1,5 @@
 import 'package:doctor_2/main.screen.dart';
-import 'package:doctor_2/success.dart';
+import 'package:doctor_2/register/success.dart';
 import 'package:flutter/material.dart';
 
 class RegisterWidget extends StatefulWidget {

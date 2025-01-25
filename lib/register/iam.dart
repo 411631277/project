@@ -1,4 +1,4 @@
-import 'package:doctor_2/register.dart';
+import 'package:doctor_2/register/register.dart';
 import 'package:flutter/material.dart';
 
 class IamWidget extends StatelessWidget {

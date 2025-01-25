@@ -1,5 +1,5 @@
-import 'package:doctor_2/forget_phone.dart';
-import 'package:doctor_2/success.dart';
+import 'package:doctor_2/login/forget_phone.dart';
+import 'package:doctor_2/login/forget_email.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -25,7 +25,8 @@ class ForgetWidget extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SuccessWidget()),
+                    MaterialPageRoute(
+                        builder: (context) => ForgetEmailWidget()),
                   );
                 },
                 child: Container(

@@ -1,4 +1,4 @@
-import 'package:doctor_2/home/home_screen.dart';
+import 'package:doctor_2/first_quesion/born.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -54,7 +54,7 @@ class SuccessWidget extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Home_screenWidget(),
+                      builder: (context) => BornWidget(),
                     ),
                   );
                 },

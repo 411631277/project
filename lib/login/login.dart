@@ -1,4 +1,5 @@
-import 'package:doctor_2/forget.dart';
+import 'package:doctor_2/home/home_screen.dart';
+import 'package:doctor_2/login/forget.dart';
 import 'package:flutter/material.dart';
 
 class LoginWidget extends StatelessWidget {
@@ -97,12 +98,21 @@ class LoginWidget extends StatelessWidget {
                   onPressed: () {
                     // 下一步按鈕功能
                   },
-                  child: const Text(
-                    '下一步',
-                    style: TextStyle(
-                      color: Color.fromRGBO(147, 129, 108, 1),
-                      fontSize: 18,
-                    ),
+                  child: GestureDetector(
+                    onTap: () {
+                      // 點擊跳轉到主畫面
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Home_screenWidget(),
+                        ),
+                      );
+                    },
+                    child: const Text('下一步',
+                        style: TextStyle(
+                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontSize: 18,
+                        )),
                   ),
                 ),
               ),

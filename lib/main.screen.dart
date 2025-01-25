@@ -1,5 +1,5 @@
-import 'package:doctor_2/iam.dart';
-import 'package:doctor_2/login.dart';
+import 'package:doctor_2/register/iam.dart';
+import 'package:doctor_2/login/login.dart';
 import 'package:flutter/material.dart';
 
 // ignore: camel_case_types
