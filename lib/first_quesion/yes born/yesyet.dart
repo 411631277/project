@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
-class FrequencyWidget extends StatefulWidget {
-  const FrequencyWidget({super.key});
+class YesyetWidget extends StatefulWidget {
+  const YesyetWidget({super.key});
 
   @override
-  State<FrequencyWidget> createState() => _FrequencyWidgetState();
+  State<YesyetWidget> createState() => _YesyetWidgetState();
 }
 
-class _FrequencyWidgetState extends State<FrequencyWidget> {
-  String? breastfeedingAnswer; // 存儲親自哺乳的回答
-  String? pregnancyCount; // 懷孕次數
-  String? deliveryCount; // 生產次數
+class _YesyetWidgetState extends State<YesyetWidget> {
+  String? babyCount;
+  String? pregnancyCount;
+  String? deliveryCount;
+  String? complicationAnswer;
+  String? breastfeedingAnswer;
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +23,12 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
         color: const Color.fromRGBO(233, 227, 213, 1),
         child: Stack(
           children: <Widget>[
-            // 第一部分: 懷孕次數
+            // 第一部分: 肚子裡有幾個寶寶
             const Positioned(
-              top: 134,
+              top: 75,
               left: 135,
               child: Text(
-                '懷孕次數',
+                '肚子裡有幾個寶寶',
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   color: Color.fromRGBO(147, 129, 108, 1),
@@ -38,7 +40,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
               ),
             ),
             Positioned(
-              top: 200,
+              top: 100,
               left: 129,
               child: SizedBox(
                 width: 150,
@@ -70,12 +72,12 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                 ),
               ),
             ),
-            // 第二部分: 是否發生過妊娠合併症
+            // 第二部分: 懷孕次數
             const Positioned(
-              top: 317,
+              top: 170,
               left: 135,
               child: Text(
-                '生產次數',
+                '懷孕次數',
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   color: Color.fromRGBO(147, 129, 108, 1),
@@ -87,12 +89,12 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
               ),
             ),
             Positioned(
-              top: 387,
+              top: 190,
               left: 129,
               child: SizedBox(
                 width: 150,
                 child: DropdownButtonFormField<String>(
-                  value: deliveryCount,
+                  value: pregnancyCount,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
@@ -113,18 +115,134 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                       .toList(),
                   onChanged: (value) {
                     setState(() {
-                      deliveryCount = value;
+                      pregnancyCount = value;
                     });
                   },
                 ),
               ),
             ),
-            // 第三部分: 新生兒誕生後是否願意親自哺餵母乳?
+            // 第三部分: 生產次數
             const Positioned(
-              top: 462,
+              top: 265,
               left: 135,
               child: Text(
-                '是否為首次哺乳?',
+                '生產次數',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: Color.fromRGBO(147, 129, 108, 1),
+                  fontFamily: 'Inter',
+                  fontSize: 25,
+                  fontWeight: FontWeight.normal,
+                  height: 1,
+                ),
+              ),
+            ),
+            Positioned(
+              top: 285,
+              left: 129,
+              child: SizedBox(
+                width: 150,
+                child: DropdownButtonFormField<String>(
+                  value: pregnancyCount,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
+                  ),
+                  hint: const Text(
+                    '次數',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  items: ['0', '1', '2', '3', '4']
+                      .map((count) => DropdownMenuItem<String>(
+                            value: count,
+                            child: Text(count),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      pregnancyCount = value;
+                    });
+                  },
+                ),
+              ),
+            ),
+            // 第四部分: 是否發生過妊娠合併症
+            const Positioned(
+              top: 360,
+              left: 79,
+              child: Text(
+                '是否發生過妊娠合併症?',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: Color.fromRGBO(147, 129, 108, 1),
+                  fontFamily: 'Inter',
+                  fontSize: 25,
+                  fontWeight: FontWeight.normal,
+                  height: 1,
+                ),
+              ),
+            ),
+            Positioned(
+              top: 380,
+              left: 89,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // 是選項
+                  SizedBox(
+                    width: 120,
+                    child: RadioListTile<String>(
+                      title: const Text(
+                        '是',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      value: 'yes',
+                      groupValue: complicationAnswer,
+                      onChanged: (value) {
+                        setState(() {
+                          complicationAnswer = value;
+                        });
+                      },
+                    ),
+                  ),
+                  // 否選項
+                  SizedBox(
+                    width: 120,
+                    child: RadioListTile<String>(
+                      title: const Text(
+                        '否',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      value: 'no',
+                      groupValue: complicationAnswer,
+                      onChanged: (value) {
+                        setState(() {
+                          complicationAnswer = value;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // 第五部分: 目前是否為有哺餵新生兒母乳??
+            const Positioned(
+              top: 450,
+              left: 57,
+              child: Text(
+                '目前是否為有哺餵新生兒母乳?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color.fromRGBO(147, 129, 108, 1),
@@ -136,7 +254,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
               ),
             ),
             Positioned(
-              top: 559,
+              top: 470,
               left: 89,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -200,10 +318,9 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                     ),
                     onPressed: () {
                       if (breastfeedingAnswer == 'yes') {
-                        Navigator.pushNamed(
-                            context, '/FirstBreastfeedingWidget');
+                        Navigator.pushNamed(context, '/Nowfeeding');
                       } else if (breastfeedingAnswer == 'no') {
-                        Navigator.pushNamed(context, '/SuccessWidget');
+                        Navigator.pushNamed(context, '/FinishWidget');
                       }
                     },
                     child: const Text(
@@ -219,7 +336,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
               ),
             // 返回按鍵
             Positioned(
-              top: 756,
+              top: 560,
               left: 94,
               child: GestureDetector(
                 onTap: () {

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-class Notyet1Widget extends StatefulWidget {
-  const Notyet1Widget({super.key});
+class NotfirstWidget extends StatefulWidget {
+  const NotfirstWidget({super.key});
 
   @override
-  State<Notyet1Widget> createState() => _Notyet1WidgetState();
+  State<NotfirstWidget> createState() => _NotfirstWidget();
 }
 
-class _Notyet1WidgetState extends State<Notyet1Widget> {
-  String? breastfeedingAnswer; // 存儲親自哺餵母乳的回答
-  String? complicationAnswer; // 存儲妊娠合併症的回答
-  String? selectedBabyCount; // 存儲肚子裡寶寶的數量
+class _NotfirstWidget extends State<NotfirstWidget> {
+  String? painindex;
+  String? brokenskin;
+  String? duration;
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +21,12 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
         color: const Color.fromRGBO(233, 227, 213, 1),
         child: Stack(
           children: <Widget>[
-            // 第一部分: 肚子裡有幾個寶寶
+            // 第一部分: 前次哺乳的乳頭疼痛指數
             const Positioned(
-              top: 134,
-              left: 106,
+              top: 75,
+              left: 135,
               child: Text(
-                '肚子裡有幾個寶寶',
+                '前次哺乳的乳頭疼痛指數',
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   color: Color.fromRGBO(147, 129, 108, 1),
@@ -38,12 +38,12 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
               ),
             ),
             Positioned(
-              top: 200,
+              top: 100,
               left: 129,
               child: SizedBox(
                 width: 150,
                 child: DropdownButtonFormField<String>(
-                  value: selectedBabyCount,
+                  value: painindex,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
@@ -53,7 +53,7 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                     ),
                   ),
                   hint: const Text(
-                    '數量',
+                    '次數',
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   items: ['0', '1', '2', '3', '4']
@@ -64,18 +64,18 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                       .toList(),
                   onChanged: (value) {
                     setState(() {
-                      selectedBabyCount = value;
+                      painindex = value;
                     });
                   },
                 ),
               ),
             ),
-            // 第二部分: 是否發生過妊娠合併症
+            // 第二部分: 是否有乳頭破皮的狀況發生?
             const Positioned(
-              top: 317,
+              top: 200,
               left: 79,
               child: Text(
-                '是否發生過妊娠合併症?',
+                '是否有乳頭破皮的狀況發生?',
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   color: Color.fromRGBO(147, 129, 108, 1),
@@ -87,7 +87,7 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
               ),
             ),
             Positioned(
-              top: 370,
+              top: 220,
               left: 89,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -105,10 +105,10 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                         ),
                       ),
                       value: 'yes',
-                      groupValue: complicationAnswer,
+                      groupValue: brokenskin,
                       onChanged: (value) {
                         setState(() {
-                          complicationAnswer = value;
+                          brokenskin = value;
                         });
                       },
                     ),
@@ -126,10 +126,10 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                         ),
                       ),
                       value: 'no',
-                      groupValue: complicationAnswer,
+                      groupValue: brokenskin,
                       onChanged: (value) {
                         setState(() {
-                          complicationAnswer = value;
+                          brokenskin = value;
                         });
                       },
                     ),
@@ -137,13 +137,13 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                 ],
               ),
             ),
-            // 第三部分: 新生兒誕生後是否願意親自哺餵母乳?
+            // 第三部分: 前胎哺乳持續時長誰幾個月?
             const Positioned(
-              top: 462,
-              left: 57,
+              top: 300,
+              left: 135,
               child: Text(
-                '新生兒誕生後是否願意親自\n哺餵母乳?',
-                textAlign: TextAlign.center,
+                '前胎哺乳持續時長誰幾個月?',
+                textAlign: TextAlign.left,
                 style: TextStyle(
                   color: Color.fromRGBO(147, 129, 108, 1),
                   fontFamily: 'Inter',
@@ -154,60 +154,41 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
               ),
             ),
             Positioned(
-              top: 559,
-              left: 89,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // 是選項
-                  SizedBox(
-                    width: 120,
-                    child: RadioListTile<String>(
-                      title: const Text(
-                        '是',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      value: 'yes',
-                      groupValue: breastfeedingAnswer,
-                      onChanged: (value) {
-                        setState(() {
-                          breastfeedingAnswer = value;
-                        });
-                      },
+              top: 320,
+              left: 129,
+              child: SizedBox(
+                width: 150,
+                child: DropdownButtonFormField<String>(
+                  value: duration,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.grey),
                     ),
                   ),
-                  // 否選項
-                  SizedBox(
-                    width: 120,
-                    child: RadioListTile<String>(
-                      title: const Text(
-                        '否',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      value: 'no',
-                      groupValue: breastfeedingAnswer,
-                      onChanged: (value) {
-                        setState(() {
-                          breastfeedingAnswer = value;
-                        });
-                      },
-                    ),
+                  hint: const Text(
+                    '次數',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
-                ],
+                  items: ['0', '1', '2', '3', '4']
+                      .map((count) => DropdownMenuItem<String>(
+                            value: count,
+                            child: Text(count),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      duration = value;
+                    });
+                  },
+                ),
               ),
             ),
-            // 下一步按鍵
-            if (breastfeedingAnswer != null)
+            if (duration != null)
               Positioned(
-                top: 709,
+                top: 687,
                 left: 129,
                 child: SizedBox(
                   width: 154,
@@ -217,11 +198,8 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                       backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
                     ),
                     onPressed: () {
-                      if (breastfeedingAnswer == 'yes') {
-                        Navigator.pushNamed(context, '/FrequencyWidget');
-                      } else if (breastfeedingAnswer == 'no') {
-                        Navigator.pushNamed(context, '/FirsttimeWidget');
-                      }
+                      // 下一步邏輯，跳轉到目標頁面
+                      Navigator.pushNamed(context, '/StopWidget');
                     },
                     child: const Text(
                       '下一步',
@@ -234,26 +212,6 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                   ),
                 ),
               ),
-            // 返回按鍵
-            Positioned(
-              top: 806,
-              left: 94,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context); // 返回上一頁
-                },
-                child: Container(
-                  width: 61,
-                  height: 65,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/back.png'),
-                      fit: BoxFit.fitWidth,
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),

@@ -11,7 +11,8 @@ class RegisterWidget extends StatefulWidget {
 }
 
 class _RegisterWidgetState extends State<RegisterWidget> {
-  // 問題的答案狀態
+  // 新增變數來儲存婚姻狀況選擇
+  String? maritalStatus; // 用於儲存目前婚姻狀況選擇
   Map<String, bool?> answers = {
     "是否會喝酒?": null,
     "是否會吸菸?": null,
@@ -19,91 +20,80 @@ class _RegisterWidgetState extends State<RegisterWidget> {
     "有無慢性病": null,
   };
 
-  // 聯絡偏好設定狀態
   bool isEmailPreferred = false;
   bool isPhonePreferred = false;
-
-  // 單獨管理「是否為新手媽媽」
   bool? isNewMom;
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
-        width: 412,
-        height: 917,
+        width: screenWidth,
+        height: screenHeight,
         color: const Color.fromRGBO(233, 227, 213, 1),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(screenWidth * 0.05),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 姓名、生日、身高
               Row(
                 children: [
-                  _buildLabel('姓名'),
-                  const SizedBox(width: 100),
-                  _buildLabel('生日'),
-                  const SizedBox(width: 100),
-                  _buildLabel('身高'),
+                  Expanded(
+                      child: _buildLabeledTextField('姓名', screenWidth * 0.25)),
+                  SizedBox(width: screenWidth * 0.05),
+                  Expanded(
+                      child: _buildLabeledTextField('生日', screenWidth * 0.25)),
+                  SizedBox(width: screenWidth * 0.05),
+                  Expanded(
+                      child: _buildLabeledTextField('身高', screenWidth * 0.25)),
                 ],
               ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  _buildTextField(width: 100),
-                  const SizedBox(width: 10),
-                  _buildTextField(width: 100),
-                  const SizedBox(width: 10),
-                  _buildTextField(width: 100),
-                ],
-              ),
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.02),
               // 目前體重、孕前體重
               Row(
                 children: [
-                  _buildLabel('目前體重'),
-                  const SizedBox(width: 110),
-                  _buildLabel('孕前體重'),
+                  Expanded(
+                      child: _buildLabeledTextField('目前體重', screenWidth * 0.4)),
+                  SizedBox(width: screenWidth * 0.05),
+                  Expanded(
+                      child: _buildLabeledTextField('孕前體重', screenWidth * 0.4)),
                 ],
               ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  _buildTextField(width: 150),
-                  const SizedBox(width: 20),
-                  _buildTextField(width: 150),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // Email、驗證碼
+              SizedBox(height: screenHeight * 0.02),
+              // Email
               _buildLabel('e-mail'),
-              const SizedBox(height: 10),
+              SizedBox(height: screenHeight * 0.01),
               Row(
                 children: [
-                  _buildTextField(width: 200),
-                  const SizedBox(width: 10),
+                  Expanded(child: _buildTextField(width: screenWidth * 0.6)),
+                  SizedBox(width: screenWidth * 0.02),
                   _buildButton('獲取驗證碼'),
                 ],
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: screenHeight * 0.01),
               _buildTextField(hintText: '輸入驗證碼'),
-              const SizedBox(height: 10),
-              _buildButton('驗證', width: 80, backgroundColor: Colors.green),
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.01),
+              _buildButton('驗證',
+                  width: screenWidth * 0.2, backgroundColor: Colors.green),
+              SizedBox(height: screenHeight * 0.02),
               // 電話
               _buildLabel('電話'),
-              const SizedBox(height: 10),
+              SizedBox(height: screenHeight * 0.01),
               Row(
                 children: [
-                  _buildTextField(width: 200),
-                  const SizedBox(width: 10),
+                  Expanded(child: _buildTextField(width: screenWidth * 0.6)),
+                  SizedBox(width: screenWidth * 0.02),
                   _buildButton('獲取驗證碼'),
                 ],
               ),
-              const SizedBox(height: 10),
-              _buildButton('驗證', width: 80, backgroundColor: Colors.green),
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.01),
+              _buildButton('驗證',
+                  width: screenWidth * 0.2, backgroundColor: Colors.green),
+              SizedBox(height: screenHeight * 0.02),
               // 聯絡偏好設定
               _buildLabel('聯絡偏好設定'),
               Row(
@@ -132,15 +122,43 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              // 勾選題
+              SizedBox(height: screenHeight * 0.02),
+              // 是/否問題
               ...answers.keys.map((question) => _buildYesNoRow(question)),
-              const SizedBox(height: 20),
-              // 下拉選單與婚姻狀況
+              SizedBox(height: screenHeight * 0.02),
+              // 婚姻狀況
               _buildLabel('目前婚姻狀況'),
-              const SizedBox(height: 10),
-              _buildDropdown(['--', '結婚', '未婚', '離婚', '喪偶']),
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.01),
+              SizedBox(
+                width: screenWidth * 0.6,
+                child: DropdownButtonFormField<String>(
+                  value: maritalStatus,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
+                  ),
+                  hint: const Text(
+                    '選擇婚姻狀況',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  items: ['結婚', '未婚', '離婚', '喪偶']
+                      .map((status) => DropdownMenuItem<String>(
+                            value: status,
+                            child: Text(status),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      maritalStatus = value;
+                    });
+                  },
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.02),
               // 是否為新手媽媽
               _buildLabel('是否為新手媽媽'),
               Row(
@@ -170,17 +188,16 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                 ],
               ),
               const Divider(),
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.02),
               // 按鈕
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildButton(
                     '返回',
-                    width: 100,
+                    width: screenWidth * 0.25,
                     backgroundColor: Colors.grey,
                     onPressed: () {
-                      // 返回到 main_screen.dart 定义的页面
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -190,13 +207,13 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   ),
                   _buildButton(
                     '下一步',
-                    width: 100,
+                    width: screenWidth * 0.25,
                     backgroundColor: Colors.blue,
                     onPressed: () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SuccessWidget(),
+                            builder: (context) => const SuccessWidget(),
                           ));
                     },
                   ),
@@ -214,7 +231,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
       text,
       style: const TextStyle(
         color: Color.fromRGBO(147, 129, 108, 1),
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: FontWeight.normal,
       ),
     );
@@ -231,6 +248,17 @@ class _RegisterWidgetState extends State<RegisterWidget> {
           border: const OutlineInputBorder(),
         ),
       ),
+    );
+  }
+
+  Widget _buildLabeledTextField(String label, double width) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        SizedBox(height: 5),
+        _buildTextField(width: width),
+      ],
     );
   }
 
@@ -287,21 +315,6 @@ class _RegisterWidgetState extends State<RegisterWidget> {
         ),
         const Divider(),
       ],
-    );
-  }
-
-  Widget _buildDropdown(List<String> items) {
-    return DropdownButton<String>(
-      value: items[0],
-      onChanged: (value) {},
-      items: items
-          .map(
-            (item) => DropdownMenuItem(
-              value: item,
-              child: Text(item),
-            ),
-          )
-          .toList(),
     );
   }
 }

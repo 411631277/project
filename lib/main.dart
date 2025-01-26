@@ -1,10 +1,12 @@
-import 'package:doctor_2/first_quesion/breastfeeding_duration.dart';
+import 'package:doctor_2/first_quesion/not%20born/breastfeeding_duration.dart';
 import 'package:doctor_2/first_quesion/finish.dart';
 import 'package:doctor_2/first_quesion/first_breastfeeding.dart';
-import 'package:doctor_2/first_quesion/firsttime.dart';
-import 'package:doctor_2/first_quesion/frequency.dart';
-import 'package:doctor_2/first_quesion/notyet1.dart';
+import 'package:doctor_2/first_quesion/not%20born/firsttime.dart';
+import 'package:doctor_2/first_quesion/not%20born/frequency.dart';
+import 'package:doctor_2/first_quesion/not%20born/notyet1.dart';
 import 'package:doctor_2/first_quesion/stop.dart';
+import 'package:doctor_2/first_quesion/yes%20born/notfirst.dart';
+import 'package:doctor_2/first_quesion/yes%20born/nowfeeding.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/main.screen.dart';
@@ -39,6 +41,8 @@ class MyApp extends StatelessWidget {
         '/Breastfeeding_durationWidget': (context) =>
             const Breastfeeding_durationWidget(),
         '/StopWidget': (context) => const StopWidget(),
+        '/Nowfeeding': (context) => const Nowfeeding(),
+        '/NotfirstWidget': (context) => const NotfirstWidget(),
       },
     );
   }

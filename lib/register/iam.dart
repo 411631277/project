@@ -6,85 +6,94 @@ class IamWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Figma Flutter Generator IamWidget - FRAME
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Container(
-        width: 412,
-        height: 917,
-        decoration: BoxDecoration(
+        width: screenWidth,
+        height: screenHeight,
+        decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
         child: Stack(children: <Widget>[
+          // 標題文字
           Positioned(
-              top: 354,
-              left: 226,
-              child: Container(
-                  width: 132,
-                  height: 69,
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(244, 202, 234, 1),
-                  ))),
+            top: screenHeight * 0.23,
+            left: screenWidth * 0.33,
+            child: const Text(
+              '我是...?',
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: Color.fromRGBO(147, 129, 108, 1),
+                fontFamily: 'Inter',
+                fontSize: 40,
+                letterSpacing: 0,
+                fontWeight: FontWeight.normal,
+                height: 1,
+                decoration: TextDecoration.none, // 明確設定無下劃線
+              ),
+            ),
+          ),
+          // 爸爸按鍵
           Positioned(
-              top: 354,
-              left: 57,
-              child: Container(
-                  width: 132,
-                  height: 69,
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(187, 223, 248, 1),
-                  ))),
-          Positioned(
-              top: 216,
-              left: 141,
-              child: Text(
-                '我是...?',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                    color: Color.fromRGBO(147, 129, 108, 1),
-                    fontFamily: 'Inter',
-                    fontSize: 40,
-                    letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
-                    fontWeight: FontWeight.normal,
-                    height: 1),
-              )),
-          Positioned(
-              top: 365,
-              left: 83,
-              child: Text(
-                '爸爸',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                    color: Color.fromRGBO(147, 129, 108, 1),
-                    fontFamily: 'Inter',
-                    fontSize: 40,
-                    letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
-                    fontWeight: FontWeight.normal,
-                    height: 1),
-              )),
-          Positioned(
-              top: 365,
-              left: 252,
-              child: GestureDetector(
-                onTap: () {
-                  // 點擊跳轉到  IamWidget
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RegisterWidget(),
+              top: screenHeight * 0.38,
+              left: screenWidth * 0.14,
+              child: SizedBox(
+                width: screenWidth * 0.32,
+                height: screenHeight * 0.08,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(187, 223, 248, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  );
-                },
-                child: Text('媽媽',
-                    textAlign: TextAlign.left,
+                  ),
+                  onPressed: () {
+                    // 點擊「爸爸」按鍵的邏輯
+                  },
+                  child: const Text(
+                    '爸爸',
                     style: TextStyle(
-                        color: Color.fromRGBO(147, 129, 108, 1),
-                        fontFamily: 'Inter',
-                        fontSize: 40,
-                        letterSpacing:
-                            0 /*percentages not used in flutter. defaulting to zero*/,
-                        fontWeight: FontWeight.normal,
-                        height: 1)),
+                      color: Color.fromRGBO(147, 129, 108, 1),
+                      fontFamily: 'Inter',
+                      fontSize: 25,
+                    ),
+                  ),
+                ),
+              )),
+
+          // 媽媽按鍵
+          Positioned(
+              top: screenHeight * 0.38,
+              left: screenWidth * 0.55,
+              child: SizedBox(
+                width: screenWidth * 0.32,
+                height: screenHeight * 0.08,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(244, 202, 234, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    // 點擊跳轉到 RegisterWidget
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterWidget(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    '媽媽',
+                    style: TextStyle(
+                      color: Color.fromRGBO(147, 129, 108, 1),
+                      fontFamily: 'Inter',
+                      fontSize: 25,
+                    ),
+                  ),
+                ),
               )),
         ]));
   }

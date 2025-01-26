@@ -1,29 +1,52 @@
-import 'package:doctor_2/first_quesion/notyet1.dart';
+import 'package:doctor_2/first_quesion/not%20born/notyet1.dart';
+import 'package:doctor_2/first_quesion/yes%20born/yesyet.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 class BornWidget extends StatelessWidget {
   const BornWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        width: 412,
-        height: 917,
-        decoration: BoxDecoration(
-          color: const Color.fromRGBO(233, 227, 213, 1),
+    // 螢幕寬高自適應
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
+      body: Container(
+        width: screenWidth,
+        height: screenHeight,
+        decoration: const BoxDecoration(
+          color: Color.fromRGBO(233, 227, 213, 1),
         ),
         child: Stack(
           children: <Widget>[
+            // 問題文字
             Positioned(
-              top: 334,
-              left: 133,
+              top: screenHeight * 0.25,
+              left: screenWidth * 0.15,
+              child: Text(
+                '請問寶寶出生了嗎?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: const Color.fromRGBO(147, 129, 108, 1),
+                  fontSize: screenWidth * 0.08, // 根據螢幕寬度調整字體大小
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+            // 還沒按鈕
+            Positioned(
+              top: screenHeight * 0.4,
+              left: screenWidth * 0.27,
               child: SizedBox(
-                width: 147,
-                height: 51,
+                width: screenWidth * 0.45,
+                height: screenHeight * 0.07,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -33,75 +56,51 @@ class BornWidget extends StatelessWidget {
                       ),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     '還沒',
                     style: TextStyle(
-                      color: Color.fromRGBO(147, 129, 108, 1),
-                      fontSize: 20,
+                      color: const Color.fromRGBO(147, 129, 108, 1),
+                      fontSize: screenWidth * 0.05,
                     ),
                   ),
                 ),
               ),
             ),
+            // 出生了按鈕
             Positioned(
-              top: 433,
-              left: 133,
+              top: screenHeight * 0.5 + 15, // 向下移動 15 的距離
+              left: screenWidth * 0.27,
               child: SizedBox(
-                width: 147,
-                height: 51,
+                width: screenWidth * 0.45,
+                height: screenHeight * 0.07,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
-                  ),
-                  onPressed: () {
-                    // TODO: 處理 "出生了" 按鈕邏輯Notyet1Widget
-                  },
-                  child: const Text(
-                    '出生了',
-                    style: TextStyle(
-                      color: Color.fromRGBO(147, 129, 108, 1),
-                      fontSize: 20,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 229,
-              left: 62,
-              child: Text(
-                '請問寶寶出生了嗎?',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontSize: 32,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 776,
-              left: 124,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context); // 返回上一頁
-                },
-                child: Transform.rotate(
-                  angle: 179.80448080946567 * (math.pi / 180),
-                  child: Container(
-                    width: 61,
-                    height: 65.25581359863281,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/images/Back.png'),
-                        fit: BoxFit.fitWidth,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const YesyetWidget(),
                       ),
+                    );
+                  },
+                  child: Text(
+                    '出生了',
+                    style: TextStyle(
+                      color: const Color.fromRGBO(147, 129, 108, 1),
+                      fontSize: screenWidth * 0.05,
                     ),
                   ),
                 ),
               ),
             ),
           ],
-        ));
+        ),
+      ),
+    );
   }
 }
