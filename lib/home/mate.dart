@@ -6,97 +6,116 @@ class MateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Figma Flutter Generator MateWidget - FRAME
-    return Container(
-        width: 412,
-        height: 917,
-        decoration: BoxDecoration(
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
+      body: Container(
+        width: screenWidth,
+        height: screenHeight,
+        decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
-        child: Stack(children: <Widget>[
-          Positioned(
-              top: 64,
-              left: 41,
+        child: Stack(
+          children: <Widget>[
+            // 圖示
+            Positioned(
+              top: screenHeight * 0.1,
+              left: screenWidth * 0.1,
               child: Container(
-                  width: 96,
-                  height: 96,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage('assets/images/pregnancy.png'),
-                        fit: BoxFit.fitWidth),
-                  ))),
-          Positioned(
-              top: 92,
-              left: 156,
+                width: screenWidth * 0.25,
+                height: screenHeight * 0.1,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/pregnancy.png'),
+                    fit: BoxFit.fitWidth,
+                  ),
+                ),
+              ),
+            ),
+            // 標題文字
+            Positioned(
+              top: screenHeight * 0.13,
+              left: screenWidth * 0.38,
               child: Text(
                 '配偶分享碼',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: Color.fromRGBO(147, 129, 108, 1),
-                    fontFamily: 'Inter',
-                    fontSize: 30,
-                    letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
-                    fontWeight: FontWeight.normal,
-                    height: 1),
-              )),
-          Positioned(
-              top: 733,
-              left: 109,
+                  color: const Color.fromRGBO(147, 129, 108, 1),
+                  fontFamily: 'Inter',
+                  fontSize: screenWidth * 0.07,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+            // 配偶分享碼文字
+            Positioned(
+              top: screenHeight * 0.35,
+              left: screenWidth * 0.1,
+              child: Text(
+                '配偶分享碼',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: const Color.fromRGBO(147, 129, 108, 1),
+                  fontFamily: 'Poppins',
+                  fontSize: screenWidth * 0.05,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+            // 分享碼背景框
+            Positioned(
+              top: screenHeight * 0.35,
+              left: screenWidth * 0.42,
+              child: Container(
+                width: screenWidth * 0.4,
+                height: screenHeight * 0.03,
+                decoration: const BoxDecoration(
+                  color: Color.fromRGBO(255, 255, 255, 1),
+                ),
+              ),
+            ),
+            // 分享碼文字
+            Positioned(
+              top: screenHeight * 0.352,
+              left: screenWidth * 0.55,
+              child: Text(
+                '758902',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: const Color.fromRGBO(147, 129, 108, 1),
+                  fontFamily: 'Poppins',
+                  fontSize: screenWidth * 0.045,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+            // 返回按鈕
+            Positioned(
+              top: screenHeight * 0.8,
+              left: screenWidth * 0.3,
               child: GestureDetector(
                 onTap: () {
                   Navigator.pop(context); // 返回上一頁
                 },
                 child: Transform.rotate(
-                    angle: -179.93464394637994 * (math.pi / 180),
-                    child: Container(
-                        width: 57.0217399597168,
-                        height: 61,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage('assets/images/Back.png'),
-                              fit: BoxFit.fitWidth),
-                        ))),
-              )),
-          Positioned(
-              top: 214,
-              left: 37,
-              child: Text(
-                '配偶分享碼',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                    color: Color.fromRGBO(147, 129, 108, 1),
-                    fontFamily: 'Poppins',
-                    fontSize: 20,
-                    letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
-                    fontWeight: FontWeight.normal,
-                    height: 1),
-              )),
-          Positioned(
-              top: 219,
-              left: 174,
-              child: Container(
-                  width: 154,
-                  height: 19,
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(255, 255, 255, 1),
-                  ))),
-          Positioned(
-              top: 217,
-              left: 223,
-              child: Text(
-                '758902',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                    color: Color.fromRGBO(147, 129, 108, 1),
-                    fontFamily: 'Poppins',
-                    fontSize: 15,
-                    letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
-                    fontWeight: FontWeight.normal,
-                    height: 1),
-              )),
-        ]));
+                  angle: math.pi,
+                  child: Container(
+                    width: screenWidth * 0.14,
+                    height: screenHeight * 0.07,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/Back.png'),
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -6,10 +6,13 @@ class DetaWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
-        width: 412,
-        height: 917,
+        width: screenWidth,
+        height: screenHeight,
         decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
@@ -17,339 +20,100 @@ class DetaWidget extends StatelessWidget {
           children: <Widget>[
             // 圖示
             Positioned(
-              top: 56,
-              left: 152,
+              top: screenHeight * 0.2,
+              left: screenWidth * 0.37,
               child: Container(
-                width: 100,
-                height: 84,
+                width: screenWidth * 0.24,
+                height: screenHeight * 0.1,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/images/data.png'),
-                    fit: BoxFit.fitWidth,
+                    image: AssetImage('assets/images/5.png'),
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
             ),
             // 姓名與生日
-            const Positioned(
-              top: 192,
-              left: 17,
-              child: Text(
-                '姓名',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 192,
-              left: 224,
-              child: Text(
-                '生日',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
+            Positioned(
+              top: screenHeight * 0.21,
+              left: screenWidth * 0.05,
+              child: _buildLabel('姓名'),
             ),
             Positioned(
-              top: 192,
-              left: 87,
-              child: Container(
-                width: 102,
-                height: 32,
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.6),
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
+              top: screenHeight * 0.21,
+              left: screenWidth * 0.55,
+              child: _buildLabel('生日'),
             ),
             Positioned(
-              top: 192,
-              left: 298,
-              child: Container(
-                width: 102,
-                height: 32,
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.6),
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
+              top: screenHeight * 0.21,
+              left: screenWidth * 0.2,
+              child: _buildTextField(width: screenWidth * 0.3),
+            ),
+            Positioned(
+              top: screenHeight * 0.21,
+              left: screenWidth * 0.7,
+              child: _buildTextField(width: screenWidth * 0.3),
             ),
             // 血型、身高與體重
-            const Positioned(
-              top: 246,
-              left: 17,
-              child: Text(
-                '血型',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
+            Positioned(
+              top: screenHeight * 0.27,
+              left: screenWidth * 0.05,
+              child: _buildLabel('血型'),
             ),
             Positioned(
-              top: 246,
-              left: 75,
-              child: Container(
-                width: 57,
-                height: 31,
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.6),
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 246,
-              left: 144,
-              child: Text(
-                '身高',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
+              top: screenHeight * 0.27,
+              left: screenWidth * 0.2,
+              child: _buildTextField(width: screenWidth * 0.2),
             ),
             Positioned(
-              top: 246,
-              left: 202,
-              child: Container(
-                width: 56,
-                height: 31,
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.6),
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 246,
-              left: 276,
-              child: Text(
-                '體重',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
+              top: screenHeight * 0.27,
+              left: screenWidth * 0.45,
+              child: _buildLabel('身高'),
             ),
             Positioned(
-              top: 246,
-              left: 344,
-              child: Container(
-                width: 57,
-                height: 31,
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.6),
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
+              top: screenHeight * 0.27,
+              left: screenWidth * 0.6,
+              child: _buildTextField(width: screenWidth * 0.2),
+            ),
+            Positioned(
+              top: screenHeight * 0.27,
+              left: screenWidth * 0.8,
+              child: _buildLabel('體重'),
+            ),
+            Positioned(
+              top: screenHeight * 0.27,
+              left: screenWidth * 0.9,
+              child: _buildTextField(width: screenWidth * 0.2),
             ),
             // 緊急聯絡人區域
-            const Positioned(
-              top: 354,
-              left: 17,
-              child: Text(
-                '緊急聯絡人',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-            // 姓名、關係與電話
-            const Positioned(
-              top: 405,
-              left: 17,
-              child: Text(
-                '姓名',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
             Positioned(
-              top: 410,
-              left: 80,
-              child: Container(
-                width: 119,
-                height: 31,
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.6),
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
+              top: screenHeight * 0.38,
+              left: screenWidth * 0.05,
+              child: _buildLabel('緊急聯絡人'),
             ),
-            const Positioned(
-              top: 461,
-              left: 17,
-              child: Text(
-                '關係',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 461,
-              left: 80,
-              child: Container(
-                width: 119,
-                height: 31,
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.6),
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 515,
-              left: 17,
-              child: Text(
-                '電話',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 517,
-              left: 80,
-              child: Container(
-                width: 119,
-                height: 31,
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.6),
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 410,
-              left: 219,
-              child: Text(
-                '姓名',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 410,
-              left: 283,
-              child: Container(
-                width: 119,
-                height: 31,
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.6),
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 461,
-              left: 219,
-              child: Text(
-                '關係',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 461,
-              left: 283,
-              child: Container(
-                width: 119,
-                height: 31,
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.6),
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 515,
-              left: 219,
-              child: Text(
-                '電話',
-                style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 517,
-              left: 283,
-              child: Container(
-                width: 119,
-                height: 31,
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: Colors.white.withOpacity(0.6),
-                  border: Border.all(color: Colors.black),
-                ),
-              ),
+            // 緊急聯絡人：姓名、關係與電話
+            _buildEmergencyContactRow(
+              top: screenHeight * 0.43,
+              left1: screenWidth * 0.05,
+              left2: screenWidth * 0.55,
             ),
             // 返回按鈕
             Positioned(
-              top: 733,
-              left: 109,
+              top: screenHeight * 0.8,
+              left: screenWidth * 0.4,
               child: GestureDetector(
                 onTap: () {
                   Navigator.pop(context); // 返回上一頁
                 },
                 child: Transform.rotate(
-                  angle: -179.7534073506047 * (math.pi / 180),
+                  angle: math.pi,
                   child: Container(
-                    width: 58,
-                    height: 61,
+                    width: screenWidth * 0.15,
+                    height: screenHeight * 0.1,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage('assets/images/back.png'),
-                        fit: BoxFit.fitWidth,
+                        image: AssetImage('assets/images/7.png'),
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
@@ -359,6 +123,86 @@ class DetaWidget extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // 共用的文字標籤方法
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Color.fromRGBO(147, 129, 108, 1),
+        fontFamily: 'Inter',
+        fontSize: 20,
+        fontWeight: FontWeight.normal,
+      ),
+    );
+  }
+
+  // 共用的輸入框方法
+  Widget _buildTextField({double width = 100}) {
+    return SizedBox(
+      width: width,
+      height: 32,
+      child: TextField(
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
+
+  // 緊急聯絡人區域建構
+  Widget _buildEmergencyContactRow({
+    required double top,
+    required double left1,
+    required double left2,
+  }) {
+    return Stack(
+      children: [
+        Positioned(
+          top: top,
+          left: left1,
+          child: _buildLabel('姓名'),
+        ),
+        Positioned(
+          top: top + 30,
+          left: left1,
+          child: _buildTextField(width: 150),
+        ),
+        Positioned(
+          top: top + 70,
+          left: left1,
+          child: _buildLabel('關係'),
+        ),
+        Positioned(
+          top: top + 100,
+          left: left1,
+          child: _buildTextField(width: 150),
+        ),
+        Positioned(
+          top: top,
+          left: left2,
+          child: _buildLabel('姓名'),
+        ),
+        Positioned(
+          top: top + 30,
+          left: left2,
+          child: _buildTextField(width: 150),
+        ),
+        Positioned(
+          top: top + 70,
+          left: left2,
+          child: _buildLabel('關係'),
+        ),
+        Positioned(
+          top: top + 100,
+          left: left2,
+          child: _buildTextField(width: 150),
+        ),
+      ],
     );
   }
 }

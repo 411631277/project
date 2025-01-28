@@ -13,37 +13,41 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // 獲取螢幕寬度和高度
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
-        width: 412,
-        height: 917,
+        width: screenWidth,
+        height: screenHeight,
         decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
         child: Stack(
           children: <Widget>[
             // 標題: 問題文字
-            const Positioned(
-              top: 315,
-              left: 56,
+            Positioned(
+              top: screenHeight * 0.3,
+              left: screenWidth * 0.15 - 5,
               child: Text(
                 '目前預期純哺乳哺餵時長為\n幾個月?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
+                  color: const Color.fromRGBO(147, 129, 108, 1),
                   fontFamily: 'Inter',
-                  fontSize: 25,
+                  fontSize: screenWidth * 0.06, // 動態調整字體大小
                   fontWeight: FontWeight.normal,
-                  height: 1,
+                  height: 1.5, // 調整行距
                 ),
               ),
             ),
             // 下拉框: 哺乳時長選項
             Positioned(
-              top: 419,
-              left: 118,
+              top: screenHeight * 0.42,
+              left: screenWidth * 0.25,
               child: SizedBox(
-                width: 176,
+                width: screenWidth * 0.5,
                 child: DropdownButtonFormField<String>(
                   value: selectedDuration,
                   decoration: InputDecoration(
@@ -54,9 +58,12 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
                       borderSide: const BorderSide(color: Colors.grey),
                     ),
                   ),
-                  hint: const Text(
+                  hint: Text(
                     '選擇月份',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.04,
+                      color: Colors.grey,
+                    ),
                   ),
                   items: List.generate(13, (index) => index.toString())
                       .map((month) => DropdownMenuItem<String>(
@@ -75,25 +82,28 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
             // 下一步按鈕
             if (selectedDuration != null)
               Positioned(
-                top: 687,
-                left: 129,
+                top: screenHeight * 0.75,
+                left: screenWidth * 0.3,
                 child: SizedBox(
-                  width: 154,
-                  height: 60,
+                  width: screenWidth * 0.4,
+                  height: screenHeight * 0.07,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     onPressed: () {
                       // 下一步邏輯，跳轉到目標頁面
                       Navigator.pushNamed(context, '/FinishWidget');
                     },
-                    child: const Text(
+                    child: Text(
                       '下一步',
                       style: TextStyle(
                         color: Colors.black,
                         fontFamily: 'Inter',
-                        fontSize: 25,
+                        fontSize: screenWidth * 0.05,
                       ),
                     ),
                   ),

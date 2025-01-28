@@ -6,15 +6,6 @@ class PrivacyPolicyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          '隱私權政策',
-          style: TextStyle(color: Color.fromRGBO(147, 129, 108, 1)),
-        ),
-        backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
-        iconTheme: const IconThemeData(color: Color.fromRGBO(147, 129, 108, 1)),
-        elevation: 0,
-      ),
       body: Container(
         color: const Color.fromRGBO(233, 227, 213, 1),
         padding: const EdgeInsets.all(16.0),

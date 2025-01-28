@@ -28,7 +28,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
             // 第一部分: 懷孕次數
             Positioned(
               top: screenHeight * 0.15,
-              left: screenWidth * 0.33 + 15,
+              left: screenWidth * 0.33 + 5,
               child: Text(
                 '懷孕次數',
                 textAlign: TextAlign.left,
@@ -43,7 +43,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
             ),
             Positioned(
               top: screenHeight * 0.2,
-              left: screenWidth * 0.33,
+              left: screenWidth * 0.28,
               child: SizedBox(
                 width: screenWidth * 0.4,
                 child: DropdownButtonFormField<String>(
@@ -80,7 +80,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
             // 第二部分: 生產次數
             Positioned(
               top: screenHeight * 0.35,
-              left: screenWidth * 0.33 + 15,
+              left: screenWidth * 0.33 + 5,
               child: Text(
                 '生產次數',
                 textAlign: TextAlign.left,
@@ -94,8 +94,8 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
               ),
             ),
             Positioned(
-              top: screenHeight * 0.42,
-              left: screenWidth * 0.33,
+              top: screenHeight * 0.40,
+              left: screenWidth * 0.28,
               child: SizedBox(
                 width: screenWidth * 0.4,
                 child: DropdownButtonFormField<String>(
@@ -132,7 +132,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
             // 第三部分: 新生兒誕生後是否願意親自哺餵母乳?
             Positioned(
               top: screenHeight * 0.55,
-              left: screenWidth * 0.25 + 15,
+              left: screenWidth * 0.25 + 5,
               child: Text(
                 '是否為首次哺乳?',
                 textAlign: TextAlign.center,
@@ -147,7 +147,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
             ),
             Positioned(
               top: screenHeight * 0.60,
-              left: screenWidth * 0.20,
+              left: screenWidth * 0.15,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

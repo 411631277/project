@@ -15,48 +15,52 @@ class _NotifyWidgetState extends State<NotifyWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
-        width: 412,
-        height: 917,
+        width: screenWidth,
+        height: screenHeight,
         decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
         child: Stack(
           children: <Widget>[
+            // 圖標
             Positioned(
-              top: 199,
-              left: 174,
+              top: screenHeight * 0.22,
+              left: screenWidth * 0.42,
               child: Container(
-                width: 42,
-                height: 49,
+                width: screenWidth * 0.1,
+                height: screenHeight * 0.07,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage('assets/images/notify.png'),
-                    fit: BoxFit.fitWidth,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
             ),
             // 身體數據量測提醒
             Positioned(
-              top: 335,
-              left: 40,
-              child: const Text(
+              top: screenHeight * 0.38,
+              left: screenWidth * 0.1,
+              child: Text(
                 '身體數據量測提醒',
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
+                  color: const Color.fromRGBO(147, 129, 108, 1),
                   fontFamily: 'Inter',
-                  fontSize: 20,
+                  fontSize: screenWidth * 0.06,
                   fontWeight: FontWeight.normal,
                   height: 1,
                 ),
               ),
             ),
             Positioned(
-              top: 335,
-              left: 282,
+              top: screenHeight * 0.36,
+              left: screenWidth * 0.7,
               child: Switch(
                 value: isBodyDataReminderOn,
                 onChanged: (bool newValue) {
@@ -68,23 +72,23 @@ class _NotifyWidgetState extends State<NotifyWidget> {
             ),
             // 運動提醒
             Positioned(
-              top: 398,
-              left: 40,
-              child: const Text(
+              top: screenHeight * 0.5,
+              left: screenWidth * 0.1,
+              child: Text(
                 '運動提醒',
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
+                  color: const Color.fromRGBO(147, 129, 108, 1),
                   fontFamily: 'Inter',
-                  fontSize: 20,
+                  fontSize: screenWidth * 0.06,
                   fontWeight: FontWeight.normal,
                   height: 1,
                 ),
               ),
             ),
             Positioned(
-              top: 398,
-              left: 282,
+              top: screenHeight * 0.48,
+              left: screenWidth * 0.7,
               child: Switch(
                 value: isExerciseReminderOn,
                 onChanged: (bool newValue) {
@@ -96,21 +100,21 @@ class _NotifyWidgetState extends State<NotifyWidget> {
             ),
             // 返回按鈕
             Positioned(
-              top: 720,
-              left: 215.0640106201172,
+              top: screenHeight * 0.78,
+              left: screenWidth * 0.4,
               child: GestureDetector(
                 onTap: () {
                   Navigator.pop(context); // 返回上一頁
                 },
                 child: Transform.rotate(
-                  angle: 179.80448080946567 * (math.pi / 180),
+                  angle: math.pi,
                   child: Container(
-                    width: 70.06442260742188,
-                    height: 64.76126861572266,
+                    width: screenWidth * 0.15,
+                    height: screenHeight * 0.08,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/images/back.png'),
-                        fit: BoxFit.fitWidth,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),

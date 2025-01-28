@@ -6,10 +6,13 @@ class LanguageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
-        width: 412,
-        height: 917,
+        width: screenWidth,
+        height: screenHeight,
         decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
@@ -17,72 +20,80 @@ class LanguageWidget extends StatelessWidget {
           children: <Widget>[
             // 地球圖標
             Positioned(
-              top: 150,
-              left: 156,
+              top: screenHeight * 0.16,
+              left: screenWidth * 0.35,
               child: Container(
-                width: 101,
-                height: 98,
+                width: screenWidth * 0.25,
+                height: screenHeight * 0.1,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage('assets/images/language.png'),
-                    fit: BoxFit.fitWidth,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
             ),
             // 繁體中文按鈕
             Positioned(
-              top: 300,
-              left: 100,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      const Color.fromRGBO(185, 156, 107, 1), // 背景顏色
-                  fixedSize: const Size(200, 50), // 固定大小
-                ),
-                onPressed: () {},
-                child: const Text(
-                  '繁體中文',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
+              top: screenHeight * 0.32,
+              left: screenWidth * 0.2,
+              child: SizedBox(
+                width: screenWidth * 0.6,
+                height: screenHeight * 0.07,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(185, 156, 107, 1),
+                  ),
+                  onPressed: () {
+                    // 繁體中文按鈕邏輯
+                  },
+                  child: Text(
+                    '繁體中文',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: screenWidth * 0.045,
+                    ),
                   ),
                 ),
               ),
             ),
             // English 按鈕
             Positioned(
-              top: 380,
-              left: 100,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      const Color.fromRGBO(185, 156, 107, 1), // 背景顏色
-                  fixedSize: const Size(200, 50), // 固定大小
-                ),
-                onPressed: () {},
-                child: const Text(
-                  'English',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
+              top: screenHeight * 0.45,
+              left: screenWidth * 0.2,
+              child: SizedBox(
+                width: screenWidth * 0.6,
+                height: screenHeight * 0.07,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(185, 156, 107, 1),
+                  ),
+                  onPressed: () {
+                    // English 按鈕邏輯
+                  },
+                  child: Text(
+                    'English',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: screenWidth * 0.045,
+                    ),
                   ),
                 ),
               ),
             ),
             // 返回箭頭按鈕
             Positioned(
-              top: 650,
-              left: 30,
+              top: screenHeight * 0.71,
+              left: screenWidth * 0.1,
               child: GestureDetector(
                 onTap: () {
                   Navigator.pop(context); // 返回上一頁
                 },
                 child: Transform.rotate(
-                  angle: 179.24092303969866 * (math.pi / 180),
+                  angle: math.pi,
                   child: Container(
-                    width: 60,
-                    height: 50,
+                    width: screenWidth * 0.15,
+                    height: screenHeight * 0.08,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/images/back.png'),

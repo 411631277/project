@@ -6,113 +6,115 @@ class SignoutWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Figma Flutter Generator SignoutWidget - FRAME
-    return Container(
-        width: 412,
-        height: 917,
-        decoration: BoxDecoration(
+    // 獲取螢幕尺寸
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
+      body: Container(
+        width: screenWidth,
+        height: screenHeight,
+        decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
-        child: Stack(children: <Widget>[
-          Positioned(
-              top: 272,
-              left: 47,
+        child: Stack(
+          children: <Widget>[
+            // 登出提示框背景
+            Positioned(
+              top: screenHeight * 0.3,
+              left: screenWidth * 0.1,
               child: Container(
-                  width: 318,
-                  height: 283,
-                  decoration: BoxDecoration(),
-                  child: Stack(children: <Widget>[
-                    Positioned(
-                        top: 52,
-                        left: 30,
-                        child: Container(
-                            width: 255,
-                            height: 205,
-                            decoration: BoxDecoration(
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                            ))),
-                    Positioned(
-                        top: 111,
-                        left: 72,
-                        child: Text(
-                          '確認要登出帳號嗎?',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color.fromRGBO(255, 255, 255, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 20,
-                              letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.normal,
-                              height: 1),
-                        )),
-                    Positioned(
-                        top: 180,
-                        left: 72,
-                        child: Container(
-                            width: 58,
-                            height: 27,
-                            decoration: BoxDecoration(
-                              color: Color.fromRGBO(
-                                  255, 255, 255, 0.6000000238418579),
-                            ))),
-                    Positioned(
-                        top: 180,
-                        left: 185,
-                        child: Container(
-                            width: 58,
-                            height: 27,
-                            decoration: BoxDecoration(
-                              color: Color.fromRGBO(
-                                  255, 255, 255, 0.6000000238418579),
-                            ))),
-                    Positioned(
-                        top: 182,
-                        left: 91,
-                        child: GestureDetector(
-                            onTap: () {
-                              // 點擊跳轉到 LanguageWidget
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Main_screenWidget(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              '是',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: Color.fromRGBO(
-                                      0, 0, 0, 0.36000001430511475),
-                                  fontFamily: 'Inter',
-                                  fontSize: 20,
-                                  letterSpacing:
-                                      0 /*percentages not used in flutter. defaulting to zero*/,
-                                  fontWeight: FontWeight.normal,
-                                  height: 1),
-                            ))),
-                    Positioned(
-                        top: 182,
-                        left: 204,
-                        child: GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context); // 返回上一頁
-                            },
-                            child: Text(
-                              '否',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: Color.fromRGBO(
-                                      0, 0, 0, 0.36000001430511475),
-                                  fontFamily: 'Inter',
-                                  fontSize: 20,
-                                  letterSpacing:
-                                      0 /*percentages not used in flutter. defaulting to zero*/,
-                                  fontWeight: FontWeight.normal,
-                                  height: 1),
-                            ))),
-                  ]))),
-        ]));
+                width: screenWidth * 0.8,
+                height: screenHeight * 0.3,
+                decoration: const BoxDecoration(
+                  color: Color.fromRGBO(147, 129, 108, 1),
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+              ),
+            ),
+            // 提示文字
+            Positioned(
+              top: screenHeight * 0.37,
+              left: screenWidth * 0.28,
+              child: Text(
+                '確認要登出帳號嗎?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Inter',
+                  fontSize: screenWidth * 0.05,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+            // "是" 按鈕
+            Positioned(
+              top: screenHeight * 0.47,
+              left: screenWidth * 0.22,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Main_screenWidget(),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: screenWidth * 0.2,
+                  height: screenHeight * 0.05,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color.fromRGBO(255, 255, 255, 0.6),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Text(
+                    '是',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      // ignore: deprecated_member_use
+                      color: Colors.black.withOpacity(0.36),
+                      fontFamily: 'Inter',
+                      fontSize: screenWidth * 0.045,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // "否" 按鈕
+            Positioned(
+              top: screenHeight * 0.47,
+              left: screenWidth * 0.58,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  width: screenWidth * 0.2,
+                  height: screenHeight * 0.05,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color.fromRGBO(255, 255, 255, 0.6),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Text(
+                    '否',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      // ignore: deprecated_member_use
+                      color: Colors.black.withOpacity(0.36),
+                      fontFamily: 'Inter',
+                      fontSize: screenWidth * 0.045,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
