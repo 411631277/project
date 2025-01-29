@@ -1,4 +1,4 @@
-import 'package:doctor_2/register/iam.dart';
+import 'package:doctor_2/agree.dart';
 import 'package:doctor_2/login/login.dart';
 import 'package:flutter/material.dart';
 
@@ -34,11 +34,11 @@ class Main_screenWidget extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // 點擊跳轉到 IamWidget
+                  // 點擊跳轉到 agreeWidget
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const IamWidget(),
+                      builder: (context) => const ResearchAgreementWidget(),
                     ),
                   );
                 },

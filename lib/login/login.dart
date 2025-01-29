@@ -173,7 +173,7 @@ class LoginWidget extends StatelessWidget {
                     child: const Text('忘記密碼',
                         style: TextStyle(
                           color: Color.fromRGBO(0, 0, 0, 0.54),
-                          fontSize: 24,
+                          fontSize: 18,
                         )),
                   ),
                 ),

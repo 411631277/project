@@ -49,7 +49,13 @@ class IamWidget extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // 點擊「爸爸」按鍵的邏輯
+                    // 點擊跳轉到 RegisterWidget
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterWidget(),
+                      ),
+                    );
                   },
                   child: const Text(
                     '爸爸',

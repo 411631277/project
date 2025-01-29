@@ -14,7 +14,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const <Widget>[
               Text(
-                '非常歡迎您光臨內政部全球資訊網(以下簡稱本網站)，為了讓您能夠安心的使用本網站的各項服務與資訊，特此向您說明本網站的隱私權保護政策，以保障您的權益，請您詳閱下列內容：\n',
+                '\n\n\n非常歡迎您光臨內政部全球資訊網(以下簡稱本網站)，為了讓您能夠安心的使用本網站的各項服務與資訊，特此向您說明本網站的隱私權保護政策，以保障您的權益，請您詳閱下列內容：\n',
                 style: TextStyle(
                   fontSize: 16,
                   color: Color.fromRGBO(147, 129, 108, 1),
@@ -75,7 +75,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               ),
               Text(
                 '六、隱私權保護政策之修正\n'
-                '本網站隱私權保護政策將因應需求隨時進行修正，修正後的條款將刊登於網站上。\n',
+                '本網站隱私權保護政策將因應需求隨時進行修正，修正後的條款將刊登於網站上。\n\n\n',
                 style: TextStyle(
                   fontSize: 16,
                   color: Color.fromRGBO(147, 129, 108, 1),

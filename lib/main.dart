@@ -8,9 +8,9 @@ import 'package:doctor_2/first_quesion/stop.dart';
 import 'package:doctor_2/first_quesion/yes%20born/notfirst.dart';
 import 'package:doctor_2/first_quesion/yes%20born/nowfeeding.dart';
 import 'package:doctor_2/home/home_screen.dart';
-import 'package:doctor_2/home/setting.dart';
+import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
-//import 'package:doctor_2/main.screen.dart';
+import 'package:doctor_2/main.screen.dart';
 import 'package:doctor_2/register/success.dart';
 
 void main() {
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/', // 初始路由
       routes: {
-        '/': (context) => const SettingWidget(), // 主畫面
+        '/': (context) => const Main_screenWidget(), // 主畫面
         '/Notyet1Widget': (context) => const Notyet1Widget(), // Notyet1頁面
         '/FrequencyWidget': (context) => const FrequencyWidget(), // Deta頁面
         '/SuccessWidget': (context) => const SuccessWidget(), // Success頁面
@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
         '/StopWidget': (context) => const StopWidget(),
         '/Nowfeeding': (context) => const Nowfeeding(),
         '/NotfirstWidget': (context) => const NotfirstWidget(),
+        '/IamWidget': (context) => const IamWidget(),
       },
     );
   }

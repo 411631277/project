@@ -13,43 +13,49 @@ class _Nowfeeding extends State<Nowfeeding> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // 檢查是否所有問題都填答
+    final isAllAnswered = purebreastmilk != null && firstime != null;
+
     return Scaffold(
       body: Container(
-        width: 412,
-        height: 917,
+        width: screenWidth,
+        height: screenHeight,
         color: const Color.fromRGBO(233, 227, 213, 1),
         child: Stack(
           children: <Widget>[
-            const Positioned(
-              top: 360,
-              left: 79,
+            // **第一部分: 新生兒哺乳是否為純母乳?**
+            Positioned(
+              top: screenHeight * 0.35,
+              left: screenWidth * 0.2,
               child: Text(
                 '新生兒哺乳是否為純母乳??',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
+                  color: const Color.fromRGBO(147, 129, 108, 1),
                   fontFamily: 'Inter',
-                  fontSize: 25,
+                  fontSize: screenWidth * 0.05,
                   fontWeight: FontWeight.normal,
-                  height: 1,
                 ),
               ),
             ),
             Positioned(
-              top: 380,
-              left: 89,
+              top: screenHeight * 0.4,
+              left: screenWidth * 0.2,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 是選項
+                  // **是選項**
                   SizedBox(
-                    width: 120,
+                    width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: const Text(
+                      title: Text(
                         '是',
                         style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontSize: screenWidth * 0.045,
+                          color: const Color.fromRGBO(147, 129, 108, 1),
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -62,15 +68,15 @@ class _Nowfeeding extends State<Nowfeeding> {
                       },
                     ),
                   ),
-                  // 否選項
+                  // **否選項**
                   SizedBox(
-                    width: 120,
+                    width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: const Text(
+                      title: Text(
                         '否',
                         style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontSize: screenWidth * 0.045,
+                          color: const Color.fromRGBO(147, 129, 108, 1),
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -86,37 +92,37 @@ class _Nowfeeding extends State<Nowfeeding> {
                 ],
               ),
             ),
-            // 第二部分: 是否為首次哺乳??
-            const Positioned(
-              top: 450,
-              left: 57,
+
+            // **第二部分: 是否為首次哺乳?**
+            Positioned(
+              top: screenHeight * 0.5,
+              left: screenWidth * 0.25 + 10,
               child: Text(
                 '是否為首次哺乳?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
+                  color: const Color.fromRGBO(147, 129, 108, 1),
                   fontFamily: 'Inter',
-                  fontSize: 25,
+                  fontSize: screenWidth * 0.05,
                   fontWeight: FontWeight.normal,
-                  height: 1,
                 ),
               ),
             ),
             Positioned(
-              top: 470,
-              left: 89,
+              top: screenHeight * 0.55,
+              left: screenWidth * 0.2,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 是選項
+                  // **是選項**
                   SizedBox(
-                    width: 120,
+                    width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: const Text(
+                      title: Text(
                         '是',
                         style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontSize: screenWidth * 0.045,
+                          color: const Color.fromRGBO(147, 129, 108, 1),
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -129,15 +135,15 @@ class _Nowfeeding extends State<Nowfeeding> {
                       },
                     ),
                   ),
-                  // 否選項
+                  // **否選項**
                   SizedBox(
-                    width: 120,
+                    width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: const Text(
+                      title: Text(
                         '否',
                         style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontSize: screenWidth * 0.045,
+                          color: const Color.fromRGBO(147, 129, 108, 1),
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -153,14 +159,15 @@ class _Nowfeeding extends State<Nowfeeding> {
                 ],
               ),
             ),
-            // 下一步按鍵
-            if (firstime != null)
+
+            // **「下一步」按鈕**
+            if (isAllAnswered)
               Positioned(
-                top: 709,
-                left: 129,
+                top: screenHeight * 0.8,
+                left: screenWidth * 0.3,
                 child: SizedBox(
-                  width: 154,
-                  height: 60,
+                  width: screenWidth * 0.4,
+                  height: screenHeight * 0.07,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
@@ -169,41 +176,21 @@ class _Nowfeeding extends State<Nowfeeding> {
                       if (firstime == 'yes') {
                         Navigator.pushNamed(
                             context, '/FirstBreastfeedingWidget');
-                      } else if (firstime == 'no') {
+                      } else {
                         Navigator.pushNamed(context, '/NotfirstWidget');
                       }
                     },
-                    child: const Text(
+                    child: Text(
                       '下一步',
                       style: TextStyle(
                         color: Colors.black,
+                        fontSize: screenWidth * 0.05,
                         fontFamily: 'Inter',
-                        fontSize: 25,
                       ),
                     ),
                   ),
                 ),
               ),
-            // 返回按鍵
-            Positioned(
-              top: 560,
-              left: 94,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context); // 返回上一頁
-                },
-                child: Container(
-                  width: 61,
-                  height: 65,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/back.png'),
-                      fit: BoxFit.fitWidth,
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),

@@ -14,34 +14,40 @@ class _NotfirstWidget extends State<NotfirstWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // 檢查是否所有問題都填答
+    final isAllAnswered =
+        painindex != null && brokenskin != null && duration != null;
+
     return Scaffold(
       body: Container(
-        width: 412,
-        height: 917,
+        width: screenWidth,
+        height: screenHeight,
         color: const Color.fromRGBO(233, 227, 213, 1),
         child: Stack(
           children: <Widget>[
-            // 第一部分: 前次哺乳的乳頭疼痛指數
-            const Positioned(
-              top: 75,
-              left: 135,
+            // **第一部分: 前次哺乳的乳頭疼痛指數**
+            Positioned(
+              top: screenHeight * 0.15,
+              left: screenWidth * 0.2,
               child: Text(
                 '前次哺乳的乳頭疼痛指數',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
+                  color: const Color.fromRGBO(147, 129, 108, 1),
                   fontFamily: 'Inter',
-                  fontSize: 25,
+                  fontSize: screenWidth * 0.05,
                   fontWeight: FontWeight.normal,
-                  height: 1,
                 ),
               ),
             ),
             Positioned(
-              top: 100,
-              left: 129,
+              top: screenHeight * 0.2,
+              left: screenWidth * 0.25,
               child: SizedBox(
-                width: 150,
+                width: screenWidth * 0.5,
                 child: DropdownButtonFormField<String>(
                   value: painindex,
                   decoration: InputDecoration(
@@ -53,13 +59,17 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                     ),
                   ),
                   hint: const Text(
-                    '次數',
+                    '請選擇',
+                    textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
-                  items: ['0', '1', '2', '3', '4']
+                  items: ['0', '1', '2', '3', '4', '5']
                       .map((count) => DropdownMenuItem<String>(
                             value: count,
-                            child: Text(count),
+                            child: Text(
+                              count,
+                              textAlign: TextAlign.center,
+                            ),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -70,37 +80,37 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                 ),
               ),
             ),
-            // 第二部分: 是否有乳頭破皮的狀況發生?
-            const Positioned(
-              top: 200,
-              left: 79,
+
+            // **第二部分: 是否有乳頭破皮的狀況發生?**
+            Positioned(
+              top: screenHeight * 0.3,
+              left: screenWidth * 0.2,
               child: Text(
                 '是否有乳頭破皮的狀況發生?',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
+                  color: const Color.fromRGBO(147, 129, 108, 1),
                   fontFamily: 'Inter',
-                  fontSize: 25,
+                  fontSize: screenWidth * 0.05,
                   fontWeight: FontWeight.normal,
-                  height: 1,
                 ),
               ),
             ),
             Positioned(
-              top: 220,
-              left: 89,
+              top: screenHeight * 0.35,
+              left: screenWidth * 0.2,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 是選項
+                  // **是選項**
                   SizedBox(
-                    width: 120,
+                    width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: const Text(
+                      title: Text(
                         '是',
                         style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontSize: screenWidth * 0.045,
+                          color: const Color.fromRGBO(147, 129, 108, 1),
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -113,15 +123,15 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                       },
                     ),
                   ),
-                  // 否選項
+                  // **否選項**
                   SizedBox(
-                    width: 120,
+                    width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: const Text(
+                      title: Text(
                         '否',
                         style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontSize: screenWidth * 0.045,
+                          color: const Color.fromRGBO(147, 129, 108, 1),
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -137,27 +147,27 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                 ],
               ),
             ),
-            // 第三部分: 前胎哺乳持續時長誰幾個月?
-            const Positioned(
-              top: 300,
-              left: 135,
+
+            // **第三部分: 前胎哺乳持續時長**
+            Positioned(
+              top: screenHeight * 0.45,
+              left: screenWidth * 0.25,
               child: Text(
-                '前胎哺乳持續時長誰幾個月?',
+                '前胎哺乳持續時長?',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
+                  color: const Color.fromRGBO(147, 129, 108, 1),
                   fontFamily: 'Inter',
-                  fontSize: 25,
+                  fontSize: screenWidth * 0.05,
                   fontWeight: FontWeight.normal,
-                  height: 1,
                 ),
               ),
             ),
             Positioned(
-              top: 320,
-              left: 129,
+              top: screenHeight * 0.5,
+              left: screenWidth * 0.25,
               child: SizedBox(
-                width: 150,
+                width: screenWidth * 0.5,
                 child: DropdownButtonFormField<String>(
                   value: duration,
                   decoration: InputDecoration(
@@ -169,13 +179,17 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                     ),
                   ),
                   hint: const Text(
-                    '次數',
+                    '請選擇',
+                    textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
-                  items: ['0', '1', '2', '3', '4']
-                      .map((count) => DropdownMenuItem<String>(
-                            value: count,
-                            child: Text(count),
+                  items: List.generate(25, (index) => index.toString())
+                      .map((month) => DropdownMenuItem<String>(
+                            value: month,
+                            child: Text(
+                              '$month 個月',
+                              textAlign: TextAlign.center,
+                            ),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -186,27 +200,28 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                 ),
               ),
             ),
-            if (duration != null)
+
+            // **「下一步」按鈕**
+            if (isAllAnswered)
               Positioned(
-                top: 687,
-                left: 129,
+                top: screenHeight * 0.75,
+                left: screenWidth * 0.3,
                 child: SizedBox(
-                  width: 154,
-                  height: 60,
+                  width: screenWidth * 0.4,
+                  height: screenHeight * 0.07,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
                     ),
                     onPressed: () {
-                      // 下一步邏輯，跳轉到目標頁面
                       Navigator.pushNamed(context, '/StopWidget');
                     },
-                    child: const Text(
+                    child: Text(
                       '下一步',
                       style: TextStyle(
                         color: Colors.black,
+                        fontSize: screenWidth * 0.05,
                         fontFamily: 'Inter',
-                        fontSize: 25,
                       ),
                     ),
                   ),

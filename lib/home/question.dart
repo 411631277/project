@@ -5,31 +5,25 @@ class QuestionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          '',
-          style: TextStyle(color: Color.fromRGBO(147, 129, 108, 1)),
-        ),
-        backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
-        iconTheme: const IconThemeData(color: Color.fromRGBO(147, 129, 108, 1)),
-        elevation: 0,
-      ),
       body: Container(
-        width: 412,
-        height: 917,
+        width: screenWidth,
+        height: screenHeight,
         decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
         child: Stack(
           children: <Widget>[
-            // 問卷標題圖標
+            // **問卷標題圖標**
             Positioned(
-              top: 71,
-              left: 38,
+              top: screenHeight * 0.08,
+              left: screenWidth * 0.1,
               child: Container(
-                width: 34,
-                height: 40,
+                width: screenWidth * 0.08,
+                height: screenHeight * 0.05,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage('assets/images/Question.png'),
@@ -38,193 +32,66 @@ class QuestionWidget extends StatelessWidget {
                 ),
               ),
             ),
-            // 問卷文字標題
-            const Positioned(
-              top: 79,
-              left: 95,
+            // **問卷文字標題**
+            Positioned(
+              top: screenHeight * 0.085,
+              left: screenWidth * 0.25,
               child: Text(
                 '問卷',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 30,
-                  fontWeight: FontWeight.normal,
-                  height: 1,
-                ),
-              ),
-            ),
-            // 母乳哺餵知識量表
-            Positioned(
-              top: 163,
-              left: 28,
-              child: Container(
-                width: 262,
-                height: 37,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
                   color: const Color.fromRGBO(147, 129, 108, 1),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 170,
-              left: 75,
-              child: Text(
-                '母乳哺餵知識量表',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color.fromRGBO(255, 255, 255, 1),
                   fontFamily: 'Inter',
-                  fontSize: 20,
+                  fontSize: screenWidth * 0.08,
                   fontWeight: FontWeight.normal,
-                  height: 1,
                 ),
               ),
             ),
-            // 產後憂鬱量表
-            Positioned(
-              top: 251,
-              left: 28,
-              child: Container(
-                width: 262,
-                height: 37,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 258,
-              left: 95,
-              child: Text(
-                '產後憂鬱量表',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color.fromRGBO(255, 255, 255, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                  height: 1,
-                ),
-              ),
-            ),
-            // 生產支持知覺量表
-            Positioned(
-              top: 347,
-              left: 28,
-              child: Container(
-                width: 262,
-                height: 37,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 354,
-              left: 75,
-              child: Text(
-                '生產支持知覺量表',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color.fromRGBO(255, 255, 255, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                  height: 1,
-                ),
-              ),
-            ),
-            // 親子依附量表
-            Positioned(
-              top: 449,
-              left: 28,
-              child: Container(
-                width: 262,
-                height: 37,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 456,
-              left: 100,
-              child: Text(
-                '親子依附量表',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color.fromRGBO(255, 255, 255, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                  height: 1,
-                ),
-              ),
-            ),
-            // 親子同室情況
-            Positioned(
-              top: 545,
-              left: 28,
-              child: Container(
-                width: 262,
-                height: 37,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 552,
-              left: 100,
-              child: Text(
-                '親子同室情況',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color.fromRGBO(255, 255, 255, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                  height: 1,
-                ),
-              ),
-            ),
-            // 會陰疼痛分數計算
-            Positioned(
-              top: 630,
-              left: 28,
-              child: Container(
-                width: 262,
-                height: 37,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 639,
-              left: 80,
-              child: Text(
-                '會陰疼痛分數計算',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color.fromRGBO(255, 255, 255, 1),
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                  height: 1,
-                ),
-              ),
-            ),
+            // **問卷選項**
+            _buildSurveyButton(screenWidth, screenHeight, 0.18, '母乳哺餵知識量表'),
+            _buildSurveyButton(screenWidth, screenHeight, 0.28, '產後憂鬱量表'),
+            _buildSurveyButton(screenWidth, screenHeight, 0.38, '生產支持知覺量表'),
+            _buildSurveyButton(screenWidth, screenHeight, 0.48, '親子依附量表'),
+            _buildSurveyButton(screenWidth, screenHeight, 0.58, '親子同室情況'),
+            _buildSurveyButton(screenWidth, screenHeight, 0.68, '會陰疼痛分數計算'),
           ],
         ),
       ),
+    );
+  }
+
+  // **建構問卷按鈕**
+  Widget _buildSurveyButton(double screenWidth, double screenHeight,
+      double topPosition, String text) {
+    return Stack(
+      children: [
+        Positioned(
+          top: screenHeight * topPosition,
+          left: screenWidth * 0.1,
+          child: Container(
+            width: screenWidth * 0.7,
+            height: screenHeight * 0.05,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+              color: const Color.fromRGBO(147, 129, 108, 1),
+            ),
+          ),
+        ),
+        Positioned(
+          top: screenHeight * topPosition + screenHeight * 0.01,
+          left: screenWidth * 0.22,
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: const Color.fromRGBO(255, 255, 255, 1),
+              fontFamily: 'Inter',
+              fontSize: screenWidth * 0.05,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
