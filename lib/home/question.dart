@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 class QuestionWidget extends StatelessWidget {
   const QuestionWidget({super.key});
@@ -54,6 +55,30 @@ class QuestionWidget extends StatelessWidget {
             _buildSurveyButton(screenWidth, screenHeight, 0.48, '親子依附量表'),
             _buildSurveyButton(screenWidth, screenHeight, 0.58, '親子同室情況'),
             _buildSurveyButton(screenWidth, screenHeight, 0.68, '會陰疼痛分數計算'),
+
+            // **返回按鈕（獨立出來）**
+            Positioned(
+              top: screenHeight * 0.8,
+              left: screenWidth * 0.1,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context); // **這裡不會報錯**
+                },
+                child: Transform.rotate(
+                  angle: 180 * (math.pi / 180), // 旋轉 180 度
+                  child: Container(
+                    width: screenWidth * 0.2,
+                    height: screenHeight * 0.08,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/back.png'),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -7,7 +7,11 @@ import 'package:doctor_2/first_quesion/not%20born/notyet1.dart';
 import 'package:doctor_2/first_quesion/stop.dart';
 import 'package:doctor_2/first_quesion/yes%20born/notfirst.dart';
 import 'package:doctor_2/first_quesion/yes%20born/nowfeeding.dart';
+import 'package:doctor_2/home/baby_acc.dart';
+import 'package:doctor_2/home/delete.dart';
+import 'package:doctor_2/home/delete_acc.dart';
 import 'package:doctor_2/home/home_screen.dart';
+import 'package:doctor_2/home/revise.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/main.screen.dart';
@@ -39,12 +43,17 @@ class MyApp extends StatelessWidget {
         '/Home_screenWidget': (context) => const Home_screenWidget(),
         '/FinishWidget': (context) => const FinishWidget(),
         '/FirsttimeWidget': (context) => const FirsttimeWidget(),
-        '/Breastfeeding_durationWidget': (context) =>
-            const Breastfeeding_durationWidget(),
+        '/BreastfeedingDurationWidget': (context) =>
+            const BreastfeedingDurationWidget(),
         '/StopWidget': (context) => const StopWidget(),
         '/Nowfeeding': (context) => const Nowfeeding(),
         '/NotfirstWidget': (context) => const NotfirstWidget(),
         '/IamWidget': (context) => const IamWidget(),
+        '/ReviseWidget': (context) => const ReviseWidget(),
+        '/DeleteWidget': (context) => const DeleteWidget(),
+        '/DeleteAccWidget': (context) => const DeleteAccWidget(),
+        '/Main_screenWidget': (context) => const Main_screenWidget(),
+        '/BabyAccWidget': (context) => const BabyAccWidget(),
       },
     );
   }

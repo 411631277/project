@@ -4,55 +4,56 @@ class FirsttimeWidget extends StatefulWidget {
   const FirsttimeWidget({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _FirsttimeWidgetState createState() => _FirsttimeWidgetState();
+  State<FirsttimeWidget> createState() => _FirsttimeWidgetState();
 }
 
 class _FirsttimeWidgetState extends State<FirsttimeWidget> {
-  String? answer; // 用於儲存「是」或「否」的回答
+  String? answer; // 儲存「是」或「否」的回答
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
-        width: 412,
-        height: 917,
+        width: screenWidth,
+        height: screenHeight,
         decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
-        child: Stack(
-          children: <Widget>[
-            // 問題文字
-            const Positioned(
-              top: 317,
-              left: 90,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // **問題文字**
+            Padding(
+              padding: EdgeInsets.only(top: screenHeight * 0.2),
               child: Text(
                 '是否為第一次生產?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color.fromRGBO(147, 129, 108, 1),
+                  color: const Color.fromRGBO(147, 129, 108, 1),
                   fontFamily: 'Inter',
-                  fontSize: 25,
+                  fontSize: screenWidth * 0.07, // 自適應字體大小
                   fontWeight: FontWeight.normal,
-                  height: 1,
                 ),
               ),
             ),
-            Positioned(
-              top: 370,
-              left: 89,
+
+            // **選項 (讓 "是" 和 "否" 在同行)**
+            Padding(
+              padding: EdgeInsets.only(top: screenHeight * 0.05),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center, // 水平居中
                 children: [
-                  // 是選項
                   SizedBox(
-                    width: 120,
+                    width: screenWidth * 0.3, // 固定寬度，避免擠壓換行
                     child: RadioListTile<String>(
-                      title: const Text(
+                      title: Text(
                         '是',
                         style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontSize: screenWidth * 0.05,
+                          color: const Color.fromRGBO(147, 129, 108, 1),
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -65,15 +66,14 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
                       },
                     ),
                   ),
-                  // 否選項
                   SizedBox(
-                    width: 120,
+                    width: screenWidth * 0.3, // 固定寬度
                     child: RadioListTile<String>(
-                      title: const Text(
+                      title: Text(
                         '否',
                         style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromRGBO(147, 129, 108, 1),
+                          fontSize: screenWidth * 0.05,
+                          color: const Color.fromRGBO(147, 129, 108, 1),
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -89,33 +89,32 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
                 ],
               ),
             ),
-            // 下一步按鍵
+
+            // **下一步按鈕**
             if (answer != null)
-              Positioned(
-                top: 553,
-                left: 126,
+              Padding(
+                padding: EdgeInsets.only(top: screenHeight * 0.1),
                 child: SizedBox(
-                  width: 154,
-                  height: 60,
+                  width: screenWidth * 0.5,
+                  height: screenHeight * 0.07,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
                     ),
                     onPressed: () {
                       if (answer == 'yes') {
-                        Navigator.pushNamed(
-                            context, '/FinishWidget'); // 替換為「是」的頁面路徑
+                        Navigator.pushNamed(context, '/FinishWidget');
                       } else {
-                        Navigator.pushNamed(context,
-                            '/Breastfeeding_durationWidget'); // 替換為「否」的頁面路徑
+                        Navigator.pushNamed(
+                            context, '/BreastfeedingDurationWidget');
                       }
                     },
-                    child: const Text(
+                    child: Text(
                       '下一步',
                       style: TextStyle(
                         color: Colors.black,
                         fontFamily: 'Inter',
-                        fontSize: 25,
+                        fontSize: screenWidth * 0.06,
                       ),
                     ),
                   ),

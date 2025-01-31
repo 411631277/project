@@ -1,3 +1,4 @@
+import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/setting.dart';
 import 'package:flutter/material.dart';
@@ -194,16 +195,25 @@ class _Home_screenWidgetState extends State<Home_screenWidget> {
             Positioned(
               top: screenHeight * 0.66,
               left: screenWidth * 0.08,
-              child: Container(
-                width: screenWidth * 0.13,
-                height: screenHeight * 0.08,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/Baby.png'),
-                    fit: BoxFit.fitWidth,
-                  ),
-                ),
-              ),
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BabyWidget(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: screenWidth * 0.13,
+                    height: screenHeight * 0.08,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/Baby.png'),
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                  )),
             ),
             // 小寶文字
             Positioned(
