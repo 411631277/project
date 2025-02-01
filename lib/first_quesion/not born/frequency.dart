@@ -213,7 +213,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                         Navigator.pushNamed(
                             context, '/FirstBreastfeedingWidget');
                       } else if (breastfeedingAnswer == 'no') {
-                        Navigator.pushNamed(context, '/SuccessWidget');
+                        Navigator.pushNamed(context, '/NotfirstWidget');
                       }
                     },
                     child: Text(
