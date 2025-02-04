@@ -163,14 +163,15 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                     );
                   }),
                   _buildButton('下一步', Colors.blue, () async {
-                    await _saveUserData(); // 先儲存資料
-                    if (mounted) {
-                      // 只有當 Widget 仍然掛載時，才導航到下一頁
-                      Navigator.push(
-                        // ignore: use_build_context_synchronously
+                    final String? userId =
+                        await _saveUserData(); // ✅ 儲存資料並獲取 userId
+
+                    if (userId != null && mounted) {
+                      // 只有當 Widget 仍然掛載時，才導航到成功頁面
+                      Navigator.pushNamed(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => const SuccessWidget()),
+                        '/SuccessWidget', // ✅ 使用 routes 而非 MaterialPageRoute
+                        arguments: userId, // ✅ 傳遞 `userId`
                       );
                     }
                   }),
@@ -183,17 +184,15 @@ class _RegisterWidgetState extends State<RegisterWidget> {
     );
   }
 
-  Future<void> _saveUserData() async {
+  Future<String?> _saveUserData() async {
     try {
       AggregateQuerySnapshot countSnapshot =
           await FirebaseFirestore.instance.collection('users').count().get();
 
       int newId = (countSnapshot.count ?? 0) + 1; // 新 ID = 目前總數 + 1
+      String userId = newId.toString(); // 確保 userId 是字串
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(newId.toString())
-          .set({
+      await FirebaseFirestore.instance.collection('users').doc(userId).set({
         'name': nameController.text,
         'birth': birthController.text,
         'height': heightController.text,
@@ -207,17 +206,11 @@ class _RegisterWidgetState extends State<RegisterWidget> {
         'answers': answers,
       });
 
-      logger.i("✅ 使用者資料已存入 Firestore，ID：$newId");
-
-      // 🔹 確保 `mounted` 為 `true`，然後執行導航
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const SuccessWidget()),
-        );
-      }
+      logger.i("✅ 使用者資料已存入 Firestore，ID：$userId");
+      return userId; // ✅ 回傳 userId
     } catch (e) {
       logger.e("❌ Firestore 儲存錯誤: $e");
+      return null;
     }
   }
 

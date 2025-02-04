@@ -16,6 +16,7 @@ import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/main.screen.dart';
 import 'package:doctor_2/register/success.dart';
+import 'package:doctor_2/first_quesion/born.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -24,8 +25,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
-  runApp(const MyApp());
+  runApp(const MyApp()); // ✅ 只執行一次 runApp()
 }
 
 class MyApp extends StatelessWidget {
@@ -40,11 +40,30 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.brown, // 主題顏色
       ),
       initialRoute: '/', // 初始路由
+      onGenerateRoute: (settings) {
+        if (settings.name == '/SuccessWidget') {
+          final userId =
+              settings.arguments as String; // ✅ 透過 arguments 傳遞 userId
+          return MaterialPageRoute(
+            builder: (context) => SuccessWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/Notyet1Widget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => Notyet1Widget(userId: userId),
+          );
+        }
+        if (settings.name == '/BornWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => BornWidget(userId: userId),
+          );
+        }
+      },
       routes: {
         '/': (context) => const Main_screenWidget(), // 主畫面
-        '/Notyet1Widget': (context) => const Notyet1Widget(), // Notyet1頁面
         '/FrequencyWidget': (context) => const FrequencyWidget(), // Deta頁面
-        '/SuccessWidget': (context) => const SuccessWidget(), // Success頁面
         '/FirstBreastfeedingWidget': (context) =>
             const FirstBreastfeedingWidget(),
         '/Home_screenWidget': (context) => const Home_screenWidget(),

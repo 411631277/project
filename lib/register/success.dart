@@ -1,8 +1,8 @@
-import 'package:doctor_2/first_quesion/born.dart';
 import 'package:flutter/material.dart';
 
 class SuccessWidget extends StatelessWidget {
-  const SuccessWidget({super.key});
+  final String userId;
+  const SuccessWidget({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,6 @@ class SuccessWidget extends StatelessWidget {
         ),
         child: Stack(
           children: <Widget>[
-            // 標題文字
             Positioned(
               top: screenHeight * 0.2,
               left: screenWidth * 0.05,
@@ -37,7 +36,6 @@ class SuccessWidget extends StatelessWidget {
                 ),
               ),
             ),
-            // 下一步按鈕
             Positioned(
               top: screenHeight * 0.55,
               left: screenWidth * 0.25,
@@ -52,11 +50,11 @@ class SuccessWidget extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.push(
+                    print("🟢 SuccessWidget 正在導航到 BornWidget，userId: $userId");
+                    Navigator.pushNamed(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const BornWidget(),
-                      ),
+                      '/BornWidget', // ✅ 改用 routes 導航
+                      arguments: userId, // ✅ 傳遞 userId
                     );
                   },
                   child: const Text(

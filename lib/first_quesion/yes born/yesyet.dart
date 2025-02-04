@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class YesyetWidget extends StatefulWidget {
-  const YesyetWidget({super.key});
+  const YesyetWidget({super.key, required String userId});
 
   @override
   State<YesyetWidget> createState() => _YesyetWidgetState();

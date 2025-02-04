@@ -1,13 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_2/first_quesion/not%20born/notyet1.dart';
 import 'package:doctor_2/first_quesion/yes%20born/yesyet.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+
+final Logger logger = Logger(); // 🔹 確保 Logger 存在
 
 class BornWidget extends StatelessWidget {
-  const BornWidget({super.key});
+  final String userId; // 🔹 接收 userId
+
+  const BornWidget({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
-    // 螢幕寬高自適應
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -20,7 +25,6 @@ class BornWidget extends StatelessWidget {
         ),
         child: Stack(
           children: <Widget>[
-            // 問題文字
             Positioned(
               top: screenHeight * 0.25,
               left: screenWidth * 0.15,
@@ -29,12 +33,11 @@ class BornWidget extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontSize: screenWidth * 0.08, // 根據螢幕寬度調整字體大小
+                  fontSize: screenWidth * 0.08,
                   fontWeight: FontWeight.normal,
                 ),
               ),
             ),
-            // 還沒按鈕
             Positioned(
               top: screenHeight * 0.4,
               left: screenWidth * 0.27,
@@ -42,59 +45,68 @@ class BornWidget extends StatelessWidget {
                 width: screenWidth * 0.45,
                 height: screenHeight * 0.07,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Notyet1Widget(),
-                      ),
-                    );
+                  onPressed: () async {
+                    if (userId.isEmpty) {
+                      logger.e("❌ userId 為空，無法更新 Firestore！");
+                      return;
+                    }
+
+                    try {
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userId) // ✅ 使用 userId 更新 Firestore
+                          .update({"babyBorn": false});
+
+                      logger.i(
+                          "✅ Firestore 更新成功，userId: $userId -> babyBorn: false");
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Notyet1Widget(userId: userId),
+                        ),
+                      );
+                    } catch (e) {
+                      logger.e("❌ Firestore 更新失敗: $e");
+                    }
                   },
-                  child: Text(
-                    '還沒',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(147, 129, 108, 1),
-                      fontSize: screenWidth * 0.05,
-                    ),
-                  ),
+                  child: const Text("還沒"),
                 ),
               ),
             ),
-            // 出生了按鈕
             Positioned(
-              top: screenHeight * 0.5 + 15, // 向下移動 15 的距離
+              top: screenHeight * 0.5 + 15,
               left: screenWidth * 0.27,
               child: SizedBox(
                 width: screenWidth * 0.45,
                 height: screenHeight * 0.07,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const YesyetWidget(),
-                      ),
-                    );
+                  onPressed: () async {
+                    if (userId.isEmpty) {
+                      logger.e("❌ userId 為空，無法更新 Firestore！");
+                      return;
+                    }
+
+                    try {
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userId)
+                          .update({"babyBorn": true});
+
+                      logger.i(
+                          "✅ Firestore 更新成功，userId: $userId -> babyBorn: true");
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => YesyetWidget(userId: userId),
+                        ),
+                      );
+                    } catch (e) {
+                      logger.e("❌ Firestore 更新失敗: $e");
+                    }
                   },
-                  child: Text(
-                    '出生了',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(147, 129, 108, 1),
-                      fontSize: screenWidth * 0.05,
-                    ),
-                  ),
+                  child: const Text("出生了"),
                 ),
               ),
             ),

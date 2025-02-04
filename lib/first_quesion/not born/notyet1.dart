@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Notyet1Widget extends StatefulWidget {
-  const Notyet1Widget({super.key});
+  const Notyet1Widget({super.key, required String userId});
 
   @override
   State<Notyet1Widget> createState() => _Notyet1WidgetState();
