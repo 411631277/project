@@ -3,7 +3,7 @@ import 'package:doctor_2/first_quesion/finish.dart';
 import 'package:doctor_2/first_quesion/first_breastfeeding.dart';
 import 'package:doctor_2/first_quesion/not%20born/firsttime.dart';
 import 'package:doctor_2/first_quesion/not%20born/frequency.dart';
-import 'package:doctor_2/first_quesion/not%20born/notyet1.dart';
+import 'package:doctor_2/first_quesion/not%20born/notyet.dart';
 import 'package:doctor_2/first_quesion/stop.dart';
 import 'package:doctor_2/first_quesion/yes%20born/notfirst.dart';
 import 'package:doctor_2/first_quesion/yes%20born/nowfeeding.dart';
@@ -39,11 +39,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.brown, // 主題顏色
       ),
+      //路由設定
       initialRoute: '/', // 初始路由
       onGenerateRoute: (settings) {
+        //接收userID放這裡
         if (settings.name == '/SuccessWidget') {
-          final userId =
-              settings.arguments as String; // ✅ 透過 arguments 傳遞 userId
+          final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => SuccessWidget(userId: userId),
           );
@@ -60,20 +61,44 @@ class MyApp extends StatelessWidget {
             builder: (context) => BornWidget(userId: userId),
           );
         }
+        if (settings.name == '/FrequencyWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => FrequencyWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/FirsttimeWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => FirsttimeWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/FirstBreastfeedingWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => FirstBreastfeedingWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/NotfirstWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => NotfirstWidget(userId: userId),
+          );
+        }
+        return null;
       },
+      //靜態畫面
       routes: {
         '/': (context) => const Main_screenWidget(), // 主畫面
-        '/FrequencyWidget': (context) => const FrequencyWidget(), // Deta頁面
-        '/FirstBreastfeedingWidget': (context) =>
-            const FirstBreastfeedingWidget(),
+
         '/Home_screenWidget': (context) => const Home_screenWidget(),
         '/FinishWidget': (context) => const FinishWidget(),
-        '/FirsttimeWidget': (context) => const FirsttimeWidget(),
+
         '/BreastfeedingDurationWidget': (context) =>
             const BreastfeedingDurationWidget(),
         '/StopWidget': (context) => const StopWidget(),
         '/Nowfeeding': (context) => const Nowfeeding(),
-        '/NotfirstWidget': (context) => const NotfirstWidget(),
+
         '/IamWidget': (context) => const IamWidget(),
         '/ReviseWidget': (context) => const ReviseWidget(),
         '/DeleteWidget': (context) => const DeleteWidget(),

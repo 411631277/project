@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class NotfirstWidget extends StatefulWidget {
-  const NotfirstWidget({super.key});
+  const NotfirstWidget({super.key, required String userId});
 
   @override
   State<NotfirstWidget> createState() => _NotfirstWidget();

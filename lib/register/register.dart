@@ -1,5 +1,4 @@
 import 'package:doctor_2/main.screen.dart';
-import 'package:doctor_2/register/success.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/services/firestore_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -193,16 +192,16 @@ class _RegisterWidgetState extends State<RegisterWidget> {
       String userId = newId.toString(); // 確保 userId 是字串
 
       await FirebaseFirestore.instance.collection('users').doc(userId).set({
-        'name': nameController.text,
-        'birth': birthController.text,
-        'height': heightController.text,
-        'weight': weightController.text,
-        'prePregnancyWeight': prePregnancyWeightController.text,
-        'email': emailController.text,
-        'phone': phoneController.text,
-        'maritalStatus': maritalStatus,
-        'isNewMom': isNewMom,
-        'preferences': {'email': isEmailPreferred, 'phone': isPhonePreferred},
+        '名字': nameController.text,
+        '生日': birthController.text,
+        '身高': heightController.text,
+        '目前體重': weightController.text,
+        '孕前體重': prePregnancyWeightController.text,
+        '電子信箱': emailController.text,
+        '手機號碼': phoneController.text,
+        '婚姻狀況': maritalStatus,
+        '是否為新手媽咪': isNewMom,
+        '聯絡偏好': {'email': isEmailPreferred, 'phone': isPhonePreferred},
         'answers': answers,
       });
 

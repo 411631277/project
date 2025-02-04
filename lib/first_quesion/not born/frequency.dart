@@ -1,7 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:doctor_2/first_quesion/first_breastfeeding.dart';
+import 'package:doctor_2/first_quesion/yes%20born/notfirst.dart';
+
+final Logger logger = Logger(); // 🔹 記錄 Firestore 變更
 
 class FrequencyWidget extends StatefulWidget {
-  const FrequencyWidget({super.key});
+  final String userId;
+  const FrequencyWidget({super.key, required this.userId});
 
   @override
   State<FrequencyWidget> createState() => _FrequencyWidgetState();
@@ -14,9 +21,12 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // 獲取螢幕寬高比例
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
+    final isAllAnswered = pregnancyCount != null &&
+        deliveryCount != null &&
+        breastfeedingAnswer != null;
 
     return Scaffold(
       body: Container(
@@ -25,19 +35,16 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
         color: const Color.fromRGBO(233, 227, 213, 1),
         child: Stack(
           children: <Widget>[
-            // 第一部分: 懷孕次數
             Positioned(
               top: screenHeight * 0.15,
               left: screenWidth * 0.33 + 5,
-              child: Text(
+              child: const Text(
                 '懷孕次數',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.06,
+                  color: Color.fromRGBO(147, 129, 108, 1),
+                  fontSize: 20,
                   fontWeight: FontWeight.normal,
-                  height: 1,
                 ),
               ),
             ),
@@ -56,13 +63,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                       borderSide: const BorderSide(color: Colors.grey),
                     ),
                   ),
-                  hint: Text(
-                    '次數',
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.045,
-                      color: Colors.grey,
-                    ),
-                  ),
+                  hint: const Text('次數', style: TextStyle(color: Colors.grey)),
                   items: ['0', '1', '2', '3', '4']
                       .map((count) => DropdownMenuItem<String>(
                             value: count,
@@ -77,19 +78,16 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                 ),
               ),
             ),
-            // 第二部分: 生產次數
             Positioned(
               top: screenHeight * 0.35,
               left: screenWidth * 0.33 + 5,
-              child: Text(
+              child: const Text(
                 '生產次數',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.06,
+                  color: Color.fromRGBO(147, 129, 108, 1),
+                  fontSize: 20,
                   fontWeight: FontWeight.normal,
-                  height: 1,
                 ),
               ),
             ),
@@ -108,13 +106,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                       borderSide: const BorderSide(color: Colors.grey),
                     ),
                   ),
-                  hint: Text(
-                    '次數',
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.045,
-                      color: Colors.grey,
-                    ),
-                  ),
+                  hint: const Text('次數', style: TextStyle(color: Colors.grey)),
                   items: ['0', '1', '2', '3', '4']
                       .map((count) => DropdownMenuItem<String>(
                             value: count,
@@ -129,19 +121,16 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                 ),
               ),
             ),
-            // 第三部分: 新生兒誕生後是否願意親自哺餵母乳?
             Positioned(
               top: screenHeight * 0.55,
               left: screenWidth * 0.25 + 5,
-              child: Text(
+              child: const Text(
                 '是否為首次哺乳?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.06,
+                  color: Color.fromRGBO(147, 129, 108, 1),
+                  fontSize: 20,
                   fontWeight: FontWeight.normal,
-                  height: 1,
                 ),
               ),
             ),
@@ -154,14 +143,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                   SizedBox(
                     width: screenWidth * 0.35,
                     child: RadioListTile<String>(
-                      title: Text(
-                        '是',
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.05,
-                          color: const Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
+                      title: const Text('是'),
                       value: 'yes',
                       groupValue: breastfeedingAnswer,
                       onChanged: (value) {
@@ -174,14 +156,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                   SizedBox(
                     width: screenWidth * 0.35,
                     child: RadioListTile<String>(
-                      title: Text(
-                        '否',
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.05,
-                          color: const Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
+                      title: const Text('否'),
                       value: 'no',
                       groupValue: breastfeedingAnswer,
                       onChanged: (value) {
@@ -194,10 +169,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                 ],
               ),
             ),
-            // 下一步按鈕
-            if (pregnancyCount != null &&
-                deliveryCount != null &&
-                breastfeedingAnswer != null)
+            if (isAllAnswered)
               Positioned(
                 top: screenHeight * 0.8,
                 left: screenWidth * 0.3,
@@ -208,22 +180,46 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
                     ),
-                    onPressed: () {
-                      if (breastfeedingAnswer == 'yes') {
-                        Navigator.pushNamed(
-                            context, '/FirstBreastfeedingWidget');
-                      } else if (breastfeedingAnswer == 'no') {
-                        Navigator.pushNamed(context, '/NotfirstWidget');
+                    onPressed: () async {
+                      if (widget.userId.isEmpty) {
+                        logger.e("❌ userId 為空，無法更新 Firestore！");
+                        return;
+                      }
+
+                      try {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(widget.userId)
+                            .update({
+                          "懷孕次數": pregnancyCount,
+                          "生產次數": deliveryCount,
+                          "首次哺乳": breastfeedingAnswer,
+                        });
+
+                        logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
+
+                        if (breastfeedingAnswer == 'yes') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FirstBreastfeedingWidget(
+                                  userId: widget.userId),
+                            ),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  NotfirstWidget(userId: widget.userId),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        logger.e("❌ Firestore 更新失敗: $e");
                       }
                     },
-                    child: Text(
-                      '下一步',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Inter',
-                        fontSize: screenWidth * 0.06,
-                      ),
-                    ),
+                    child: const Text("下一步"),
                   ),
                 ),
               ),

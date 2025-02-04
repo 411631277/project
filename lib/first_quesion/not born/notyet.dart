@@ -1,14 +1,21 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:doctor_2/first_quesion/not%20born/frequency.dart';
+import 'package:doctor_2/first_quesion/not%20born/firsttime.dart';
+
+final Logger logger = Logger(); // 🔹 確保 Logger 存在
 
 class Notyet1Widget extends StatefulWidget {
-  const Notyet1Widget({super.key, required String userId});
+  final String userId; // 🔹 接收 userId
+  const Notyet1Widget({super.key, required this.userId});
 
   @override
   State<Notyet1Widget> createState() => _Notyet1WidgetState();
 }
 
 class _Notyet1WidgetState extends State<Notyet1Widget> {
-  String? breastfeedingAnswer; // 存儲親自哺餵母乳的回答
+  String? breastfeedingAnswer; // 存儲親自哺乳的回答
   String? complicationAnswer; // 存儲妊娠合併症的回答
   String? selectedBabyCount; // 存儲肚子裡寶寶的數量
 
@@ -17,7 +24,6 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // 檢查是否所有問題都填答
     final isAllAnswered = breastfeedingAnswer != null &&
         complicationAnswer != null &&
         selectedBabyCount != null;
@@ -26,26 +32,26 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
       body: Container(
         width: screenWidth,
         height: screenHeight,
-        color: const Color.fromRGBO(233, 227, 213, 1),
+        decoration: const BoxDecoration(
+          color: Color.fromRGBO(233, 227, 213, 1),
+        ),
         child: Stack(
           children: <Widget>[
-            // 第一部分: 肚子裡有幾個寶寶
             Positioned(
-              top: screenHeight * 0.15,
-              left: screenWidth * 0.1 + 70,
+              top: screenHeight * 0.25,
+              left: screenWidth * 0.15,
               child: Text(
-                '肚子裡有幾個寶寶',
+                '肚子裡有幾個寶寶?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.05,
+                  fontSize: screenWidth * 0.06,
                   fontWeight: FontWeight.normal,
                 ),
               ),
             ),
             Positioned(
-              top: screenHeight * 0.2,
+              top: screenHeight * 0.3,
               left: screenWidth * 0.25,
               child: SizedBox(
                 width: screenWidth * 0.5,
@@ -81,39 +87,29 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                 ),
               ),
             ),
-            // 第二部分: 是否發生過妊娠合併症
             Positioned(
-              top: screenHeight * 0.35,
-              left: screenWidth * 0.1 + 40,
+              top: screenHeight * 0.45,
+              left: screenWidth * 0.15,
               child: Text(
                 '是否發生過妊娠合併症?',
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
                   fontSize: screenWidth * 0.05,
                   fontWeight: FontWeight.normal,
                 ),
               ),
             ),
             Positioned(
-              top: screenHeight * 0.4,
-              left: screenWidth * 0.1 + 20,
+              top: screenHeight * 0.5,
+              left: screenWidth * 0.15,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 是選項
                   SizedBox(
                     width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: Text(
-                        '是',
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.05,
-                          color: const Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
+                      title: const Text('是'),
                       value: 'yes',
                       groupValue: complicationAnswer,
                       onChanged: (value) {
@@ -123,18 +119,10 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                       },
                     ),
                   ),
-                  // 否選項
                   SizedBox(
                     width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: Text(
-                        '否',
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.05,
-                          color: const Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
+                      title: const Text('否'),
                       value: 'no',
                       groupValue: complicationAnswer,
                       onChanged: (value) {
@@ -147,39 +135,29 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                 ],
               ),
             ),
-            // 第三部分: 新生兒誕生後是否願意親自哺餵母乳?
             Positioned(
-              top: screenHeight * 0.55,
-              left: screenWidth * 0.1 + 40,
+              top: screenHeight * 0.6,
+              left: screenWidth * 0.15,
               child: Text(
                 '新生兒誕生後是否願意\n親自哺餵母乳?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
                   fontSize: screenWidth * 0.05,
                   fontWeight: FontWeight.normal,
                 ),
               ),
             ),
             Positioned(
-              top: screenHeight * 0.65,
-              left: screenWidth * 0.1 + 20,
+              top: screenHeight * 0.7,
+              left: screenWidth * 0.15,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 是選項
                   SizedBox(
                     width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: Text(
-                        '是',
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.05,
-                          color: const Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
+                      title: const Text('是'),
                       value: 'yes',
                       groupValue: breastfeedingAnswer,
                       onChanged: (value) {
@@ -189,18 +167,10 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                       },
                     ),
                   ),
-                  // 否選項
                   SizedBox(
                     width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: Text(
-                        '否',
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.05,
-                          color: const Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
+                      title: const Text('否'),
                       value: 'no',
                       groupValue: breastfeedingAnswer,
                       onChanged: (value) {
@@ -213,10 +183,9 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                 ],
               ),
             ),
-            // 下一步按鍵
             if (isAllAnswered)
               Positioned(
-                top: screenHeight * 0.8,
+                top: screenHeight * 0.85,
                 left: screenWidth * 0.3,
                 child: SizedBox(
                   width: screenWidth * 0.4,
@@ -225,21 +194,46 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
                     ),
-                    onPressed: () {
-                      if (breastfeedingAnswer == 'yes') {
-                        Navigator.pushNamed(context, '/FrequencyWidget');
-                      } else if (breastfeedingAnswer == 'no') {
-                        Navigator.pushNamed(context, '/FirsttimeWidget');
+                    onPressed: () async {
+                      if (widget.userId.isEmpty) {
+                        logger.e("❌ userId 為空，無法更新 Firestore！");
+                        return;
+                      }
+
+                      try {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(widget.userId)
+                            .update({
+                          "肚子有幾個寶寶": selectedBabyCount,
+                          "是否發生過妊娠合併症?": complicationAnswer,
+                          "是否願意親自哺餵母乳": breastfeedingAnswer,
+                        });
+
+                        logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
+
+                        if (breastfeedingAnswer == 'yes') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  FrequencyWidget(userId: widget.userId),
+                            ),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  FirsttimeWidget(userId: widget.userId),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        logger.e("❌ Firestore 更新失敗: $e");
                       }
                     },
-                    child: Text(
-                      '下一步',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: screenWidth * 0.05,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
+                    child: const Text("下一步"),
                   ),
                 ),
               ),

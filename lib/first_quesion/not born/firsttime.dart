@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FirsttimeWidget extends StatefulWidget {
-  const FirsttimeWidget({super.key});
+  const FirsttimeWidget({super.key, required String userId});
 
   @override
   State<FirsttimeWidget> createState() => _FirsttimeWidgetState();

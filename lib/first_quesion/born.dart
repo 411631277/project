@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:doctor_2/first_quesion/not%20born/notyet1.dart';
+import 'package:doctor_2/first_quesion/not%20born/notyet.dart';
 import 'package:doctor_2/first_quesion/yes%20born/yesyet.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -55,10 +55,10 @@ class BornWidget extends StatelessWidget {
                       await FirebaseFirestore.instance
                           .collection('users')
                           .doc(userId) // ✅ 使用 userId 更新 Firestore
-                          .update({"babyBorn": false});
+                          .update({"寶寶出生": false});
 
                       logger.i(
-                          "✅ Firestore 更新成功，userId: $userId -> babyBorn: false");
+                          "✅ Firestore 更新成功，userId: $userId -> babyBorn: 還沒");
 
                       Navigator.push(
                         context,
@@ -91,10 +91,10 @@ class BornWidget extends StatelessWidget {
                       await FirebaseFirestore.instance
                           .collection('users')
                           .doc(userId)
-                          .update({"babyBorn": true});
+                          .update({"寶寶出生": true});
 
                       logger.i(
-                          "✅ Firestore 更新成功，userId: $userId -> babyBorn: true");
+                          "✅ Firestore 更新成功，userId: $userId -> babyBorn: 出生了");
 
                       Navigator.push(
                         context,
