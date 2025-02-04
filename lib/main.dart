@@ -85,6 +85,12 @@ class MyApp extends StatelessWidget {
             builder: (context) => NotfirstWidget(userId: userId),
           );
         }
+        if (settings.name == '/FinishWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => FinishWidget(userId: userId),
+          );
+        }
         return null;
       },
       //靜態畫面
@@ -92,7 +98,6 @@ class MyApp extends StatelessWidget {
         '/': (context) => const Main_screenWidget(), // 主畫面
 
         '/Home_screenWidget': (context) => const Home_screenWidget(),
-        '/FinishWidget': (context) => const FinishWidget(),
 
         '/BreastfeedingDurationWidget': (context) =>
             const BreastfeedingDurationWidget(),

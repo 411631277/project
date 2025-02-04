@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FinishWidget extends StatelessWidget {
-  const FinishWidget({super.key});
+  const FinishWidget({super.key, required String userId});
 
   @override
   Widget build(BuildContext context) {
