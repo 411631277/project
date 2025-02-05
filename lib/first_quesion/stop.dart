@@ -44,7 +44,7 @@ class _StopWidgetState extends State<StopWidget> {
           children: <Widget>[
             Positioned(
               top: screenHeight * 0.25,
-              left: screenWidth * 0.1,
+              left: screenWidth * 0.20,
               child: Text(
                 '停止哺餵母乳的原因',
                 textAlign: TextAlign.center,

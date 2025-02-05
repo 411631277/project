@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:doctor_2/first_quesion/not%20born/frequency.dart';
-import 'package:doctor_2/first_quesion/not%20born/firsttime.dart';
+import 'package:doctor_2/first_quesion/frequency.dart';
+import 'package:doctor_2/first_quesion/firsttime.dart';
 
 final Logger logger = Logger();
 
@@ -38,8 +38,8 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
         child: Stack(
           children: <Widget>[
             Positioned(
-              top: screenHeight * 0.25,
-              left: screenWidth * 0.15,
+              top: screenHeight * 0.20,
+              left: screenWidth * 0.25,
               child: Text(
                 '肚子裡有幾個寶寶?',
                 textAlign: TextAlign.center,
@@ -89,7 +89,7 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
             ),
             Positioned(
               top: screenHeight * 0.45,
-              left: screenWidth * 0.15,
+              left: screenWidth * 0.25,
               child: Text(
                 '是否發生過妊娠合併症?',
                 textAlign: TextAlign.left,
@@ -102,7 +102,7 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
             ),
             Positioned(
               top: screenHeight * 0.5,
-              left: screenWidth * 0.15,
+              left: screenWidth * 0.20,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -137,7 +137,7 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
             ),
             Positioned(
               top: screenHeight * 0.6,
-              left: screenWidth * 0.15,
+              left: screenWidth * 0.25,
               child: Text(
                 '新生兒誕生後是否願意\n親自哺餵母乳?',
                 textAlign: TextAlign.center,
@@ -150,7 +150,7 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
             ),
             Positioned(
               top: screenHeight * 0.7,
-              left: screenWidth * 0.15,
+              left: screenWidth * 0.20,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

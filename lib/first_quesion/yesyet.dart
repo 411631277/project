@@ -1,5 +1,5 @@
 import 'package:doctor_2/first_quesion/finish.dart';
-import 'package:doctor_2/first_quesion/yes%20born/nowfeeding.dart';
+import 'package:doctor_2/first_quesion/nowfeeding.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -43,7 +43,7 @@ class _YesyetWidgetState extends State<YesyetWidget> {
             // **第一部分: 肚子裡有幾個寶寶**
             Positioned(
               top: screenHeight * 0.1,
-              left: screenWidth * 0.5 - (screenWidth * 0.2),
+              left: screenWidth * 0.3 - 2,
               child: Text(
                 '肚子裡有幾個寶寶',
                 textAlign: TextAlign.center,
@@ -93,7 +93,7 @@ class _YesyetWidgetState extends State<YesyetWidget> {
             // **第二部分: 懷孕次數**
             Positioned(
               top: screenHeight * 0.25,
-              left: screenWidth * 0.5 - (screenWidth * 0.2),
+              left: screenWidth * 0.35 + 5,
               child: Text(
                 '懷孕次數',
                 textAlign: TextAlign.center,
@@ -143,7 +143,7 @@ class _YesyetWidgetState extends State<YesyetWidget> {
             // **第三部分: 生產次數**
             Positioned(
               top: screenHeight * 0.4,
-              left: screenWidth * 0.5 - (screenWidth * 0.2),
+              left: screenWidth * 0.35 + 5,
               child: Text(
                 '生產次數',
                 textAlign: TextAlign.center,
@@ -207,7 +207,7 @@ class _YesyetWidgetState extends State<YesyetWidget> {
             ),
             Positioned(
               top: screenHeight * 0.58,
-              left: screenWidth * 0.2,
+              left: screenWidth * 0.15,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -258,8 +258,8 @@ class _YesyetWidgetState extends State<YesyetWidget> {
             ),
             // 第五部分: 目前是否為有哺餵新生兒母乳??
             Positioned(
-              top: screenHeight * 0.65,
-              left: screenWidth * 0.2,
+              top: screenHeight * 0.67,
+              left: screenWidth * 0.17,
               child: Text(
                 '目前是否為有哺餵新生兒母乳?',
                 textAlign: TextAlign.center,
@@ -273,8 +273,8 @@ class _YesyetWidgetState extends State<YesyetWidget> {
               ),
             ),
             Positioned(
-              top: screenHeight * 0.68,
-              left: screenWidth * 0.2,
+              top: screenHeight * 0.70,
+              left: screenWidth * 0.15,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

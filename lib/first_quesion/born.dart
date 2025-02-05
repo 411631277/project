@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:doctor_2/first_quesion/not%20born/notyet.dart';
-import 'package:doctor_2/first_quesion/yes%20born/yesyet.dart';
+import 'package:doctor_2/first_quesion/notyet.dart';
+import 'package:doctor_2/first_quesion/yesyet.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
