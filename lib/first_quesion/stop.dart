@@ -1,14 +1,32 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_2/first_quesion/finish.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+
+final Logger logger = Logger(); // ✅ 確保 Logger 存在
 
 class StopWidget extends StatefulWidget {
-  const StopWidget({super.key});
+  final String userId; // ✅ 接收 userId
+  const StopWidget({super.key, required this.userId});
 
   @override
   State<StopWidget> createState() => _StopWidgetState();
 }
 
 class _StopWidgetState extends State<StopWidget> {
-  String? breastfeedingReason; // 存儲輸入的停止哺乳原因
+  late TextEditingController reasonController;
+
+  @override
+  void initState() {
+    super.initState();
+    reasonController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    reasonController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,35 +37,30 @@ class _StopWidgetState extends State<StopWidget> {
       body: Container(
         width: screenWidth,
         height: screenHeight,
-        color: const Color.fromRGBO(233, 227, 213, 1),
+        decoration: const BoxDecoration(
+          color: Color.fromRGBO(233, 227, 213, 1),
+        ),
         child: Stack(
           children: <Widget>[
-            // **標題: 停止哺乳的原因**
             Positioned(
-              top: screenHeight * 0.35, // 佔螢幕 35% 的高度
-              left: screenWidth * 0.2, // 讓標題置中
+              top: screenHeight * 0.25,
+              left: screenWidth * 0.1,
               child: Text(
                 '停止哺餵母乳的原因',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.06, // 自適應字體大小
+                  fontSize: screenWidth * 0.06,
                   fontWeight: FontWeight.normal,
                 ),
               ),
             ),
-            // **輸入框: 讓使用者輸入停止哺乳的原因**
             Positioned(
-              top: screenHeight * 0.45,
+              top: screenHeight * 0.4,
               left: screenWidth * 0.1,
               right: screenWidth * 0.1,
               child: TextField(
-                onChanged: (value) {
-                  setState(() {
-                    breastfeedingReason = value;
-                  });
-                },
+                controller: reasonController,
                 decoration: InputDecoration(
                   hintText: '請輸入原因',
                   filled: true,
@@ -57,16 +70,15 @@ class _StopWidgetState extends State<StopWidget> {
                     borderSide: const BorderSide(color: Colors.grey),
                   ),
                 ),
-                style: TextStyle(fontSize: screenWidth * 0.05), // 讓文字大小隨螢幕變化
+                style: TextStyle(fontSize: screenWidth * 0.05),
               ),
             ),
-            // **下一步按鈕**
             Positioned(
-              top: screenHeight * 0.75, // 佔螢幕 75% 的高度
+              top: screenHeight * 0.7,
               left: screenWidth * 0.3,
               child: SizedBox(
-                width: screenWidth * 0.4, // 按鈕寬度佔螢幕 40%
-                height: screenHeight * 0.07, // 按鈕高度佔螢幕 7%
+                width: screenWidth * 0.4,
+                height: screenHeight * 0.07,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
@@ -74,16 +86,48 @@ class _StopWidgetState extends State<StopWidget> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  onPressed: () {
-                    // **跳轉到 FinishWidget 頁面**
-                    Navigator.pushNamed(context, '/FinishWidget');
+                  onPressed: () async {
+                    if (widget.userId.isEmpty) {
+                      logger.e("❌ userId 為空，無法更新 Firestore！");
+                      return;
+                    }
+
+                    final reason = reasonController.text.trim();
+                    if (reason.isEmpty) {
+                      logger.e("❌ 停止哺乳原因為空，請輸入後再繼續！");
+                      return;
+                    }
+
+                    try {
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(widget.userId)
+                          .update({
+                        "停止哺乳原因": reason,
+                      });
+
+                      logger.i(
+                          "✅ Firestore 更新成功，userId: ${widget.userId} -> 停止哺乳原因: $reason");
+
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                FinishWidget(userId: widget.userId),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      logger.e("❌ Firestore 更新失敗: $e");
+                    }
                   },
                   child: Text(
                     '下一步',
                     style: TextStyle(
                       color: Colors.black,
                       fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.06, // 自適應字體大小
+                      fontSize: screenWidth * 0.06,
                     ),
                   ),
                 ),

@@ -65,9 +65,9 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                   ),
                   hint: const Text('次數', style: TextStyle(color: Colors.grey)),
                   items: ['0', '1', '2', '3', '4']
-                      .map((count) => DropdownMenuItem<String>(
-                            value: count,
-                            child: Text(count),
+                      .map((pregnantcount) => DropdownMenuItem<String>(
+                            value: pregnantcount,
+                            child: Text(pregnantcount),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -108,9 +108,9 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                   ),
                   hint: const Text('次數', style: TextStyle(color: Colors.grey)),
                   items: ['0', '1', '2', '3', '4']
-                      .map((count) => DropdownMenuItem<String>(
-                            value: count,
-                            child: Text(count),
+                      .map((babyCountOption) => DropdownMenuItem<String>(
+                            value: babyCountOption,
+                            child: Text(babyCountOption),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -198,6 +198,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
 
                         logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
 
+                        if (!context.mounted) return;
                         if (breastfeedingAnswer == 'yes') {
                           Navigator.push(
                             context,

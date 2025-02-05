@@ -1,7 +1,14 @@
+import 'package:doctor_2/first_quesion/finish.dart';
+import 'package:doctor_2/first_quesion/yes%20born/nowfeeding.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+final Logger logger = Logger();
 
 class YesyetWidget extends StatefulWidget {
-  const YesyetWidget({super.key, required String userId});
+  final String userId;
+  const YesyetWidget({super.key, required this.userId});
 
   @override
   State<YesyetWidget> createState() => _YesyetWidgetState();
@@ -69,9 +76,9 @@ class _YesyetWidgetState extends State<YesyetWidget> {
                         fontSize: screenWidth * 0.045, color: Colors.grey),
                   ),
                   items: ['0', '1', '2', '3', '4']
-                      .map((count) => DropdownMenuItem<String>(
-                            value: count,
-                            child: Text(count),
+                      .map((countbaby) => DropdownMenuItem<String>(
+                            value: countbaby,
+                            child: Text(countbaby),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -119,9 +126,9 @@ class _YesyetWidgetState extends State<YesyetWidget> {
                         fontSize: screenWidth * 0.045, color: Colors.grey),
                   ),
                   items: ['0', '1', '2', '3', '4']
-                      .map((count) => DropdownMenuItem<String>(
-                            value: count,
-                            child: Text(count),
+                      .map((pregnantcount) => DropdownMenuItem<String>(
+                            value: pregnantcount,
+                            child: Text(pregnantcount),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -169,9 +176,9 @@ class _YesyetWidgetState extends State<YesyetWidget> {
                         fontSize: screenWidth * 0.045, color: Colors.grey),
                   ),
                   items: ['0', '1', '2', '3', '4']
-                      .map((count) => DropdownMenuItem<String>(
-                            value: count,
-                            child: Text(count),
+                      .map((productioncount) => DropdownMenuItem<String>(
+                            value: productioncount,
+                            child: Text(productioncount),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -328,11 +335,52 @@ class _YesyetWidgetState extends State<YesyetWidget> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
                     ),
-                    onPressed: () {
-                      if (breastfeedingAnswer == 'yes') {
-                        Navigator.pushNamed(context, '/Nowfeeding');
-                      } else {
-                        Navigator.pushNamed(context, '/FinishWidget');
+                    onPressed: () async {
+                      if (widget.userId.isEmpty) {
+                        logger.e("❌ userId 為空，無法更新 Firestore！");
+                        return;
+                      }
+
+                      try {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(widget.userId)
+                            .set(
+                                {
+                              "肚子寶寶數量": babyCount,
+                              "懷孕次數": pregnancyCount,
+                              "生產次數": deliveryCount,
+                              "是否有妊娠合併症": complicationAnswer,
+                              "是否有餵哺新生兒母乳": breastfeedingAnswer,
+                            },
+                                SetOptions(
+                                    merge:
+                                        true)); // 🔹 使用 `merge: true` 避免覆蓋原有資料
+
+                        logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
+
+                        if (!context.mounted) return;
+
+                        // 🔹 使用 `Navigator.pushReplacement` 來避免返回上一頁
+                        if (breastfeedingAnswer == 'yes') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  Nowfeeding(userId: widget.userId),
+                            ),
+                          );
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  FinishWidget(userId: widget.userId),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        logger.e("❌ Firestore 更新失敗: $e");
                       }
                     },
                     child: Text(

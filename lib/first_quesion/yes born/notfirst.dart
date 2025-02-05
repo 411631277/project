@@ -1,21 +1,68 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_2/first_quesion/first_breastfeeding.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+
+final Logger logger = Logger();
 
 class NotfirstWidget extends StatefulWidget {
-  const NotfirstWidget({super.key, required String userId});
+  final String userId;
+  const NotfirstWidget({super.key, required this.userId});
 
   @override
-  State<NotfirstWidget> createState() => _NotfirstWidget();
+  State<NotfirstWidget> createState() => _NotfirstWidgetState();
 }
 
-class _NotfirstWidget extends State<NotfirstWidget> {
+class _NotfirstWidgetState extends State<NotfirstWidget> {
   String? painindex;
   String? brokenskin;
   String? duration;
+  bool isLoading = true; // 🔹 Firestore 資料加載中狀態
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDataFromFirestore(); // 🔹 初始化時載入 Firestore 的數據
+  }
+
+  /// **🔹 從 Firestore 讀取數據**
+  Future<void> _loadDataFromFirestore() async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .get();
+
+      if (userDoc.exists) {
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+
+        setState(() {
+          painindex = userData['前次哺乳乳頭疼痛次數']?.toString();
+          brokenskin = userData['是否有乳頭破皮']?.toString();
+          duration = userData['前胎哺乳持續時長']?.toString();
+          isLoading = false;
+        });
+      } else {
+        logger.w("⚠️ 找不到 userId: ${widget.userId} 的 Firestore 文檔");
+        setState(() => isLoading = false);
+      }
+    } catch (e) {
+      logger.e("❌ 加載 Firestore 數據失敗: $e");
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
+    // 🔹 Firestore 還在加載時顯示 Loading
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     // 檢查是否所有問題都填答
     final isAllAnswered =
@@ -32,14 +79,12 @@ class _NotfirstWidget extends State<NotfirstWidget> {
             Positioned(
               top: screenHeight * 0.15,
               left: screenWidth * 0.2,
-              child: Text(
+              child: const Text(
                 '前次哺乳的乳頭疼痛指數',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.05,
-                  fontWeight: FontWeight.normal,
+                  color: Color.fromRGBO(147, 129, 108, 1),
+                  fontSize: 20,
                 ),
               ),
             ),
@@ -58,18 +103,11 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                       borderSide: const BorderSide(color: Colors.grey),
                     ),
                   ),
-                  hint: const Text(
-                    '請選擇',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
+                  hint: const Text('請選擇'),
                   items: ['0', '1', '2', '3', '4', '5']
-                      .map((count) => DropdownMenuItem<String>(
-                            value: count,
-                            child: Text(
-                              count,
-                              textAlign: TextAlign.center,
-                            ),
+                      .map((paincount) => DropdownMenuItem<String>(
+                            value: paincount,
+                            child: Text(paincount),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -85,14 +123,12 @@ class _NotfirstWidget extends State<NotfirstWidget> {
             Positioned(
               top: screenHeight * 0.3,
               left: screenWidth * 0.2,
-              child: Text(
+              child: const Text(
                 '是否有乳頭破皮的狀況發生?',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.05,
-                  fontWeight: FontWeight.normal,
+                  color: Color.fromRGBO(147, 129, 108, 1),
+                  fontSize: 20,
                 ),
               ),
             ),
@@ -100,20 +136,11 @@ class _NotfirstWidget extends State<NotfirstWidget> {
               top: screenHeight * 0.35,
               left: screenWidth * 0.2,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // **是選項**
                   SizedBox(
                     width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: Text(
-                        '是',
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.045,
-                          color: const Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
+                      title: const Text('是'),
                       value: 'yes',
                       groupValue: brokenskin,
                       onChanged: (value) {
@@ -123,18 +150,10 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                       },
                     ),
                   ),
-                  // **否選項**
                   SizedBox(
                     width: screenWidth * 0.3,
                     child: RadioListTile<String>(
-                      title: Text(
-                        '否',
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.045,
-                          color: const Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
+                      title: const Text('否'),
                       value: 'no',
                       groupValue: brokenskin,
                       onChanged: (value) {
@@ -147,7 +166,6 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                 ],
               ),
             ),
-
             // **第三部分: 前胎哺乳持續時長**
             Positioned(
               top: screenHeight * 0.45,
@@ -178,18 +196,12 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                       borderSide: const BorderSide(color: Colors.grey),
                     ),
                   ),
-                  hint: const Text(
-                    '請選擇',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
+                  hint: const Text('請選擇', textAlign: TextAlign.center),
                   items: List.generate(25, (index) => index.toString())
                       .map((month) => DropdownMenuItem<String>(
                             value: month,
-                            child: Text(
-                              '$month 個月',
-                              textAlign: TextAlign.center,
-                            ),
+                            child:
+                                Text('$month 個月', textAlign: TextAlign.center),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -200,7 +212,6 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                 ),
               ),
             ),
-
             // **「下一步」按鈕**
             if (isAllAnswered)
               Positioned(
@@ -210,20 +221,32 @@ class _NotfirstWidget extends State<NotfirstWidget> {
                   width: screenWidth * 0.4,
                   height: screenHeight * 0.07,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
-                    ),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/StopWidget');
+                    onPressed: () async {
+                      try {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(widget.userId)
+                            .set({
+                          "前次哺乳乳頭疼痛次數": painindex,
+                          "是否有乳頭破皮": brokenskin,
+                          "前胎哺乳持續時長": duration,
+                        }, SetOptions(merge: true)); // 🔹 保留先前數據
+
+                        logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
+
+                        if (!context.mounted) return;
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                FirstBreastfeedingWidget(userId: widget.userId),
+                          ),
+                        );
+                      } catch (e) {
+                        logger.e("❌ Firestore 更新失敗: $e");
+                      }
                     },
-                    child: Text(
-                      '下一步',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: screenWidth * 0.05,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
+                    child: const Text("下一步"),
                   ),
                 ),
               ),

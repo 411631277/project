@@ -7,6 +7,7 @@ import 'package:doctor_2/first_quesion/not%20born/notyet.dart';
 import 'package:doctor_2/first_quesion/stop.dart';
 import 'package:doctor_2/first_quesion/yes%20born/notfirst.dart';
 import 'package:doctor_2/first_quesion/yes%20born/nowfeeding.dart';
+import 'package:doctor_2/first_quesion/yes%20born/yesyet.dart';
 import 'package:doctor_2/home/baby_acc.dart';
 import 'package:doctor_2/home/delete.dart';
 import 'package:doctor_2/home/delete_acc.dart';
@@ -91,6 +92,36 @@ class MyApp extends StatelessWidget {
             builder: (context) => FinishWidget(userId: userId),
           );
         }
+        if (settings.name == '/BreastfeedingDurationWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => BreastfeedingDurationWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/StopWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => StopWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/Nowfeeding') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => Nowfeeding(userId: userId),
+          );
+        }
+        if (settings.name == '/YesyetWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => YesyetWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/StopWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => StopWidget(userId: userId),
+          );
+        }
         return null;
       },
       //靜態畫面
@@ -98,11 +129,6 @@ class MyApp extends StatelessWidget {
         '/': (context) => const Main_screenWidget(), // 主畫面
 
         '/Home_screenWidget': (context) => const Home_screenWidget(),
-
-        '/BreastfeedingDurationWidget': (context) =>
-            const BreastfeedingDurationWidget(),
-        '/StopWidget': (context) => const StopWidget(),
-        '/Nowfeeding': (context) => const Nowfeeding(),
 
         '/IamWidget': (context) => const IamWidget(),
         '/ReviseWidget': (context) => const ReviseWidget(),

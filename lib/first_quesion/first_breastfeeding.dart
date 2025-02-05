@@ -107,13 +107,15 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
                         logger.i(
                             "✅ Firestore 更新成功，userId: ${widget.userId}, breastfeedingDuration: $selectedDuration");
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                FinishWidget(userId: widget.userId),
-                          ),
-                        );
+                        if (context.mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  FinishWidget(userId: widget.userId),
+                            ),
+                          );
+                        }
                       } catch (e) {
                         logger.e("❌ Firestore 更新失敗: $e");
                       }

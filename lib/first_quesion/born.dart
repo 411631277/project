@@ -4,10 +4,10 @@ import 'package:doctor_2/first_quesion/yes%20born/yesyet.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
-final Logger logger = Logger(); // 🔹 確保 Logger 存在
+final Logger logger = Logger();
 
 class BornWidget extends StatelessWidget {
-  final String userId; // 🔹 接收 userId
+  final String userId;
 
   const BornWidget({super.key, required this.userId});
 
@@ -54,9 +54,9 @@ class BornWidget extends StatelessWidget {
                     try {
                       await FirebaseFirestore.instance
                           .collection('users')
-                          .doc(userId) // ✅ 使用 userId 更新 Firestore
+                          .doc(userId)
                           .update({"寶寶出生": false});
-
+                      if (!context.mounted) return;
                       logger.i(
                           "✅ Firestore 更新成功，userId: $userId -> babyBorn: 還沒");
 
@@ -95,6 +95,8 @@ class BornWidget extends StatelessWidget {
 
                       logger.i(
                           "✅ Firestore 更新成功，userId: $userId -> babyBorn: 出生了");
+
+                      if (!context.mounted) return; // 🔹 確保 context 仍然有效
 
                       Navigator.push(
                         context,

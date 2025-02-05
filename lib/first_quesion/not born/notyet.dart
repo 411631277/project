@@ -4,10 +4,10 @@ import 'package:logger/logger.dart';
 import 'package:doctor_2/first_quesion/not%20born/frequency.dart';
 import 'package:doctor_2/first_quesion/not%20born/firsttime.dart';
 
-final Logger logger = Logger(); // 🔹 確保 Logger 存在
+final Logger logger = Logger();
 
 class Notyet1Widget extends StatefulWidget {
-  final String userId; // 🔹 接收 userId
+  final String userId;
   const Notyet1Widget({super.key, required this.userId});
 
   @override
@@ -15,9 +15,9 @@ class Notyet1Widget extends StatefulWidget {
 }
 
 class _Notyet1WidgetState extends State<Notyet1Widget> {
-  String? breastfeedingAnswer; // 存儲親自哺乳的回答
-  String? complicationAnswer; // 存儲妊娠合併症的回答
-  String? selectedBabyCount; // 存儲肚子裡寶寶的數量
+  String? breastfeedingAnswer;
+  String? complicationAnswer;
+  String? selectedBabyCount;
 
   @override
   Widget build(BuildContext context) {
@@ -71,10 +71,10 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   items: ['0', '1', '2', '3', '4']
-                      .map((count) => DropdownMenuItem<String>(
-                            value: count,
+                      .map((babyCountOption) => DropdownMenuItem<String>(
+                            value: babyCountOption,
                             child: Text(
-                              count,
+                              babyCountOption,
                               textAlign: TextAlign.center,
                             ),
                           ))
@@ -205,30 +205,34 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                             .collection('users')
                             .doc(widget.userId)
                             .update({
-                          "肚子有幾個寶寶": selectedBabyCount,
-                          "是否發生過妊娠合併症?": complicationAnswer,
-                          "是否願意親自哺餵母乳": breastfeedingAnswer,
+                          "寶寶數量": selectedBabyCount,
+                          "妊娠合併症": complicationAnswer,
+                          "親自哺餵母乳": breastfeedingAnswer,
                         });
 
                         logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
 
-                        if (breastfeedingAnswer == 'yes') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  FrequencyWidget(userId: widget.userId),
-                            ),
-                          );
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  FirsttimeWidget(userId: widget.userId),
-                            ),
-                          );
-                        }
+                        if (!mounted) return;
+
+                        setState(() {
+                          if (breastfeedingAnswer == 'yes') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    FrequencyWidget(userId: widget.userId),
+                              ),
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    FirsttimeWidget(userId: widget.userId),
+                              ),
+                            );
+                          }
+                        });
                       } catch (e) {
                         logger.e("❌ Firestore 更新失敗: $e");
                       }

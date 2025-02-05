@@ -1,16 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_2/first_quesion/stop.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
-class BreastfeedingDurationWidget extends StatefulWidget {
-  const BreastfeedingDurationWidget({super.key});
+final Logger logger = Logger(); // ✅ 確保 Logger 存在
 
-  @override
-  State<BreastfeedingDurationWidget> createState() =>
-      _BreastfeedingDurationWidgetState();
-}
-
-class _BreastfeedingDurationWidgetState
-    extends State<BreastfeedingDurationWidget> {
-  String? selectedDuration; // 存儲選擇的哺乳時長
+class BreastfeedingDurationWidget extends StatelessWidget {
+  final String userId; // ✅ 接收 userId
+  const BreastfeedingDurationWidget({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -24,31 +21,27 @@ class _BreastfeedingDurationWidgetState
         decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // **標題: 問題文字**
-            Padding(
-              padding: EdgeInsets.only(top: screenHeight * 0.1),
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              top: screenHeight * 0.25,
+              left: screenWidth * 0.1,
               child: Text(
                 '前胎哺乳持續大概幾個月?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.06, // 字體大小自適應
+                  fontSize: screenWidth * 0.06,
                   fontWeight: FontWeight.normal,
                 ),
               ),
             ),
-
-            // **下拉框: 哺乳時長選項**
-            Padding(
-              padding: EdgeInsets.only(top: screenHeight * 0.05),
+            Positioned(
+              top: screenHeight * 0.4,
+              left: screenWidth * 0.2,
               child: SizedBox(
-                width: screenWidth * 0.5,
+                width: screenWidth * 0.6,
                 child: DropdownButtonFormField<String>(
-                  value: selectedDuration,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
@@ -69,40 +62,38 @@ class _BreastfeedingDurationWidgetState
                                 style: TextStyle(fontSize: screenWidth * 0.04)),
                           ))
                       .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedDuration = value;
-                    });
+                  onChanged: (value) async {
+                    if (userId.isEmpty) {
+                      logger.e("❌ userId 為空，無法更新 Firestore！");
+                      return;
+                    }
+
+                    try {
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userId)
+                          .update({
+                        "前胎哺乳時長": value,
+                      });
+
+                      logger.i(
+                          "✅ Firestore 更新成功，userId: $userId -> 前胎哺乳時長: $value");
+
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StopWidget(userId: userId),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      logger.e("❌ Firestore 更新失敗: $e");
+                    }
                   },
                 ),
               ),
             ),
-
-            // **下一步按鈕 (當選擇數值後才出現)**
-            if (selectedDuration != null)
-              Padding(
-                padding: EdgeInsets.only(top: screenHeight * 0.1),
-                child: SizedBox(
-                  width: screenWidth * 0.5,
-                  height: screenHeight * 0.07,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
-                    ),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/StopWidget');
-                    },
-                    child: Text(
-                      '下一步',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Inter',
-                        fontSize: screenWidth * 0.06,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
           ],
         ),
       ),

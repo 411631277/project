@@ -1,14 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_2/first_quesion/finish.dart';
+import 'package:doctor_2/first_quesion/not%20born/breastfeeding_duration.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
-class FirsttimeWidget extends StatefulWidget {
-  const FirsttimeWidget({super.key, required String userId});
+final Logger logger = Logger(); // ✅ 確保 Logger 存在
 
-  @override
-  State<FirsttimeWidget> createState() => _FirsttimeWidgetState();
-}
-
-class _FirsttimeWidgetState extends State<FirsttimeWidget> {
-  String? answer; // 儲存「是」或「否」的回答
+class FirsttimeWidget extends StatelessWidget {
+  final String userId; // ✅ 接收 userId
+  const FirsttimeWidget({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -22,107 +22,102 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
         decoration: const BoxDecoration(
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // **問題文字**
-            Padding(
-              padding: EdgeInsets.only(top: screenHeight * 0.2),
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              top: screenHeight * 0.25,
+              left: screenWidth * 0.15,
               child: Text(
                 '是否為第一次生產?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.07, // 自適應字體大小
+                  fontSize: screenWidth * 0.07,
                   fontWeight: FontWeight.normal,
                 ),
               ),
             ),
-
-            // **選項 (讓 "是" 和 "否" 在同行)**
-            Padding(
-              padding: EdgeInsets.only(top: screenHeight * 0.05),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center, // 水平居中
-                children: [
-                  SizedBox(
-                    width: screenWidth * 0.3, // 固定寬度，避免擠壓換行
-                    child: RadioListTile<String>(
-                      title: Text(
+            Positioned(
+              top: screenHeight * 0.4,
+              left: screenWidth * 0.2,
+              child: SizedBox(
+                width: screenWidth * 0.6,
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _handleSelection(context, 'yes');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                      ),
+                      child: Text(
                         '是',
                         style: TextStyle(
-                          fontSize: screenWidth * 0.05,
+                          fontSize: screenWidth * 0.06,
                           color: const Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
                         ),
                       ),
-                      value: 'yes',
-                      groupValue: answer,
-                      onChanged: (value) {
-                        setState(() {
-                          answer = value;
-                        });
-                      },
                     ),
-                  ),
-                  SizedBox(
-                    width: screenWidth * 0.3, // 固定寬度
-                    child: RadioListTile<String>(
-                      title: Text(
+                    const SizedBox(height: 20), // 增加間距
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _handleSelection(context, 'no');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                      ),
+                      child: Text(
                         '否',
                         style: TextStyle(
-                          fontSize: screenWidth * 0.05,
+                          fontSize: screenWidth * 0.06,
                           color: const Color.fromRGBO(147, 129, 108, 1),
-                          fontFamily: 'Poppins',
                         ),
                       ),
-                      value: 'no',
-                      groupValue: answer,
-                      onChanged: (value) {
-                        setState(() {
-                          answer = value;
-                        });
-                      },
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            // **下一步按鈕**
-            if (answer != null)
-              Padding(
-                padding: EdgeInsets.only(top: screenHeight * 0.1),
-                child: SizedBox(
-                  width: screenWidth * 0.5,
-                  height: screenHeight * 0.07,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
-                    ),
-                    onPressed: () {
-                      if (answer == 'yes') {
-                        Navigator.pushNamed(context, '/FinishWidget');
-                      } else {
-                        Navigator.pushNamed(
-                            context, '/BreastfeedingDurationWidget');
-                      }
-                    },
-                    child: Text(
-                      '下一步',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Inter',
-                        fontSize: screenWidth * 0.06,
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
               ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  /// **處理按鈕點擊 (Firestore 更新 + 頁面跳轉)**
+  Future<void> _handleSelection(BuildContext context, String answer) async {
+    if (userId.isEmpty) {
+      logger.e("❌ userId 為空，無法更新 Firestore！");
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        "是否為第一次生產": answer,
+      });
+
+      logger.i("✅ Firestore 更新成功，userId: $userId -> 是否第一次生產: $answer");
+
+      if (context.mounted) {
+        if (answer == 'yes') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FinishWidget(userId: userId),
+            ),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BreastfeedingDurationWidget(userId: userId),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      logger.e("❌ Firestore 更新失敗: $e");
+    }
   }
 }

@@ -164,7 +164,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   _buildButton('下一步', Colors.blue, () async {
                     final String? userId =
                         await _saveUserData(); // ✅ 儲存資料並獲取 userId
-
+                    if (!context.mounted) return;
                     if (userId != null && mounted) {
                       // 只有當 Widget 仍然掛載時，才導航到成功頁面
                       Navigator.pushNamed(

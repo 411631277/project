@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+
+final Logger logger = Logger();
 
 class SuccessWidget extends StatelessWidget {
   final String userId;
@@ -50,7 +53,8 @@ class SuccessWidget extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    print("🟢 SuccessWidget 正在導航到 BornWidget，userId: $userId");
+                    logger
+                        .i("🟢 SuccessWidget 正在導航到 BornWidget，userId: $userId");
                     Navigator.pushNamed(
                       context,
                       '/BornWidget', // ✅ 改用 routes 導航

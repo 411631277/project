@@ -1,7 +1,14 @@
+import 'package:doctor_2/first_quesion/first_breastfeeding.dart';
+import 'package:doctor_2/first_quesion/yes%20born/notfirst.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+final Logger logger = Logger();
 
 class Nowfeeding extends StatefulWidget {
-  const Nowfeeding({super.key});
+  final String userId;
+  const Nowfeeding({super.key, required this.userId});
 
   @override
   State<Nowfeeding> createState() => _Nowfeeding();
@@ -172,12 +179,45 @@ class _Nowfeeding extends State<Nowfeeding> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
                     ),
-                    onPressed: () {
-                      if (firstime == 'yes') {
-                        Navigator.pushNamed(
-                            context, '/FirstBreastfeedingWidget');
-                      } else {
-                        Navigator.pushNamed(context, '/NotfirstWidget');
+                    onPressed: () async {
+                      if (widget.userId.isEmpty) {
+                        logger.e("❌ userId 為空，無法更新 Firestore！");
+                        return;
+                      }
+
+                      try {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(widget.userId)
+                            .set({
+                          "是否為純母乳": purebreastmilk,
+                          "是否首次哺乳": firstime,
+                        }, SetOptions(merge: true)); // 🔹 避免覆蓋原有資料
+
+                        logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
+
+                        if (!context.mounted) return;
+
+                        // 🔹 使用 `Navigator.pushReplacement` 避免返回上一頁
+                        if (firstime == 'yes') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FirstBreastfeedingWidget(
+                                  userId: widget.userId),
+                            ),
+                          );
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  NotfirstWidget(userId: widget.userId),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        logger.e("❌ Firestore 更新失敗: $e");
                       }
                     },
                     child: Text(
