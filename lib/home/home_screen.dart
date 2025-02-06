@@ -2,18 +2,48 @@ import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/setting.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
+import 'package:logger/logger.dart';
 
 // ignore: camel_case_types
-class Home_screenWidget extends StatefulWidget {
-  const Home_screenWidget({super.key});
+final Logger logger = Logger();
+
+class HomeScreenWidget extends StatefulWidget {
+  final String userId; // 🔹 從登入或註冊時傳入的 userId
+  const HomeScreenWidget({super.key, required this.userId});
 
   @override
-  State<Home_screenWidget> createState() => _Home_screenWidgetState();
+  State<HomeScreenWidget> createState() => _HomeScreenWidgetState();
 }
 
 // ignore: camel_case_types
-class _Home_screenWidgetState extends State<Home_screenWidget> {
+class _HomeScreenWidgetState extends State<HomeScreenWidget> {
+  String userName = "載入中..."; // 預設文字，等待從 Firebase 讀取
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName(); // 🔹 初始化時讀取使用者名稱
+  }
+
+  Future<void> _loadUserName() async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          userName = userDoc['名字'] ?? '未知用戶'; // 🔹 讀取 Firestore 的名字欄位
+        });
+      }
+    } catch (e) {
+      logger.e("❌ 錯誤：讀取使用者名稱失敗 $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -98,7 +128,7 @@ class _Home_screenWidgetState extends State<Home_screenWidget> {
               top: screenHeight * 0.07,
               left: screenWidth * 0.32,
               child: Text(
-                '陳XX',
+                userName,
                 style: TextStyle(
                   color: const Color.fromRGBO(165, 146, 125, 1),
                   fontFamily: 'Inter',

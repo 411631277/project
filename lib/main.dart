@@ -123,14 +123,17 @@ class MyApp extends StatelessWidget {
             builder: (context) => StopWidget(userId: userId),
           );
         }
+        if (settings.name == '/HomeScreenWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => HomeScreenWidget(userId: userId),
+          );
+        }
         return null;
       },
       //靜態畫面
       routes: {
         '/': (context) => const Main_screenWidget(), // 主畫面
-
-        '/Home_screenWidget': (context) => const Home_screenWidget(),
-
         '/IamWidget': (context) => const IamWidget(),
         '/ReviseWidget': (context) => const ReviseWidget(),
         '/DeleteWidget': (context) => const DeleteWidget(),

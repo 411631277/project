@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+
+final Logger logger = Logger();
 
 class FinishWidget extends StatelessWidget {
-  const FinishWidget({super.key, required String userId});
+  final String userId;
+  const FinishWidget({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -65,17 +69,20 @@ class FinishWidget extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // 跳轉到下一頁，請根據實際需要修改頁面
-                    Navigator.pushNamed(context, '/Home_screenWidget');
+                    logger.i(
+                        "🟢 FinishWidget 正在導航到 HomeScreenWidget，userId: $userId");
+                    Navigator.pushNamed(
+                      context,
+                      '/HomeScreenWidget', // ✅ 改用 routes 導航
+                      arguments: userId, // ✅ 傳遞 userId
+                    );
                   },
-                  child: Text(
+                  child: const Text(
                     '下一步',
-                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: const Color.fromRGBO(0, 0, 0, 0.36),
+                      color: Color.fromRGBO(147, 129, 108, 1),
                       fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.05,
-                      fontWeight: FontWeight.normal,
+                      fontSize: 18,
                     ),
                   ),
                 ),

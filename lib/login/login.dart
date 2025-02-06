@@ -101,7 +101,9 @@ class LoginWidget extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Home_screenWidget(),
+                        builder: (context) => HomeScreenWidget(
+                          userId: '',
+                        ),
                       ),
                     );
                   },
