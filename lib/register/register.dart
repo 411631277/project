@@ -1,8 +1,10 @@
 import 'package:doctor_2/main.screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/services/firestore_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
+import 'package:intl/intl.dart';
 
 final FirestoreService firestoreService = FirestoreService();
 
@@ -34,9 +36,20 @@ class _RegisterWidgetState extends State<RegisterWidget> {
     "是否會喝酒?": null,
     "是否會吸菸?": null,
     "是否會嚼食檳榔": null,
-    "有無慢性病": null,
   };
-
+  bool? hasChronicDisease; // 是否有慢性病 (是/否)
+  Map<String, bool> chronicDiseaseOptions = {
+    "妊娠糖尿病": false,
+    "妊娠高血壓": false,
+    "子癇前症": false,
+    "甲狀腺功能異常": false,
+    "慢性貧血": false,
+    "慢性腎臟病": false,
+    "自體免疫疾病": false,
+    "胃腸道疾病": false,
+    "其他": false,
+  }; // 具體選項
+  TextEditingController otherDiseaseController = TextEditingController();
   @override
   void dispose() {
     // 釋放控制器，避免記憶體洩漏
@@ -70,8 +83,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                 children: [
                   Expanded(child: _buildLabeledTextField('姓名', nameController)),
                   SizedBox(width: screenWidth * 0.05),
-                  Expanded(
-                      child: _buildLabeledTextField('生日', birthController)),
+                  Expanded(child: _buildDatePickerField('生日', birthController)),
                   SizedBox(width: screenWidth * 0.05),
                   Expanded(
                       child: _buildLabeledTextField('身高', heightController)),
@@ -83,13 +95,17 @@ class _RegisterWidgetState extends State<RegisterWidget> {
               Row(
                 children: [
                   Expanded(
-                      child: _buildLabeledTextField('目前體重', weightController)),
+                    child: _buildWeightPickerField(
+                        context, '目前體重', weightController),
+                  ),
                   SizedBox(width: screenWidth * 0.05),
                   Expanded(
-                      child: _buildLabeledTextField(
-                          '孕前體重', prePregnancyWeightController)),
+                    child: _buildWeightPickerField(
+                        context, '孕前體重', prePregnancyWeightController),
+                  ),
                 ],
               ),
+
               SizedBox(height: screenHeight * 0.02),
 
               // 🔹 Email
@@ -119,7 +135,54 @@ class _RegisterWidgetState extends State<RegisterWidget> {
               // 🔹 是/否問題
               ...answers.keys.map((question) => _buildYesNoRow(question)),
               SizedBox(height: screenHeight * 0.02),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // **「有無慢性病」標籤**
+                  _buildLabel("有無慢性病"),
 
+                  // **「有無慢性病」選項（改為 CheckboxListTile）**
+                  CheckboxListTile(
+                    title: Text("有慢性病"),
+                    value: hasChronicDisease ?? false,
+                    onChanged: (value) {
+                      setState(() {
+                        hasChronicDisease = value;
+                      });
+                    },
+                    controlAffinity:
+                        ListTileControlAffinity.leading, // **讓勾選框靠左**
+                  ),
+
+                  // **如果選擇「有慢性病」，顯示具體的慢性病選項**
+                  if (hasChronicDisease == true) ...[
+                    const SizedBox(height: 10),
+                    _buildLabel("請選擇慢性病種類："),
+                    ...chronicDiseaseOptions.keys.map((option) {
+                      return CheckboxListTile(
+                        title: Text(option),
+                        value: chronicDiseaseOptions[option],
+                        onChanged: (value) {
+                          setState(() {
+                            chronicDiseaseOptions[option] = value!;
+                          });
+                        },
+                        controlAffinity:
+                            ListTileControlAffinity.leading, // **讓勾選框靠左**
+                      );
+                    }), // **如果勾選「其他」，顯示輸入框**
+                    if (chronicDiseaseOptions["其他"] == true)
+                      Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: TextField(
+                              controller: otherDiseaseController,
+                              decoration: InputDecoration(
+                                labelText: "請輸入其他慢性病",
+                                border: OutlineInputBorder(),
+                              )))
+                  ],
+                ],
+              ),
               // 🔹 婚姻狀況
               _buildLabel('目前婚姻狀況'),
               DropdownButtonFormField<String>(
@@ -183,6 +246,36 @@ class _RegisterWidgetState extends State<RegisterWidget> {
     );
   }
 
+  Widget _buildDatePickerField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        TextField(
+          controller: controller,
+          readOnly: true, // 🔹 禁止手動輸入
+          decoration: _inputDecoration(),
+          onTap: () async {
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(), // 預設今天
+              firstDate: DateTime(1950), // 最早 1950 年
+              lastDate: DateTime.now(), // 不能選未來
+            );
+
+            if (pickedDate != null) {
+              String formattedDate =
+                  DateFormat('yyyy/MM/dd').format(pickedDate);
+              setState(() {
+                controller.text = formattedDate;
+              });
+            }
+          },
+        ),
+      ],
+    );
+  }
+
   Future<String?> _saveUserData() async {
     try {
       AggregateQuerySnapshot countSnapshot =
@@ -190,6 +283,19 @@ class _RegisterWidgetState extends State<RegisterWidget> {
 
       int newId = (countSnapshot.count ?? 0) + 1; // 新 ID = 目前總數 + 1
       String userId = newId.toString(); // 確保 userId 是字串
+
+      // **✅ 修正 `.toMap()` 錯誤，改為 `{}` 建立 Map**
+      Map<String, dynamic> selectedChronicDiseases = {
+        for (var entry in chronicDiseaseOptions.entries)
+          if (entry.value) entry.key: true
+      };
+
+      // **如果「其他」被勾選，存入使用者輸入的值**
+      if (selectedChronicDiseases.containsKey("其他")) {
+        selectedChronicDiseases["其他"] = otherDiseaseController.text.isNotEmpty
+            ? otherDiseaseController.text
+            : null;
+      }
 
       await FirebaseFirestore.instance.collection('users').doc(userId).set({
         '名字': nameController.text,
@@ -203,10 +309,12 @@ class _RegisterWidgetState extends State<RegisterWidget> {
         '是否為新手媽咪': isNewMom,
         '聯絡偏好': {'email': isEmailPreferred, 'phone': isPhonePreferred},
         'answers': answers,
+        '是否有慢性病': hasChronicDisease,
+        '慢性病症狀': selectedChronicDiseases, // ✅ 修正後的 Map
       });
 
       logger.i("✅ 使用者資料已存入 Firestore，ID：$userId");
-      return userId; // ✅ 回傳 userId
+      return userId;
     } catch (e) {
       logger.e("❌ Firestore 儲存錯誤: $e");
       return null;
@@ -284,6 +392,75 @@ Widget _buildButton(String text, Color color, VoidCallback onPressed) {
     onPressed: onPressed,
     child:
         Text(text, style: const TextStyle(color: Colors.white, fontSize: 16)),
+  );
+}
+
+Widget _buildWeightPickerField(
+    BuildContext context, String label, TextEditingController controller) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _buildLabel(label),
+      TextField(
+        controller: controller,
+        readOnly: true,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(),
+        ),
+        onTap: () {
+          _showWeightPicker(context, controller);
+        },
+      ),
+    ],
+  );
+}
+
+void _showWeightPicker(BuildContext context, TextEditingController controller) {
+  int selectedWeight = controller.text.isNotEmpty
+      ? int.parse(controller.text.replaceAll(' kg', ''))
+      : 50; // 預設 50kg
+
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext builder) {
+      return StatefulBuilder(
+        builder: (context, setModalState) {
+          return SizedBox(
+            height: 250,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 200,
+                  child: CupertinoPicker(
+                    scrollController: FixedExtentScrollController(
+                        initialItem: selectedWeight - 30),
+                    itemExtent: 40,
+                    onSelectedItemChanged: (int index) {
+                      setModalState(() {
+                        selectedWeight = index + 30;
+                      });
+                    },
+                    children: List<Widget>.generate(121, (int index) {
+                      return Center(child: Text('${index + 30} kg'));
+                    }),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    controller.text =
+                        '$selectedWeight kg'; // ✅ 直接更新 controller.text
+                    Navigator.pop(context); // ✅ 關閉彈出視窗
+                  },
+                  child: const Text("確定"),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
   );
 }
 
