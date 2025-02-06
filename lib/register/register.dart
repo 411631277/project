@@ -261,11 +261,12 @@ class _RegisterWidgetState extends State<RegisterWidget> {
               initialDate: DateTime.now(), // 預設今天
               firstDate: DateTime(1950), // 最早 1950 年
               lastDate: DateTime.now(), // 不能選未來
+              locale: const Locale("zh", "TW"), // ✅ 設定為繁體中文
             );
 
             if (pickedDate != null) {
               String formattedDate =
-                  DateFormat('yyyy/MM/dd').format(pickedDate);
+                  DateFormat('yyyy年MM月dd日', 'zh_TW').format(pickedDate);
               setState(() {
                 controller.text = formattedDate;
               });

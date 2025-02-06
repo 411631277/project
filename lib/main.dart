@@ -20,6 +20,7 @@ import 'package:doctor_2/register/success.dart';
 import 'package:doctor_2/first_quesion/born.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -137,6 +138,17 @@ class MyApp extends StatelessWidget {
         '/Main_screenWidget': (context) => const Main_screenWidget(),
         '/BabyAccWidget': (context) => const BabyAccWidget(),
       },
+      locale: const Locale('zh', 'TW'), // ✅ 設定為繁體中文
+      supportedLocales: [
+        const Locale('zh', 'TW'), // 繁體中文
+        const Locale('zh', 'CN'), // 簡體中文
+        const Locale('en', 'US'), // 英文
+      ],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }

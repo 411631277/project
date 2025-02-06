@@ -229,7 +229,7 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
                             .set({
                           "前次哺乳乳頭疼痛次數": painindex,
                           "是否有乳頭破皮": brokenskin,
-                          "前胎哺乳持續時長": duration,
+                          "前胎哺乳持續時長": "$duration 個月",
                         }, SetOptions(merge: true)); // 🔹 保留先前數據
 
                         logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");

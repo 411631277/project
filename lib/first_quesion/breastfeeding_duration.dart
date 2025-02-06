@@ -113,7 +113,7 @@ class _BreastfeedingDurationWidgetState
                                 .collection('users')
                                 .doc(widget.userId)
                                 .update({
-                              "前胎哺乳時長": selectedDuration,
+                              "前胎哺乳時長": "$selectedDuration 個月",
                             });
 
                             logger.i(

@@ -101,7 +101,7 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
                             .collection('users')
                             .doc(widget.userId)
                             .update({
-                          "預期哺餵時長": selectedDuration,
+                          "預期哺餵時長": "$selectedDuration 個月",
                         });
 
                         logger.i(
