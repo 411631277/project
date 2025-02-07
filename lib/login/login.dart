@@ -1,9 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/login/forget.dart';
 import 'package:flutter/material.dart';
 
-class LoginWidget extends StatelessWidget {
+class LoginWidget extends StatefulWidget {
   const LoginWidget({super.key});
+
+  @override
+  State<LoginWidget> createState() => _LoginWidgetState();
+}
+
+class _LoginWidgetState extends State<LoginWidget> {
+  final TextEditingController accountController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  String errorMessage = ""; // 🔹 錯誤訊息
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +52,7 @@ class LoginWidget extends StatelessWidget {
                 width: screenWidth * 0.7,
                 height: screenHeight * 0.05,
                 child: TextField(
+                  controller: accountController, // 🔹 綁定帳號控制器
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: const Color.fromRGBO(255, 255, 255, 0.6),
@@ -73,6 +84,7 @@ class LoginWidget extends StatelessWidget {
                 width: screenWidth * 0.7,
                 height: screenHeight * 0.05,
                 child: TextField(
+                  controller: passwordController, // 🔹 綁定密碼控制器
                   obscureText: true,
                   decoration: InputDecoration(
                     filled: true,
@@ -82,7 +94,21 @@ class LoginWidget extends StatelessWidget {
                 ),
               ),
             ),
-            // **下一步按鈕**
+
+            // **錯誤訊息**
+            Positioned(
+              top: screenHeight * 0.55,
+              left: screenWidth * 0.15,
+              child: Text(
+                errorMessage,
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+
+            // **登入按鈕**
             Positioned(
               top: screenHeight * 0.61,
               left: screenWidth * 0.2,
@@ -97,15 +123,7 @@ class LoginWidget extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // 點擊跳轉到主畫面
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeScreenWidget(
-                          userId: '',
-                        ),
-                      ),
-                    );
+                    _login(); // 🔹 驗證帳號密碼
                   },
                   child: Text(
                     '登入',
@@ -144,6 +162,7 @@ class LoginWidget extends StatelessWidget {
                 ),
               ),
             ),
+
             // **忘記密碼按鈕**
             Positioned(
               top: screenHeight * 0.78,
@@ -181,5 +200,49 @@ class LoginWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// **🔹 驗證帳號密碼**
+  void _login() async {
+    String account = accountController.text.trim();
+    String password = passwordController.text.trim();
+
+    if (account.isEmpty || password.isEmpty) {
+      setState(() {
+        errorMessage = "帳號或密碼不能為空";
+      });
+      return;
+    }
+
+    try {
+      // **查詢 Firestore，匹配帳號與密碼**
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('帳號', isEqualTo: account)
+          .where('密碼', isEqualTo: password)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // **取得 userId**
+        String userId = querySnapshot.docs.first.id;
+
+        // **登入成功，跳轉到主畫面**
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreenWidget(userId: userId),
+          ),
+        );
+      } else {
+        setState(() {
+          errorMessage = "帳號或密碼錯誤";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = "登入失敗，請稍後再試";
+      });
+      print("❌ 登入錯誤: $e");
+    }
   }
 }
