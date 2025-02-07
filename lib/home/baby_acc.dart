@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+
+final Logger logger = Logger();
 
 class BabyAccWidget extends StatelessWidget {
-  const BabyAccWidget({super.key});
+  final String userId; // 🔹 從登入或註冊時傳入的 userId
+  const BabyAccWidget({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +55,14 @@ class BabyAccWidget extends StatelessWidget {
             Positioned(
               top: screenHeight * 0.45,
               left: screenWidth * 0.3,
-              child: _buildButton(context, '返回', Colors.brown.shade400, () {
-                Navigator.pushNamed(context, '/HomeScreenWidget'); // 跳轉到主畫面
+              child: _buildButton(context, '下一步', Colors.brown.shade400, () {
+                logger.i(
+                    "🟢 SuccessWidget 正在導航到 HomeScreenWidget，userId: $userId");
+                Navigator.pushNamed(
+                  context,
+                  '/HomeScreenWidget', // ✅ 改用 routes 導航
+                  arguments: userId, // ✅ 傳遞 userId
+                );
               }),
             ),
           ],

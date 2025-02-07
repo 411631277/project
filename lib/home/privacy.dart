@@ -109,10 +109,10 @@ class PrivacyPolicyPage extends StatelessWidget {
                   Navigator.pop(context); // 返回上一頁
                 },
                 child: Transform.rotate(
-                  angle: 180 * (math.pi / 180), // 旋轉 180 度
+                  angle: math.pi,
                   child: Container(
                     width: screenWidth * 0.15,
-                    height: screenHeight * 0.08,
+                    height: screenHeight * 0.15,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/images/back.png'),

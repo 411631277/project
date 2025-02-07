@@ -131,17 +131,17 @@ class PhoneWidget extends StatelessWidget {
             ),
             // 返回按鈕
             Positioned(
-              top: screenHeight * 0.8,
-              left: screenWidth * 0.28,
+              top: screenHeight * 0.75,
+              left: screenWidth * 0.1,
               child: GestureDetector(
                 onTap: () {
                   Navigator.pop(context); // 返回上一頁
                 },
                 child: Transform.rotate(
-                  angle: -math.pi,
+                  angle: math.pi,
                   child: Container(
-                    width: screenWidth * 0.14,
-                    height: screenHeight * 0.07,
+                    width: screenWidth * 0.15,
+                    height: screenHeight * 0.15,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/images/back.png'),

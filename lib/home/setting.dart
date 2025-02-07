@@ -300,7 +300,7 @@ class SettingWidget extends StatelessWidget {
             ),
             // 返回按鈕
             Positioned(
-              top: screenHeight * 0.8,
+              top: screenHeight * 0.75,
               left: screenWidth * 0.1,
               child: GestureDetector(
                 onTap: () {
@@ -309,8 +309,8 @@ class SettingWidget extends StatelessWidget {
                 child: Transform.rotate(
                   angle: math.pi,
                   child: Container(
-                    width: screenWidth * 0.25,
-                    height: screenHeight * 0.08,
+                    width: screenWidth * 0.15,
+                    height: screenHeight * 0.15,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/images/back.png'),

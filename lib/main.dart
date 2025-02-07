@@ -136,6 +136,12 @@ class MyApp extends StatelessWidget {
             builder: (context) => BabyWidget(userId: userId),
           );
         }
+        if (settings.name == '/BabyAccWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => BabyAccWidget(userId: userId),
+          );
+        }
         return null;
       },
       //靜態畫面
@@ -148,7 +154,6 @@ class MyApp extends StatelessWidget {
         '/DeleteWidget': (context) => const DeleteWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/Main_screenWidget': (context) => const Main_screenWidget(),
-        '/BabyAccWidget': (context) => const BabyAccWidget(),
       },
       locale: const Locale('zh', 'TW'), // ✅ 設定為繁體中文
       supportedLocales: [

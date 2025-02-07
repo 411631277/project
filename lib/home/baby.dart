@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
+import 'dart:math' as math;
 
 final Logger logger = Logger();
 
@@ -144,20 +145,37 @@ class _BabyWidgetState extends State<BabyWidget> {
                     babyHeightController,
                     hasSpecialCondition,
                     specialConditionController);
-                Navigator.pushNamed(context, '/BabyAccWidget'); // ✅ 跳轉頁面
+
+                // ✅ **確保這裡傳遞的是 widget.userId**
+                Navigator.pushNamed(
+                  context,
+                  '/BabyAccWidget',
+                  arguments: widget.userId, // ✅ **改為 widget.userId**
+                );
               }),
             ),
 
             // **返回按鈕**
             Positioned(
-              top: screenHeight * 0.85,
+              top: screenHeight * 0.75,
               left: screenWidth * 0.1,
               child: GestureDetector(
                 onTap: () {
                   Navigator.pop(context);
                 },
-                child:
-                    const Icon(Icons.arrow_back, size: 40, color: Colors.brown),
+                child: Transform.rotate(
+                  angle: math.pi,
+                  child: Container(
+                    width: screenWidth * 0.15,
+                    height: screenHeight * 0.15,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/back.png'),
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

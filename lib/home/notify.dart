@@ -100,8 +100,8 @@ class _NotifyWidgetState extends State<NotifyWidget> {
             ),
             // 返回按鈕
             Positioned(
-              top: screenHeight * 0.78,
-              left: screenWidth * 0.4,
+              top: screenHeight * 0.75,
+              left: screenWidth * 0.1,
               child: GestureDetector(
                 onTap: () {
                   Navigator.pop(context); // 返回上一頁
@@ -110,7 +110,7 @@ class _NotifyWidgetState extends State<NotifyWidget> {
                   angle: math.pi,
                   child: Container(
                     width: screenWidth * 0.15,
-                    height: screenHeight * 0.08,
+                    height: screenHeight * 0.15,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/images/back.png'),

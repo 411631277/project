@@ -222,7 +222,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
             ),
             // Baby 圖片
             Positioned(
-              top: screenHeight * 0.66,
+              top: screenHeight * 0.70,
               left: screenWidth * 0.08,
               child: GestureDetector(
                   onTap: () {

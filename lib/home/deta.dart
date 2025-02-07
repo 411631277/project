@@ -73,7 +73,7 @@ class DetaWidget extends StatelessWidget {
 
             // **返回按鈕**
             Positioned(
-              top: screenHeight * 0.85,
+              top: screenHeight * 0.75,
               left: screenWidth * 0.05,
               child: GestureDetector(
                 onTap: () {
@@ -82,8 +82,8 @@ class DetaWidget extends StatelessWidget {
                 child: Transform.rotate(
                   angle: 180 * (math.pi / 180),
                   child: Container(
-                    width: screenWidth * 0.1,
-                    height: screenHeight * 0.05,
+                    width: screenWidth * 0.15,
+                    height: screenHeight * 0.15,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/images/back.png'),
