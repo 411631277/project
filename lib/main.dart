@@ -8,6 +8,7 @@ import 'package:doctor_2/first_quesion/stop.dart';
 import 'package:doctor_2/first_quesion/notfirst.dart';
 import 'package:doctor_2/first_quesion/nowfeeding.dart';
 import 'package:doctor_2/first_quesion/yesyet.dart';
+import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/baby_acc.dart';
 import 'package:doctor_2/home/delete.dart';
 import 'package:doctor_2/home/delete_acc.dart';
@@ -129,11 +130,19 @@ class MyApp extends StatelessWidget {
             builder: (context) => HomeScreenWidget(userId: userId),
           );
         }
+        if (settings.name == '/BabyWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => BabyWidget(userId: userId),
+          );
+        }
         return null;
       },
       //靜態畫面
       routes: {
-        '/': (context) => const Main_screenWidget(), // 主畫面
+        '/': (context) => const HomeScreenWidget(
+              userId: '1',
+            ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/ReviseWidget': (context) => const ReviseWidget(),
         '/DeleteWidget': (context) => const DeleteWidget(),

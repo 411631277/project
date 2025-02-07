@@ -3,10 +3,9 @@ import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/setting.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:math' as math;
 import 'package:logger/logger.dart';
+import 'dart:math' as math;
 
-// ignore: camel_case_types
 final Logger logger = Logger();
 
 class HomeScreenWidget extends StatefulWidget {
@@ -230,7 +229,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const BabyWidget(),
+                        builder: (context) => BabyWidget(userId: widget.userId),
                       ),
                     );
                   },

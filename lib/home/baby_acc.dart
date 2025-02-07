@@ -52,7 +52,7 @@ class BabyAccWidget extends StatelessWidget {
               top: screenHeight * 0.45,
               left: screenWidth * 0.3,
               child: _buildButton(context, '返回', Colors.brown.shade400, () {
-                Navigator.pushNamed(context, '/Home_screenWidget'); // 跳轉到主畫面
+                Navigator.pushNamed(context, '/HomeScreenWidget'); // 跳轉到主畫面
               }),
             ),
           ],
