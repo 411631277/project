@@ -26,6 +26,8 @@ class _RegisterWidgetState extends State<RegisterWidget> {
       TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController accountController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   // 🔹 用戶選擇資料
   String? maritalStatus;
@@ -107,7 +109,12 @@ class _RegisterWidgetState extends State<RegisterWidget> {
               ),
 
               SizedBox(height: screenHeight * 0.02),
+              // 🔹 帳號
+              _buildLabeledTextField('帳號', accountController),
 
+              // 🔹 密碼
+              _buildLabeledTextField('密碼', passwordController,
+                  obscureText: true),
               // 🔹 Email
               _buildLabeledTextField('E-Mail', emailController),
 
@@ -299,6 +306,8 @@ class _RegisterWidgetState extends State<RegisterWidget> {
       }
 
       await FirebaseFirestore.instance.collection('users').doc(userId).set({
+        '帳號': accountController.text,
+        '密碼': passwordController.text,
         '名字': nameController.text,
         '生日': birthController.text,
         '身高': heightController.text,
@@ -311,7 +320,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
         '聯絡偏好': {'email': isEmailPreferred, 'phone': isPhonePreferred},
         'answers': answers,
         '是否有慢性病': hasChronicDisease,
-        '慢性病症狀': selectedChronicDiseases, // ✅ 修正後的 Map
+        '慢性病症狀': selectedChronicDiseases,
       });
 
       logger.i("✅ 使用者資料已存入 Firestore，ID：$userId");
@@ -325,13 +334,17 @@ class _RegisterWidgetState extends State<RegisterWidget> {
   InputDecoration _inputDecoration() => const InputDecoration(
       filled: true, fillColor: Colors.white, border: OutlineInputBorder());
 
-  Widget _buildLabeledTextField(
-      String label, TextEditingController controller) {
+  Widget _buildLabeledTextField(String label, TextEditingController controller,
+      {bool obscureText = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildLabel(label),
-        TextField(controller: controller, decoration: _inputDecoration()),
+        TextField(
+          controller: controller,
+          obscureText: obscureText, // ✅ 如果是密碼欄位則隱藏文字
+          decoration: _inputDecoration(),
+        ),
       ],
     );
   }
