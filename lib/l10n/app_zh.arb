@@ -1,0 +1,16 @@
+{
+    "@@locale": "zh",
+    "account": "帳號",
+    "@account": {
+      "description": "帳號輸入框的標籤"
+    },
+    "password": "密碼",
+    "@password": {
+      "description": "密碼輸入框的標籤"
+    },
+    "login": "登入",
+    "@login": {
+      "description": "登入按鈕文字"
+    }
+  }
+  

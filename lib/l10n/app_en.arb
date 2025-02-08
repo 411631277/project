@@ -1,0 +1,16 @@
+{
+    "@@locale": "en",
+    "account": "Account",
+    "@account": {
+      "description": "Label for account input field"
+    },
+    "password": "Password",
+    "@password": {
+      "description": "Label for password input field"
+    },
+    "login": "Login",
+    "@login": {
+      "description": "Button text for login action"
+    }
+  }
+  
