@@ -225,26 +225,35 @@ class _LoginWidgetState extends State<LoginWidget> {
           .where('密碼', isEqualTo: password)
           .get();
 
+      // **檢查是否仍然掛載**
+      if (!mounted) return;
+
       if (querySnapshot.docs.isNotEmpty) {
         // **取得 userId**
         String userId = querySnapshot.docs.first.id;
 
         // **登入成功，跳轉到主畫面**
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreenWidget(userId: userId),
-          ),
-        );
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreenWidget(userId: userId),
+            ),
+          );
+        }
       } else {
-        setState(() {
-          errorMessage = "帳號或密碼錯誤";
-        });
+        if (mounted) {
+          setState(() {
+            errorMessage = "帳號或密碼錯誤";
+          });
+        }
       }
     } catch (e) {
-      setState(() {
-        errorMessage = "登入失敗，請稍後再試";
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = "登入失敗，請稍後再試";
+        });
+      }
       logger.e("❌ 登入錯誤: $e");
     }
   }

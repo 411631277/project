@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:doctor_2/first_quesion/finish.dart';
+import 'package:doctor_2/first_question/finish.dart';
 
 final Logger logger = Logger(); // 🔹 Firestore 更新記錄
 

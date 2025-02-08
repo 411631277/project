@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:doctor_2/first_quesion/frequency.dart';
-import 'package:doctor_2/first_quesion/firsttime.dart';
+import 'package:doctor_2/first_question/frequency.dart';
+import 'package:doctor_2/first_question/firsttime.dart';
 
 final Logger logger = Logger();
 

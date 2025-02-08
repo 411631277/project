@@ -1,5 +1,5 @@
-import 'package:doctor_2/first_quesion/finish.dart';
-import 'package:doctor_2/first_quesion/nowfeeding.dart';
+import 'package:doctor_2/first_question/finish.dart';
+import 'package:doctor_2/first_question/nowfeeding.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

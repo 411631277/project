@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:doctor_2/first_quesion/breastfeeding_duration.dart';
-import 'package:doctor_2/first_quesion/finish.dart';
+import 'package:doctor_2/first_question/breastfeeding_duration.dart';
+import 'package:doctor_2/first_question/finish.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 

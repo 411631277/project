@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:doctor_2/first_quesion/first_breastfeeding.dart';
-import 'package:doctor_2/first_quesion/notfirst.dart';
+import 'package:doctor_2/first_question/first_breastfeeding.dart';
+import 'package:doctor_2/first_question/notfirst.dart';
 
 final Logger logger = Logger(); // 🔹 記錄 Firestore 變更
 

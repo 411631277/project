@@ -1,25 +1,25 @@
-import 'package:doctor_2/first_quesion/breastfeeding_duration.dart';
-import 'package:doctor_2/first_quesion/finish.dart';
-import 'package:doctor_2/first_quesion/first_breastfeeding.dart';
-import 'package:doctor_2/first_quesion/firsttime.dart';
-import 'package:doctor_2/first_quesion/frequency.dart';
-import 'package:doctor_2/first_quesion/notyet.dart';
-import 'package:doctor_2/first_quesion/stop.dart';
-import 'package:doctor_2/first_quesion/notfirst.dart';
-import 'package:doctor_2/first_quesion/nowfeeding.dart';
-import 'package:doctor_2/first_quesion/yesyet.dart';
+import 'package:doctor_2/first_question/breastfeeding_duration.dart';
+import 'package:doctor_2/first_question/finish.dart';
+import 'package:doctor_2/first_question/first_breastfeeding.dart';
+import 'package:doctor_2/first_question/firsttime.dart';
+import 'package:doctor_2/first_question/frequency.dart';
+import 'package:doctor_2/first_question/notyet.dart';
+import 'package:doctor_2/first_question/stop.dart';
+import 'package:doctor_2/first_question/notfirst.dart';
+import 'package:doctor_2/first_question/nowfeeding.dart';
+import 'package:doctor_2/first_question/yesyet.dart';
 import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/baby_acc.dart';
 import 'package:doctor_2/home/delete.dart';
 import 'package:doctor_2/home/delete_acc.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/home/revise.dart';
-import 'package:doctor_2/quesion/one_quesion.dart';
+import 'package:doctor_2/questionGroup/knowledge_widget.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/main.screen.dart';
 import 'package:doctor_2/register/success.dart';
-import 'package:doctor_2/first_quesion/born.dart';
+import 'package:doctor_2/first_question/born.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -143,11 +143,17 @@ class MyApp extends StatelessWidget {
             builder: (context) => BabyAccWidget(userId: userId),
           );
         }
+        if (settings.name == '/KnowledgeWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => KnowledgeWidget(userId: userId),
+          );
+        }
         return null;
       },
       //靜態畫面
       routes: {
-        '/': (context) => const BreastfeedingKnowledgeWidget(), // 主畫面
+        '/': (context) => const Main_screenWidget(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/ReviseWidget': (context) => const ReviseWidget(),
         '/DeleteWidget': (context) => const DeleteWidget(),

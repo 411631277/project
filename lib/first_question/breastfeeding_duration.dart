@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:doctor_2/first_quesion/stop.dart';
+import 'package:doctor_2/first_question/stop.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
