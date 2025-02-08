@@ -1,3 +1,4 @@
+import 'package:doctor_2/main.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -45,7 +46,7 @@ class LanguageWidget extends StatelessWidget {
                     backgroundColor: const Color.fromRGBO(185, 156, 107, 1),
                   ),
                   onPressed: () {
-                    // 繁體中文按鈕邏輯
+                    _setLocale(context, const Locale('zh', 'TW'));
                   },
                   child: Text(
                     '繁體中文',
@@ -69,7 +70,7 @@ class LanguageWidget extends StatelessWidget {
                     backgroundColor: const Color.fromRGBO(185, 156, 107, 1),
                   ),
                   onPressed: () {
-                    // English 按鈕邏輯
+                    _setLocale(context, const Locale('en', 'US'));
                   },
                   child: Text(
                     'English',
@@ -108,5 +109,12 @@ class LanguageWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _setLocale(BuildContext context, Locale locale) {
+    // 更新語言
+    MyApp.setLocale(context, locale);
+    // 返回上一頁
+    Navigator.pop(context);
   }
 }

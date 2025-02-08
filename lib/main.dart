@@ -23,30 +23,66 @@ import 'package:doctor_2/first_question/born.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
 import 'l10n/generated/l10n.dart';
+import 'package:logger/logger.dart';
 
+final Logger logger = Logger();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp()); // ✅ 只執行一次 runApp()
+  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  static void setLocale(BuildContext context, Locale newLocale) {
+    final _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
+    state?.setLocale(newLocale);
+  }
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale _locale = const Locale('zh', 'TW'); // 默認語言為繁體中文
+
+  void setLocale(Locale locale) {
+    logger.e('切換語言為: ${locale.languageCode}');
+    setState(() {
+      _locale = locale;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, // 隱藏 Debug 標籤
-      title: 'Settings App', // 應用標題
-      theme: ThemeData(
-        primarySwatch: Colors.brown, // 主題顏色
-      ),
-      //路由設定
-      initialRoute: '/', // 初始路由
+      debugShowCheckedModeBanner: false,
+      title: 'Settings App',
+      theme: ThemeData(primarySwatch: Colors.brown),
+      locale: _locale, // 傳遞當前語言
+      supportedLocales: const [
+        Locale('zh', 'TW'),
+        Locale('zh', 'CN'),
+        Locale('en', 'US'),
+      ],
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      routes: {
+        '/': (context) => const Main_screenWidget(), // 主畫面
+        '/IamWidget': (context) => const IamWidget(),
+        '/ReviseWidget': (context) => const ReviseWidget(),
+        '/DeleteWidget': (context) => const DeleteWidget(),
+        '/DeleteAccWidget': (context) => const DeleteAccWidget(),
+        '/Main_screenWidget': (context) => const Main_screenWidget(),
+      },
       onGenerateRoute: (settings) {
         //接收userID放這裡
         if (settings.name == '/SuccessWidget') {
@@ -153,27 +189,6 @@ class MyApp extends StatelessWidget {
         }
         return null;
       },
-      //靜態畫面
-      routes: {
-        '/': (context) => const Main_screenWidget(), // 主畫面
-        '/IamWidget': (context) => const IamWidget(),
-        '/ReviseWidget': (context) => const ReviseWidget(),
-        '/DeleteWidget': (context) => const DeleteWidget(),
-        '/DeleteAccWidget': (context) => const DeleteAccWidget(),
-        '/Main_screenWidget': (context) => const Main_screenWidget(),
-      },
-      locale: const Locale('zh', 'TW'), // ✅ 設定為繁體中文
-      supportedLocales: [
-        const Locale('zh', 'TW'), // 繁體中文
-        const Locale('zh', 'CN'), // 簡體中文
-        const Locale('en', 'US'), // 英文
-      ],
-      localizationsDelegates: [
-        AppLocalizationsDelegate(),
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
     );
   }
 }

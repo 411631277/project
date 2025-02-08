@@ -17,13 +17,22 @@ class AppLocalizations {
       'login': '登入',
     },
   };
-  String? get(String key) {
+
+  String get(String key) {
+    return _localizedValues[locale.languageCode]?[key] ?? key;
+  }
+
+  String? translate(String key) {
     return _localizedValues[locale.languageCode]?[key];
   }
 
-  static AppLocalizations? of(BuildContext context) {
-    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
+
+  // 靜態 delegate
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      AppLocalizationsDelegate();
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

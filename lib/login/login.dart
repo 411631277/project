@@ -4,6 +4,8 @@ import 'package:doctor_2/login/forget.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
+import '../l10n/generated/l10n.dart';
+
 final Logger logger = Logger();
 
 class LoginWidget extends StatefulWidget {
@@ -37,12 +39,12 @@ class _LoginWidgetState extends State<LoginWidget> {
               top: screenHeight * 0.2,
               left: screenWidth * 0.42,
               child: Text(
-                '帳號',
+                AppLocalizations.of(context).get('account'),
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   color: const Color.fromRGBO(147, 129, 108, 1),
                   fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.06, // 自適應字體大小
+                  fontSize: screenWidth * 0.06,
                   fontWeight: FontWeight.normal,
                 ),
               ),
