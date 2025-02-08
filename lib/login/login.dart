@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/login/forget.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+
+final Logger logger = Logger();
 
 class LoginWidget extends StatefulWidget {
   const LoginWidget({super.key});
@@ -242,7 +245,7 @@ class _LoginWidgetState extends State<LoginWidget> {
       setState(() {
         errorMessage = "登入失敗，請稍後再試";
       });
-      print("❌ 登入錯誤: $e");
+      logger.e("❌ 登入錯誤: $e");
     }
   }
 }

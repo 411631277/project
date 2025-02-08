@@ -14,6 +14,7 @@ import 'package:doctor_2/home/delete.dart';
 import 'package:doctor_2/home/delete_acc.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/home/revise.dart';
+import 'package:doctor_2/quesion/one_quesion.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/main.screen.dart';
@@ -146,9 +147,7 @@ class MyApp extends StatelessWidget {
       },
       //靜態畫面
       routes: {
-        '/': (context) => const HomeScreenWidget(
-              userId: '1',
-            ), // 主畫面
+        '/': (context) => const BreastfeedingKnowledgeWidget(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/ReviseWidget': (context) => const ReviseWidget(),
         '/DeleteWidget': (context) => const DeleteWidget(),
