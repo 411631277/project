@@ -73,6 +73,18 @@ class _BabyWidgetState extends State<BabyWidget> {
             _buildTextField(
                 screenWidth, screenHeight * 0.43, babyHeightController),
             Positioned(
+              top: screenHeight * 0.55, // 調整文字的垂直位置
+              left: screenWidth * 0.2,
+              child: const Text(
+                '寶寶出生是否有特殊狀況',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Color.fromRGBO(147, 129, 108, 1),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Positioned(
               top: screenHeight * 0.60,
               left: screenWidth * 0.2,
               child: Row(

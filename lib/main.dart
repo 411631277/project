@@ -15,6 +15,7 @@ import 'package:doctor_2/home/delete_acc.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/home/revise.dart';
 import 'package:doctor_2/questionGroup/knowledge_widget.dart';
+import 'package:doctor_2/questionGroup/melancholy.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/main.screen.dart';
@@ -185,6 +186,12 @@ class _MyAppState extends State<MyApp> {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => KnowledgeWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/MelancholyWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => MelancholyWidget(userId: userId),
           );
         }
         return null;

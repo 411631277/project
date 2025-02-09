@@ -56,7 +56,7 @@ class QuestionWidget extends StatelessWidget {
             _buildSurveyButton(context, screenWidth, screenHeight, 0.18,
                 '母乳哺餵知識量表', '/KnowledgeWidget', logger),
             _buildSurveyButton(context, screenWidth, screenHeight, 0.28,
-                '產後憂鬱量表', '/home2', logger),
+                '產後憂鬱量表', '/MelancholyWidget', logger),
             _buildSurveyButton(context, screenWidth, screenHeight, 0.38,
                 '生產支持知覺量表', '/home3', logger),
             _buildSurveyButton(context, screenWidth, screenHeight, 0.48,
