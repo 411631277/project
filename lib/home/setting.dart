@@ -1,3 +1,4 @@
+import 'package:doctor_2/extensions.dart';
 import 'package:doctor_2/home/mate.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -39,7 +40,7 @@ class SettingWidget extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  '語言',
+                  context.t('language'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),

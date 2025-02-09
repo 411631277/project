@@ -11,6 +11,34 @@
     "login": "登入",
     "@login": {
       "description": "登入按鈕文字"
+    },
+    "language": "語言",
+    "@language": {
+      "description": "Label for account input field"
+    },
+    "notification": "通知設定",
+    "@notification": {
+      "description": "Label for account input field"
+    },
+    "data": "基本資料修改",
+    "@data": {
+      "description": "Label for account input field"
+    },
+"phone": "院內電話查詢",
+    "@phone": {
+      "description": "Label for account input field"
+    },
+   "share": "配偶分享碼",
+    "@share": {
+      "description": "Label for account input field"
+    },
+    "privacy": "隱私權政策",
+    "@privacy": {
+      "description": "Label for account input field"
+    },
+    "signout": "登出帳號",
+    "@signout": {
+      "description": "Label for account input field"
     }
   }
   

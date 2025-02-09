@@ -11,6 +11,34 @@
     "login": "Login",
     "@login": {
       "description": "Button text for login action"
+    },
+    "language": "Language",
+    "@language": {
+      "description": "Label for account input field"
+    },
+    "notification": "Notification",
+    "@notification": {
+      "description": "Label for account input field"
+    },
+    "data": "Data modification",
+    "@data": {
+      "description": "Label for account input field"
+    },
+"phone": "phone inquiry",
+    "@phone": {
+      "description": "Label for account input field"
+    },
+   "share": "share code",
+    "@share": {
+      "description": "Label for account input field"
+    },
+    "privacy": "Privacy",
+    "@privacy": {
+      "description": "Label for account input field"
+    },
+    "signout": "Sign out",
+    "@signout": {
+      "description": "Label for account input field"
     }
   }
   

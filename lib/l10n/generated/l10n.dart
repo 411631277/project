@@ -10,11 +10,13 @@ class AppLocalizations {
       'account': 'Account',
       'password': 'Password',
       'login': 'Login',
+      'language': 'Language',
     },
     'zh': {
       'account': '帳號',
       'password': '密碼',
       'login': '登入',
+      'language': '語言',
     },
   };
 
