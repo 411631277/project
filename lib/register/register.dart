@@ -183,7 +183,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: TextField(
                               controller: otherDiseaseController,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 labelText: "請輸入其他慢性病",
                                 border: OutlineInputBorder(),
                               )))

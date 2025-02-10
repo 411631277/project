@@ -13,9 +13,12 @@ import 'package:doctor_2/home/baby_acc.dart';
 import 'package:doctor_2/home/delete.dart';
 import 'package:doctor_2/home/delete_acc.dart';
 import 'package:doctor_2/home/home_screen.dart';
+import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/revise.dart';
+import 'package:doctor_2/questionGroup/attachment.dart';
 import 'package:doctor_2/questionGroup/knowledge_widget.dart';
 import 'package:doctor_2/questionGroup/melancholy.dart';
+import 'package:doctor_2/questionGroup/production.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/main.screen.dart';
@@ -77,7 +80,9 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       routes: {
-        '/': (context) => const Main_screenWidget(), // 主畫面
+        '/': (context) => const QuestionWidget(
+              userId: '3',
+            ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/ReviseWidget': (context) => const ReviseWidget(),
         '/DeleteWidget': (context) => const DeleteWidget(),
@@ -194,6 +199,19 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => MelancholyWidget(userId: userId),
           );
         }
+        if (settings.name == '/ProdutionWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => ProdutionWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/AttachmentWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => AttachmentWidget(userId: userId),
+          );
+        }
+
         return null;
       },
     );

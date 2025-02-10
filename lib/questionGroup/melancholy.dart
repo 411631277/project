@@ -116,7 +116,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
 
   // 建立題目選項
   Widget _buildQuestionRow(int questionIndex, double screenWidth) {
-    final List<String> options = ["很好", "好", "不好", "很不好"]; // 選項文字
+    final List<String> options = ["可以", "還行", "不行", "沒辦法"]; // 選項文字
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
