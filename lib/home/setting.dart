@@ -79,7 +79,7 @@ class SettingWidget extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  '通知設定',
+                  context.t('notification'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
@@ -118,7 +118,7 @@ class SettingWidget extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  '基本資料修改',
+                  context.t('data'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
@@ -157,7 +157,7 @@ class SettingWidget extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  '院內電話查詢',
+                  context.t('phone'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
@@ -196,7 +196,7 @@ class SettingWidget extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  '配偶分享碼',
+                  context.t('share'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
@@ -235,7 +235,7 @@ class SettingWidget extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  '隱私權政策',
+                  context.t('privacy'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
@@ -274,7 +274,7 @@ class SettingWidget extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  '登出帳號',
+                  context.t('signout'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),

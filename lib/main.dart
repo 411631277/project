@@ -13,13 +13,12 @@ import 'package:doctor_2/home/baby_acc.dart';
 import 'package:doctor_2/home/delete.dart';
 import 'package:doctor_2/home/delete_acc.dart';
 import 'package:doctor_2/home/home_screen.dart';
-//import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/revise.dart';
 import 'package:doctor_2/questionGroup/attachment.dart';
 import 'package:doctor_2/questionGroup/knowledge_widget.dart';
 import 'package:doctor_2/questionGroup/melancholy.dart';
 import 'package:doctor_2/questionGroup/production.dart';
-import 'package:doctor_2/questionGroup/sleep.dart';
+//import 'package:doctor_2/questionGroup/sleep.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/main.screen.dart';
@@ -81,9 +80,7 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       routes: {
-        '/': (context) => const SleepWidget(
-              userId: '3',
-            ), // 主畫面
+        '/': (context) => const Main_screenWidget(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/ReviseWidget': (context) => const ReviseWidget(),
         '/DeleteWidget': (context) => const DeleteWidget(),
