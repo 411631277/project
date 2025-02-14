@@ -1,5 +1,6 @@
 import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/question.dart';
+import 'package:doctor_2/home/robot.dart';
 import 'package:doctor_2/home/setting.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -264,13 +265,23 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
             Positioned(
               top: screenHeight * 0.85,
               left: screenWidth * 0.8,
-              child: Container(
-                width: screenWidth * 0.15,
-                height: screenHeight * 0.1,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/Robot.png'),
-                    fit: BoxFit.fitWidth,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RobotWidget(),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: screenWidth * 0.15,
+                  height: screenHeight * 0.1,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/Robot.png'),
+                      fit: BoxFit.fitWidth,
+                    ),
                   ),
                 ),
               ),
