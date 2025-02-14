@@ -289,22 +289,19 @@ class _RegisterWidgetState extends State<RegisterWidget> {
       AggregateQuerySnapshot countSnapshot =
           await FirebaseFirestore.instance.collection('users').count().get();
 
-      int newId = (countSnapshot.count ?? 0) + 1; // 新 ID = 目前總數 + 1
-      String userId = newId.toString(); // 確保 userId 是字串
-
-      // **✅ 修正 `.toMap()` 錯誤，改為 `{}` 建立 Map**
       Map<String, dynamic> selectedChronicDiseases = {
         for (var entry in chronicDiseaseOptions.entries)
           if (entry.value) entry.key: true
       };
 
-      // **如果「其他」被勾選，存入使用者輸入的值**
       if (selectedChronicDiseases.containsKey("其他")) {
         selectedChronicDiseases["其他"] = otherDiseaseController.text.isNotEmpty
             ? otherDiseaseController.text
             : null;
       }
 
+      int newId = (countSnapshot.count ?? 0) + 1; // 新 ID = 目前總數 + 1
+      String userId = newId.toString(); // 確保 userId 是字串
       await FirebaseFirestore.instance.collection('users').doc(userId).set({
         '帳號': accountController.text,
         '密碼': passwordController.text,
@@ -324,7 +321,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
       });
 
       logger.i("✅ 使用者資料已存入 Firestore，ID：$userId");
-      return userId;
+      return userId; // ✅ 回傳 userId
     } catch (e) {
       logger.e("❌ Firestore 儲存錯誤: $e");
       return null;
