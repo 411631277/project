@@ -17,6 +17,7 @@ import 'package:doctor_2/home/revise.dart';
 import 'package:doctor_2/questionGroup/attachment.dart';
 import 'package:doctor_2/questionGroup/knowledge_widget.dart';
 import 'package:doctor_2/questionGroup/melancholy.dart';
+import 'package:doctor_2/questionGroup/painscale.dart';
 import 'package:doctor_2/questionGroup/production.dart';
 import 'package:doctor_2/questionGroup/sleep.dart';
 import 'package:doctor_2/questionGroup/sleep2.dart';
@@ -81,7 +82,7 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       routes: {
-        '/': (context) => const SleepWidget(
+        '/': (context) => const PainScaleWidget(
               userId: '7',
             ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
