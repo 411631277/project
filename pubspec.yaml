@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  auto_size_text: ^3.0.0
   firebase_core: any
   cloud_firestore: any
   firebase_auth: ^5.4.1
@@ -44,3 +45,4 @@ flutter:
     - assets/images/Robot.png
     - assets/images/Main.png
     - assets/images/pregnancy.png
+

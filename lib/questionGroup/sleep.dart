@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math' as math;
+
+final Logger logger = Logger();
 
 class SleepWidget extends StatefulWidget {
-  const SleepWidget({super.key, required String userId});
+  final String userId; // 接收 userId
+  const SleepWidget({super.key, required this.userId});
 
   @override
   State<SleepWidget> createState() => _SleepWidgetState();
@@ -66,24 +72,49 @@ class _SleepWidgetState extends State<SleepWidget> {
     {
       "type": "choice", // 選擇題
       "question": "過去一個月來，您通常一星期幾個晚上需要使用藥物幫忙睡眠？",
-      "options": ["未發生", "約一兩次", "三次以上"],
+      "options": ["未發生", "約一兩次", "三次或以上"],
     },
     {
       "type": "choice", // 選擇題
-      "question": " 過去一個月來，您是否曾在用餐、開車或社交場合瞌睡而無法保持清醒，每星期約幾次?",
-      "options": ["未發生", "約一兩次", "三次以上"],
+      "question": "過去一個月來，您是否曾在用餐、開車或社交場合瞌睡而無法保持清醒，每星期約幾次?",
+      "options": ["未發生", "約一兩次", "三次或以上"],
     },
     {
       "type": "choice", // 選擇題
-      "question": "過去一個月來,您會感到無心完成該做的事",
+      "question": "過去一個月來，您會感到無心完成該做的事",
       "options": ["沒有", "有一點", "的確有", "很嚴重"],
     },
   ];
 
   final Map<int, String?> answers = {};
 
+  // 檢查是否所有題目都填寫完成
+  bool _isAllQuestionsAnswered() {
+    // 檢查填空題是否填寫完成
+    for (int i = 0; i < 5; i++) {
+      if (questions[i]['hasHour'] && hourControllers[i]!.text.trim().isEmpty) {
+        return false;
+      }
+      if (questions[i]['hasMinute'] &&
+          minuteControllers[i]!.text.trim().isEmpty) {
+        return false;
+      }
+    }
+
+    // 檢查選擇題是否填寫完成
+    for (int i = 5; i < questions.length; i++) {
+      if (answers[i] == null || answers[i]!.isEmpty) {
+        return false;
+      }
+    }
+
+    // 如果所有檢查都通過，返回 true
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Container(
         padding: const EdgeInsets.all(20),
@@ -116,43 +147,49 @@ class _SleepWidgetState extends State<SleepWidget> {
                 },
               ),
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Icon(
-                    Icons.arrow_back,
-                    size: 30,
-                    color: Colors.brown,
+            const SizedBox(height: 10),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Transform.rotate(
+                  angle: math.pi,
+                  child: Image.asset(
+                    'assets/images/back.png',
+                    width: screenWidth * 0.15,
                   ),
                 ),
+              ),
+              // 顯示下一步按鈕僅在所有問題都填寫完整時
+              if (_isAllQuestionsAnswered())
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 40, vertical: 15),
                     backgroundColor: Colors.brown.shade400,
                   ),
-                  onPressed: () {
-                    // 提交邏輯
+                  onPressed: () async {
+                    await _saveAnswersToFirebase();
+                    if (!context.mounted) return;
+                    Navigator.pushNamed(
+                      context,
+                      '/Sleep2Widget',
+                      arguments: widget.userId,
+                    );
                   },
                   child: const Text(
                     "下一步",
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),
-              ],
-            ),
+            ]),
           ],
         ),
       ),
     );
   }
 
-  // 填空題 Widget
   Widget _buildFillQuestion(Map<String, dynamic> question) {
     final int index = question["index"];
     return Padding(
@@ -181,6 +218,7 @@ class _SleepWidgetState extends State<SleepWidget> {
                   hintStyle: TextStyle(fontSize: 12),
                 ),
                 style: const TextStyle(fontSize: 14),
+                onChanged: (_) => setState(() {}), // 輸入時更新
               ),
             ),
             const Text(
@@ -202,6 +240,7 @@ class _SleepWidgetState extends State<SleepWidget> {
                   hintStyle: TextStyle(fontSize: 12),
                 ),
                 style: const TextStyle(fontSize: 14),
+                onChanged: (_) => setState(() {}),
               ),
             ),
             const Text(
@@ -217,10 +256,9 @@ class _SleepWidgetState extends State<SleepWidget> {
     );
   }
 
-  // 選擇題 Widget
   Widget _buildChoiceQuestion(int index, Map<String, dynamic> question) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10), // 減少題目間距
+      padding: const EdgeInsets.only(bottom: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -231,39 +269,77 @@ class _SleepWidgetState extends State<SleepWidget> {
               color: Color.fromRGBO(147, 129, 108, 1),
             ),
           ),
-          const SizedBox(height: 2), // 減少題目與選項間距
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          const SizedBox(height: 5),
+          Column(
             children: (question['options'] as List<String>)
-                .map((option) => Expanded(
-                      child: Row(
-                        children: [
-                          Radio<String>(
-                            value: option,
-                            groupValue: answers[index],
-                            onChanged: (value) {
-                              setState(() {
-                                answers[index] = value;
-                              });
-                            },
-                          ),
-                          Flexible(
-                            child: Text(
-                              option,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color.fromRGBO(147, 129, 108, 1),
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                .map((option) => Row(
+                      children: [
+                        Radio<String>(
+                          value: option,
+                          groupValue: answers[index],
+                          onChanged: (value) {
+                            setState(() {
+                              answers[index] = value;
+                            });
+                          },
+                        ),
+                        Expanded(
+                          child: Text(
+                            option,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color.fromRGBO(147, 129, 108, 1),
                             ),
+                            softWrap: true,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ))
                 .toList(),
           ),
         ],
       ),
     );
+  }
+
+  Future<bool> _saveAnswersToFirebase() async {
+    try {
+      final Map<String, String?> formattedAnswers = answers.map(
+        (key, value) => MapEntry(key.toString(), value),
+      );
+
+      for (int i = 0; i < 5; i++) {
+        String hour = hourControllers[i]!.text.trim();
+        String minute = minuteControllers[i]!.text.trim();
+
+        if (hour.isNotEmpty || minute.isNotEmpty) {
+          formattedAnswers["填空題 ${i + 1}"] =
+              "${hour.isNotEmpty ? "$hour時" : ""} ${minute.isNotEmpty ? "$minute分" : ""}"
+                  .trim();
+        }
+      }
+
+      final DocumentReference docRef = FirebaseFirestore.instance
+          .collection("users")
+          .doc(widget.userId)
+          .collection("questions")
+          .doc("SleepWidget");
+
+      // 覆蓋舊資料，指定 key
+      await docRef.set({
+        "answers": {
+          "SleepWidget": {
+            "data": formattedAnswers,
+            "timestamp": Timestamp.now(),
+          }
+        }
+      }, SetOptions(merge: true));
+
+      logger.i("✅ SleepWidget 資料已成功儲存並覆蓋舊檔案！");
+      return true;
+    } catch (e) {
+      logger.e("❌ 儲存 SleepWidget 資料時發生錯誤：$e");
+      return false;
+    }
   }
 }
