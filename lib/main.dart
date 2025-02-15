@@ -82,9 +82,7 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       routes: {
-        '/': (context) => const PainScaleWidget(
-              userId: '7',
-            ), // 主畫面
+        '/': (context) => const Main_screenWidget(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/ReviseWidget': (context) => const ReviseWidget(),
         '/DeleteWidget': (context) => const DeleteWidget(),
@@ -223,6 +221,12 @@ class _MyAppState extends State<MyApp> {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => Sleep2Widget(userId: userId),
+          );
+        }
+        if (settings.name == '/PainScaleWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => PainScaleWidget(userId: userId),
           );
         }
         return null;

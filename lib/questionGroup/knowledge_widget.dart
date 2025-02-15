@@ -50,7 +50,7 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
 
     return Scaffold(
         body: Container(
-            color: const Color.fromRGBO(233, 227, 213, 1),
+            color: const Color.fromRGBO(233, 227, 213, 1), //頁面顏色
             padding: const EdgeInsets.all(16),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -74,7 +74,8 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
                       3: FlexColumnWidth(1),
                     },
                     border: TableBorder.symmetric(
-                      inside: BorderSide(color: Colors.grey.shade300),
+                      inside:
+                          BorderSide(color: const Color.fromARGB(255, 0, 0, 0)),
                     ),
                     children: [
                       TableRow(

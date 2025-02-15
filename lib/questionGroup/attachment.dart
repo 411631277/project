@@ -75,7 +75,8 @@ class _AttachmentWidget extends State<AttachmentWidget> {
                       4: FlexColumnWidth(1),
                     },
                     border: TableBorder.symmetric(
-                      inside: BorderSide(color: Colors.grey.shade300),
+                      inside:
+                          BorderSide(color: const Color.fromARGB(255, 0, 0, 0)),
                     ),
                     children: [
                       TableRow(
