@@ -20,11 +20,13 @@ class HomeScreenWidget extends StatefulWidget {
 // ignore: camel_case_types
 class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   String userName = "載入中..."; // 預設文字，等待從 Firebase 讀取
+  String babyName = "小寶";
 
   @override
   void initState() {
     super.initState();
-    _loadUserName(); // 🔹 初始化時讀取使用者名稱
+    _loadUserName();
+    _loadBabyName(); // 🔹 初始化時讀取使用者名稱
   }
 
   Future<void> _loadUserName() async {
@@ -41,6 +43,30 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
       }
     } catch (e) {
       logger.e("❌ 錯誤：讀取使用者名稱失敗 $e");
+    }
+  }
+
+  // 讀取最後輸入的寶寶名稱
+  Future<void> _loadBabyName() async {
+    try {
+      QuerySnapshot babySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('baby')
+          .orderBy('createdAt', descending: true) // 按照建立時間排序，最新的在最前
+          .get();
+
+      if (babySnapshot.docs.isNotEmpty) {
+        setState(() {
+          babyName = babySnapshot.docs.first.id; // 🔹 使用最新的寶寶名字
+        });
+      } else {
+        setState(() {
+          babyName = "小寶"; // 若沒有寶寶資料，顯示預設值
+        });
+      }
+    } catch (e) {
+      logger.e("❌ 錯誤：讀取寶寶名稱失敗 $e");
     }
   }
 
@@ -252,7 +278,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               top: screenHeight * 0.72,
               left: screenWidth * 0.25,
               child: Text(
-                '小寶',
+                babyName,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: const Color.fromRGBO(165, 146, 125, 1),

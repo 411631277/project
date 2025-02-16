@@ -85,9 +85,7 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       routes: {
-        '/': (context) => const BabyWidget(
-              userId: '1',
-            ), // 主畫面
+        '/': (context) => const MainScreenWidget(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/ReviseWidget': (context) => const ReviseWidget(),
         '/DeleteWidget': (context) => const DeleteWidget(),
