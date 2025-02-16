@@ -56,7 +56,7 @@ class SignoutWidget extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const Main_screenWidget(),
+                      builder: (context) => const MainScreenWidget(),
                     ),
                   );
                 },

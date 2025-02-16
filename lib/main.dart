@@ -32,7 +32,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/l10n.dart';
 import 'package:logger/logger.dart';
 
+//註解已完成
+
 final Logger logger = Logger();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -82,13 +85,14 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       routes: {
-        '/': (context) => const Main_screenWidget(), // 主畫面
+        '/': (context) => const MainScreenWidget(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/ReviseWidget': (context) => const ReviseWidget(),
         '/DeleteWidget': (context) => const DeleteWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
-        '/Main_screenWidget': (context) => const Main_screenWidget(),
+        '/MainScreenWidget': (context) => const MainScreenWidget(),
       },
+
       onGenerateRoute: (settings) {
         //接收userID放這裡
         if (settings.name == '/SuccessWidget') {

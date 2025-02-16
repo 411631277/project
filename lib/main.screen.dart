@@ -2,13 +2,14 @@ import 'package:doctor_2/agree.dart';
 import 'package:doctor_2/login/login.dart';
 import 'package:flutter/material.dart';
 
-// ignore: camel_case_types
-class Main_screenWidget extends StatelessWidget {
-  const Main_screenWidget({super.key});
+//註解已完成
 
+class MainScreenWidget extends StatelessWidget {
+  const MainScreenWidget({super.key});
+
+  // 使用 MediaQuery 提供自適應螢幕的比例
   @override
   Widget build(BuildContext context) {
-    // 使用 MediaQuery 提供自適應螢幕的比例
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -20,12 +21,13 @@ class Main_screenWidget extends StatelessWidget {
           color: Color.fromRGBO(233, 227, 213, 1),
         ),
         child: Stack(children: <Widget>[
+          //按鍵位置
           Positioned(
-            top: screenHeight * 0.68, // 調整按鍵位置向上
+            top: screenHeight * 0.68,
             left: screenWidth * 0.22,
             child: SizedBox(
               width: screenWidth * 0.55,
-              height: screenHeight * 0.09, // 縮小按鍵高度
+              height: screenHeight * 0.09,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(165, 146, 125, 1),
@@ -34,8 +36,8 @@ class Main_screenWidget extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // 點擊跳轉到 agreeWidget
                   Navigator.push(
+                    // 點擊跳轉到同意書頁面
                     context,
                     MaterialPageRoute(
                       builder: (context) => const ResearchAgreementWidget(),
@@ -54,12 +56,13 @@ class Main_screenWidget extends StatelessWidget {
               ),
             ),
           ),
+          // 按鍵位置
           Positioned(
-            top: screenHeight * 0.5, // 調整按鍵位置向上
+            top: screenHeight * 0.5,
             left: screenWidth * 0.22,
             child: SizedBox(
               width: screenWidth * 0.55,
-              height: screenHeight * 0.09, // 縮小按鍵高度
+              height: screenHeight * 0.09,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(165, 146, 125, 1),
@@ -68,11 +71,10 @@ class Main_screenWidget extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // 點擊跳轉到 LoginWidget
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const LoginWidget(),
+                      builder: (context) => const LoginWidget(), // 點擊跳轉到登入頁面
                     ),
                   );
                 },
@@ -88,12 +90,13 @@ class Main_screenWidget extends StatelessWidget {
               ),
             ),
           ),
+          // 圖片設定
           Positioned(
             top: screenHeight * -0.01,
             left: 0,
             child: Container(
               width: screenWidth,
-              height: screenHeight * 0.4, // 縮小圖片高度
+              height: screenHeight * 0.4,
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/Main.png'),

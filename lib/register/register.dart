@@ -6,18 +6,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
 
+//註解已完成
+
 final FirestoreService firestoreService = FirestoreService();
+
+final Logger logger = Logger();
 
 class RegisterWidget extends StatefulWidget {
   const RegisterWidget({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _RegisterWidgetState createState() => _RegisterWidgetState();
+  RegisterWidgetState createState() => RegisterWidgetState();
 }
 
-class _RegisterWidgetState extends State<RegisterWidget> {
-  // 🔹 用戶輸入控制器
+// 🔹 用戶輸入控制器
+class RegisterWidgetState extends State<RegisterWidget> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController birthController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
@@ -50,8 +53,10 @@ class _RegisterWidgetState extends State<RegisterWidget> {
     "自體免疫疾病": false,
     "胃腸道疾病": false,
     "其他": false,
-  }; // 具體選項
-  TextEditingController otherDiseaseController = TextEditingController();
+  };
+  TextEditingController otherDiseaseController =
+      TextEditingController(); // 具體選項
+
   @override
   void dispose() {
     // 釋放控制器，避免記憶體洩漏
@@ -89,11 +94,11 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   SizedBox(width: screenWidth * 0.05),
                   Expanded(
                       child: _buildLabeledTextField('身高', heightController)),
+                  SizedBox(width: screenWidth * 0.05),
                 ],
               ),
-              SizedBox(height: screenHeight * 0.02),
 
-              // 🔹 體重
+              SizedBox(height: screenHeight * 0.02), // 🔹 體重
               Row(
                 children: [
                   Expanded(
@@ -107,18 +112,12 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   ),
                 ],
               ),
-
+              // 🔹 帳號&密碼&信箱&電話
               SizedBox(height: screenHeight * 0.02),
-              // 🔹 帳號
               _buildLabeledTextField('帳號', accountController),
-
-              // 🔹 密碼
               _buildLabeledTextField('密碼', passwordController,
                   obscureText: true),
-              // 🔹 Email
               _buildLabeledTextField('E-Mail', emailController),
-
-              // 🔹 電話
               _buildLabeledTextField('電話', phoneController),
 
               // 🔹 聯絡偏好設定
@@ -137,18 +136,16 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: screenHeight * 0.02),
 
-              // 🔹 是/否問題
+              // 🔹 是非題
+              SizedBox(height: screenHeight * 0.02),
               ...answers.keys.map((question) => _buildYesNoRow(question)),
               SizedBox(height: screenHeight * 0.02),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // **「有無慢性病」標籤**
+                  //「有無慢性病」標籤
                   _buildLabel("有無慢性病"),
-
-                  // **「有無慢性病」選項（改為 CheckboxListTile）**
                   CheckboxListTile(
                     title: Text("有慢性病"),
                     value: hasChronicDisease ?? false,
@@ -157,11 +154,10 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                         hasChronicDisease = value;
                       });
                     },
-                    controlAffinity:
-                        ListTileControlAffinity.leading, // **讓勾選框靠左**
+                    controlAffinity: ListTileControlAffinity.leading, // 讓勾選框靠左
                   ),
 
-                  // **如果選擇「有慢性病」，顯示具體的慢性病選項**
+                  //如果選擇「有慢性病」，顯示具體的慢性病選項
                   if (hasChronicDisease == true) ...[
                     const SizedBox(height: 10),
                     _buildLabel("請選擇慢性病種類："),
@@ -175,9 +171,10 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                           });
                         },
                         controlAffinity:
-                            ListTileControlAffinity.leading, // **讓勾選框靠左**
+                            ListTileControlAffinity.leading, // 讓勾選框靠左
                       );
-                    }), // **如果勾選「其他」，顯示輸入框**
+                    }),
+                    // **如果勾選「其他」，顯示輸入框**
                     if (chronicDiseaseOptions["其他"] == true)
                       Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -186,6 +183,8 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                               decoration: const InputDecoration(
                                 labelText: "請輸入其他慢性病",
                                 border: OutlineInputBorder(),
+                                filled: true, // 開啟填充背景
+                                fillColor: Colors.white,
                               )))
                   ],
                 ],
@@ -203,9 +202,9 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                     .toList(),
                 onChanged: (value) => setState(() => maritalStatus = value),
               ),
-              SizedBox(height: screenHeight * 0.02),
 
               // 🔹 是否為新手媽媽
+              SizedBox(height: screenHeight * 0.02),
               _buildLabel('是否為新手媽媽'),
               Row(
                 children: [
@@ -217,10 +216,10 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                           (value) => setState(() => isNewMom = false))),
                 ],
               ),
-              const Divider(),
-              SizedBox(height: screenHeight * 0.02),
 
               // 🔹 按鈕
+              const Divider(),
+              SizedBox(height: screenHeight * 0.02),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -228,7 +227,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const Main_screenWidget()),
+                          builder: (context) => const MainScreenWidget()),
                     );
                   }),
                   _buildButton('下一步', Colors.blue, () async {
@@ -239,8 +238,8 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                       // 只有當 Widget 仍然掛載時，才導航到成功頁面
                       Navigator.pushNamed(
                         context,
-                        '/SuccessWidget', // ✅ 使用 routes 而非 MaterialPageRoute
-                        arguments: userId, // ✅ 傳遞 `userId`
+                        '/SuccessWidget',
+                        arguments: userId, //傳遞'userId'
                       );
                     }
                   }),
@@ -253,6 +252,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
     );
   }
 
+  //日期選擇器
   Widget _buildDatePickerField(String label, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,7 +260,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
         _buildLabel(label),
         TextField(
           controller: controller,
-          readOnly: true, // 🔹 禁止手動輸入
+          readOnly: true, //禁止手動輸入
           decoration: _inputDecoration(),
           onTap: () async {
             DateTime? pickedDate = await showDatePicker(
@@ -268,7 +268,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
               initialDate: DateTime.now(), // 預設今天
               firstDate: DateTime(1950), // 最早 1950 年
               lastDate: DateTime.now(), // 不能選未來
-              locale: const Locale("zh", "TW"), // ✅ 設定為繁體中文
+              locale: const Locale("zh", "TW"), //設定為繁體中文
             );
 
             if (pickedDate != null) {
@@ -284,6 +284,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
     );
   }
 
+  //儲存使用者資料
   Future<String?> _saveUserData() async {
     try {
       AggregateQuerySnapshot countSnapshot =
@@ -319,15 +320,15 @@ class _RegisterWidgetState extends State<RegisterWidget> {
         '是否有慢性病': hasChronicDisease,
         '慢性病症狀': selectedChronicDiseases,
       });
-
       logger.i("✅ 使用者資料已存入 Firestore，ID：$userId");
-      return userId; // ✅ 回傳 userId
+      return userId; //回傳 userId
     } catch (e) {
       logger.e("❌ Firestore 儲存錯誤: $e");
       return null;
     }
   }
 
+  //輸入框設定
   InputDecoration _inputDecoration() => const InputDecoration(
       filled: true, fillColor: Colors.white, border: OutlineInputBorder());
 
@@ -339,7 +340,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
         _buildLabel(label),
         TextField(
           controller: controller,
-          obscureText: obscureText, // ✅ 如果是密碼欄位則隱藏文字
+          obscureText: obscureText, //如果是密碼欄位則隱藏文字
           decoration: _inputDecoration(),
         ),
       ],
@@ -367,7 +368,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
   }
 }
 
-// 🔹 建立標籤
+//建立標籤
 Widget _buildLabel(String text) {
   return Padding(
     padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
@@ -382,7 +383,7 @@ Widget _buildLabel(String text) {
   );
 }
 
-// 🔹 建立 CheckBox 選擇框
+//建立 CheckBox 選擇框
 Widget _buildCheckbox(String text, bool value, ValueChanged<bool?> onChanged) {
   return CheckboxListTile(
     title: Text(text),
@@ -392,7 +393,7 @@ Widget _buildCheckbox(String text, bool value, ValueChanged<bool?> onChanged) {
   );
 }
 
-// 🔹 建立按鈕
+//建立按鈕
 Widget _buildButton(String text, Color color, VoidCallback onPressed) {
   return ElevatedButton(
     style: ElevatedButton.styleFrom(
@@ -431,7 +432,7 @@ Widget _buildWeightPickerField(
 void _showWeightPicker(BuildContext context, TextEditingController controller) {
   int selectedWeight = controller.text.isNotEmpty
       ? int.parse(controller.text.replaceAll(' kg', ''))
-      : 50; // 預設 50kg
+      : 50; // 預設公斤值
 
   showModalBottomSheet(
     context: context,
@@ -460,9 +461,8 @@ void _showWeightPicker(BuildContext context, TextEditingController controller) {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    controller.text =
-                        '$selectedWeight kg'; // ✅ 直接更新 controller.text
-                    Navigator.pop(context); // ✅ 關閉彈出視窗
+                    controller.text = '$selectedWeight kg'; //更新controller.text
+                    Navigator.pop(context); //關閉彈出視窗
                   },
                   child: const Text("確定"),
                 ),
@@ -474,5 +474,3 @@ void _showWeightPicker(BuildContext context, TextEditingController controller) {
     },
   );
 }
-
-final Logger logger = Logger();

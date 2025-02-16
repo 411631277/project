@@ -3,11 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
 
-final Logger logger =
-    Logger(); //, required String userId, required String userId ✅ 確保 Logger 存在
+//註解已完成
+
+final Logger logger = Logger();
 
 class Sleep2Widget extends StatefulWidget {
-  final String userId; // ✅ 接收 userId
+  final String userId; //接收 userId
   const Sleep2Widget({super.key, required this.userId});
 
   @override
@@ -47,6 +48,7 @@ class _Sleep2Widget extends State<Sleep2Widget> {
                 ),
               ),
               const SizedBox(height: 20),
+
               // 問卷表格
               Expanded(
                 child: SingleChildScrollView(
@@ -147,13 +149,12 @@ class _Sleep2Widget extends State<Sleep2Widget> {
               const SizedBox(height: 20),
               // 按鈕區域
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                // 返回按鈕
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pop(context); // 返回按鈕
                   },
                   child: Transform.rotate(
-                    angle: math.pi, // 旋轉 180 度 (弧度制，180 度 = π 弧度)
+                    angle: math.pi,
                     child: Image.asset(
                       'assets/images/back.png',
                       width: screenWidth * 0.15,
@@ -173,7 +174,7 @@ class _Sleep2Widget extends State<Sleep2Widget> {
                       if (!context.mounted) return;
                       Navigator.pushNamed(
                         context,
-                        '/FinishWidget',
+                        '/FinishWidget', //跳轉結束畫面
                         arguments: widget.userId,
                       );
                     },
@@ -186,6 +187,7 @@ class _Sleep2Widget extends State<Sleep2Widget> {
             ])));
   }
 
+  //儲存firebase的方法
   Future<bool> _saveAnswersToFirebase() async {
     try {
       final Map<String, String?> formattedAnswers = answers.map(

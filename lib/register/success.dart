@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
+//註解已完成
+
 final Logger logger = Logger();
 
 class SuccessWidget extends StatelessWidget {
-  final String userId;
+  final String userId; //帶入ID
   const SuccessWidget({super.key, required this.userId});
 
   @override
@@ -39,6 +41,7 @@ class SuccessWidget extends StatelessWidget {
                 ),
               ),
             ),
+            //下一步按鈕
             Positioned(
               top: screenHeight * 0.55,
               left: screenWidth * 0.25,

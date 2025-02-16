@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
+//註解已完成
+
 class ResearchAgreementWidget extends StatefulWidget {
   const ResearchAgreementWidget({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _ResearchAgreementWidgetState createState() =>
-      _ResearchAgreementWidgetState();
+  ResearchAgreementWidgetState createState() => ResearchAgreementWidgetState();
 }
 
-class _ResearchAgreementWidgetState extends State<ResearchAgreementWidget> {
+class ResearchAgreementWidgetState extends State<ResearchAgreementWidget> {
   bool hasScrolledToBottom = false; // 是否已滾動到底部
   bool isChecked = false; // 是否已勾選同意
 
@@ -168,7 +168,8 @@ class _ResearchAgreementWidgetState extends State<ResearchAgreementWidget> {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, '/IamWidget');
+                        Navigator.pushNamed(
+                            context, '/IamWidget'); //跳轉"我是..."頁面"
                       },
                       child: const Text(
                         "下一步",

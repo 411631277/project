@@ -1,6 +1,8 @@
 import 'package:doctor_2/register/register.dart';
 import 'package:flutter/material.dart';
 
+//註解已完成
+
 class IamWidget extends StatelessWidget {
   const IamWidget({super.key});
 
@@ -34,6 +36,7 @@ class IamWidget extends StatelessWidget {
               ),
             ),
           ),
+
           // 爸爸按鍵
           Positioned(
               top: screenHeight * 0.38,

@@ -3,6 +3,8 @@ import 'package:logger/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
 
+//註解已完成
+
 final Logger logger = Logger();
 
 class SleepWidget extends StatefulWidget {
@@ -151,7 +153,7 @@ class _SleepWidgetState extends State<SleepWidget> {
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               GestureDetector(
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(context); //回去上一頁
                 },
                 child: Transform.rotate(
                   angle: math.pi,
@@ -161,6 +163,7 @@ class _SleepWidgetState extends State<SleepWidget> {
                   ),
                 ),
               ),
+
               // 顯示下一步按鈕僅在所有問題都填寫完整時
               if (_isAllQuestionsAnswered())
                 ElevatedButton(
