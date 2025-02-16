@@ -40,7 +40,7 @@ class _BabyWidgetState extends State<BabyWidget> {
           children: <Widget>[
             // **寶寶圖示**
             Positioned(
-              top: screenHeight * 0.10,
+              top: screenHeight * 0.02,
               left: screenWidth * 0.06,
               child: Image.asset(
                 'assets/images/Baby.png',
@@ -49,29 +49,17 @@ class _BabyWidgetState extends State<BabyWidget> {
             ),
 
             // **姓名**
-            _buildLabel(screenWidth, screenHeight * 0.15, '姓名'),
-            _buildTextField(
-                screenWidth, screenHeight * 0.15, babyNameController),
+            _buildInputRow(
+                screenWidth, screenHeight * 0.15, '姓名', babyNameController),
+            _buildInputRow(
+                screenWidth, screenHeight * 0.22, '生日', babyBirthController),
+            _buildInputRow(
+                screenWidth, screenHeight * 0.29, '性別', babyGenderController),
+            _buildInputRow(
+                screenWidth, screenHeight * 0.36, '出生體重', babyWeightController),
+            _buildInputRow(
+                screenWidth, screenHeight * 0.43, '出生身高', babyHeightController),
 
-// **生日**
-            _buildLabel(screenWidth, screenHeight * 0.22, '生日'),
-            _buildTextField(
-                screenWidth, screenHeight * 0.22, babyBirthController),
-
-// **性別**
-            _buildLabel(screenWidth, screenHeight * 0.29, '性別'),
-            _buildTextField(
-                screenWidth, screenHeight * 0.29, babyGenderController),
-
-// **出生體重**
-            _buildLabel(screenWidth, screenHeight * 0.36, '出生體重'),
-            _buildTextField(
-                screenWidth, screenHeight * 0.36, babyWeightController),
-
-// **出生身高**
-            _buildLabel(screenWidth, screenHeight * 0.43, '出生身高'),
-            _buildTextField(
-                screenWidth, screenHeight * 0.43, babyHeightController),
             Positioned(
               top: screenHeight * 0.55, // 調整文字的垂直位置
               left: screenWidth * 0.2,
@@ -104,7 +92,7 @@ class _BabyWidgetState extends State<BabyWidget> {
                     style: TextStyle(
                         fontSize: 18, color: Color.fromRGBO(147, 129, 108, 1)),
                   ),
-                  SizedBox(width: screenWidth * 0.1),
+                  SizedBox(width: screenWidth * 0.2),
 
                   // **有**
                   Checkbox(
@@ -196,39 +184,41 @@ class _BabyWidgetState extends State<BabyWidget> {
     );
   }
 
-  // **標籤 Widget**
-  Widget _buildLabel(double screenWidth, double top, String text) {
+  Widget _buildInputRow(double screenWidth, double top, String label,
+      TextEditingController controller) {
     return Positioned(
       top: top,
-      left: screenWidth * 0.25,
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Color.fromRGBO(147, 129, 108, 1),
-          fontSize: 20,
-          fontFamily: 'Inter',
-        ),
-      ),
-    );
-  }
-
-  // **輸入框 Widget**
-  Widget _buildTextField(
-      double screenWidth, double top, TextEditingController controller) {
-    return Positioned(
-      top: top,
-      left: screenWidth * 0.53,
-      child: SizedBox(
-        width: screenWidth * 0.4,
-        height: 32,
-        child: TextField(
-          controller: controller, // ✅ 加入 controller
-          decoration: const InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(),
+      left: screenWidth * 0.10, // Label 起始位置
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: screenWidth * 0.40, // Label 寬度（固定比例）
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 18,
+                color: Color.fromRGBO(147, 129, 108, 1),
+                fontFamily: 'Inter',
+              ),
+            ),
           ),
-        ),
+          SizedBox(
+            width: screenWidth * 0.4, // TextField 寬度（固定比例）
+            height: 32, // TextField 高度
+            child: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+              ),
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
       ),
     );
   }

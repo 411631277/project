@@ -93,7 +93,8 @@ class RegisterWidgetState extends State<RegisterWidget> {
                   Expanded(child: _buildDatePickerField('生日', birthController)),
                   SizedBox(width: screenWidth * 0.05),
                   Expanded(
-                      child: _buildLabeledTextField('身高', heightController)),
+                      child: _buildheightPickerField(
+                          context, '身高', heightController)),
                   SizedBox(width: screenWidth * 0.05),
                 ],
               ),
@@ -407,6 +408,7 @@ Widget _buildButton(String text, Color color, VoidCallback onPressed) {
   );
 }
 
+//體重選項功能
 Widget _buildWeightPickerField(
     BuildContext context, String label, TextEditingController controller) {
   return Column(
@@ -429,6 +431,7 @@ Widget _buildWeightPickerField(
   );
 }
 
+//體重選項設定
 void _showWeightPicker(BuildContext context, TextEditingController controller) {
   int selectedWeight = controller.text.isNotEmpty
       ? int.parse(controller.text.replaceAll(' kg', ''))
@@ -462,6 +465,76 @@ void _showWeightPicker(BuildContext context, TextEditingController controller) {
                 ElevatedButton(
                   onPressed: () {
                     controller.text = '$selectedWeight kg'; //更新controller.text
+                    Navigator.pop(context); //關閉彈出視窗
+                  },
+                  child: const Text("確定"),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+//身高選項功能
+Widget _buildheightPickerField(
+    BuildContext context, String label, TextEditingController controller) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _buildLabel(label),
+      TextField(
+        controller: controller,
+        readOnly: true,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(),
+        ),
+        onTap: () {
+          _showheightPicker(context, controller);
+        },
+      ),
+    ],
+  );
+}
+
+//身高功能設定
+void _showheightPicker(BuildContext context, TextEditingController controller) {
+  int selectedHeight = controller.text.isNotEmpty
+      ? int.parse(controller.text.replaceAll(' cm', ''))
+      : 150; // 預設身高值
+
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext builder) {
+      return StatefulBuilder(
+        builder: (context, setModalState) {
+          return SizedBox(
+            height: 250,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 200,
+                  child: CupertinoPicker(
+                    scrollController: FixedExtentScrollController(
+                        initialItem: selectedHeight - 100),
+                    itemExtent: 40,
+                    onSelectedItemChanged: (int index) {
+                      setModalState(() {
+                        selectedHeight = index + 100;
+                      });
+                    },
+                    children: List<Widget>.generate(121, (int index) {
+                      return Center(child: Text('${index + 100} cm'));
+                    }),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    controller.text = '$selectedHeight cm'; //更新controller.text
                     Navigator.pop(context); //關閉彈出視窗
                   },
                   child: const Text("確定"),
