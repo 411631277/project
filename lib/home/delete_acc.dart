@@ -60,7 +60,7 @@ class DeleteAccWidget extends StatelessWidget {
               top: screenHeight * 0.65,
               left: screenWidth * 0.35,
               child: _buildButton(context, '返回', Colors.grey.shade400, () {
-                Navigator.pushNamed(context, '/Main_screenWidget'); // 跳轉到
+                Navigator.pushNamed(context, '/MainScreenWidget'); // 跳轉到
               }),
             ),
           ],
