@@ -6,7 +6,7 @@ import 'dart:math' as math;
 final Logger logger = Logger();
 
 class MelancholyWidget extends StatefulWidget {
-  final String userId; // 接收 userId
+  final String userId;
   const MelancholyWidget({super.key, required this.userId});
 
   @override
@@ -14,9 +14,7 @@ class MelancholyWidget extends StatefulWidget {
 }
 
 class _MelancholyWidgetState extends State<MelancholyWidget> {
-  late final List<int> responses;
   final List<String> questions = [
-    // 提升到類成員
     '我能開懷的笑並看到事物有趣的一面',
     '我能夠以快樂的心情來期待事情',
     '當事情不順利時，我會不必要的責備自己',
@@ -29,15 +27,30 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     '我會有傷害自己的想法',
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    responses = List.filled(questions.length, -1); // 根據題目數量初始化
+  final Map<int, List<String>> questionOptions = {
+    0: ["同以前一樣", "沒有以前那麼多", "肯定比以前少", "完全不能"],
+    1: ["同以前一樣", "沒有以前那麼多", "肯定比以前少", "完全不能"],
+    2: ["相當多時候這樣", "有時候這樣", "很少這樣", "沒有這樣"],
+    3: ["相當多時候這樣", "有時候這樣", "很少這樣", "沒有這樣"],
+    4: ["相當多時候這樣", "有時候這樣", "很少這樣", "沒有這樣"],
+    5: ["大多數時候我都不能應付", "有時候我不能像平常時那樣應付得好", "大部分時候我都能像平時那樣應付得好", "我一直都能應付得好"],
+    6: ["相當多時候這樣", "有時候這樣", "很少這樣", "沒有這樣"],
+    7: ["相當多時候這樣", "有時候這樣", "很少這樣", "沒有這樣"],
+    8: ["相當多時候這樣", "有時候這樣", "很少這樣", "沒有這樣"],
+    9: ["相當多時候這樣", "有時候這樣", "很少這樣", "沒有這樣"],
+  };
+
+  final Map<int, String?> answers = {}; // 存使用者選擇的答案
+
+  bool _isAllQuestionsAnswered() {
+    return answers.length == questions.length && !answers.containsValue(null);
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final double fontSize = screenWidth * 0.045; // 自適應字體大小
 
     return Scaffold(
       body: Container(
@@ -48,47 +61,44 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: screenHeight * 0.02),
+            Text(
               '產後憂鬱量表',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: fontSize * 1.2,
                 fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(147, 129, 108, 1),
+                color: const Color.fromRGBO(147, 129, 108, 1),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: screenHeight * 0.02),
             Expanded(
               child: ListView.builder(
-                itemCount: questions.length, // 題目數量動態獲取
+                itemCount: questions.length,
                 itemBuilder: (context, index) {
-                  return _buildQuestionRow(index, screenWidth);
+                  return _buildQuestionRow(index, screenWidth, fontSize);
                 },
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: screenHeight * 0.02),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // 返回按鈕
                 GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
+                  onTap: () => Navigator.pop(context),
                   child: Transform.rotate(
-                    angle: math.pi, // 旋轉 180 度 (弧度制，180 度 = π 弧度)
+                    angle: math.pi,
                     child: Image.asset(
                       'assets/images/back.png',
-                      width: screenWidth * 0.15,
+                      width: screenWidth * 0.12,
                     ),
                   ),
                 ),
-                // 填答完按鈕（所有問題都回答後才會顯示）
-                if (!responses.contains(-1))
+                if (_isAllQuestionsAnswered())
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 15),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.08,
+                          vertical: screenHeight * 0.015),
                       backgroundColor: Colors.brown.shade400,
                     ),
                     onPressed: () async {
@@ -100,83 +110,89 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
                         arguments: widget.userId,
                       );
                     },
-                    child: const Text(
+                    child: Text(
                       "下一步",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: screenHeight * 0.02),
           ],
         ),
       ),
     );
   }
 
-  // 建立題目選項
-  Widget _buildQuestionRow(int questionIndex, double screenWidth) {
-    final List<String> options = ["可以", "還行", "不行", "沒辦法"]; // 選項文字
+  Widget _buildQuestionRow(
+      int questionIndex, double screenWidth, double fontSize) {
+    List<String> options =
+        questionOptions[questionIndex] ?? ["可以", "還行", "不行", "沒辦法"];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           '${questionIndex + 1}. ${questions[questionIndex]}',
-          style: const TextStyle(
-            fontSize: 16,
-            color: Color.fromRGBO(147, 129, 108, 1),
+          style: TextStyle(
+            fontSize: fontSize,
+            color: const Color.fromRGBO(147, 129, 108, 1),
           ),
         ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(
-            4, // 選項數量 0, 1, 2, 3
-            (optionIndex) => Row(
+        SizedBox(height: screenWidth * 0.02),
+        Column(
+          children: options.map((option) {
+            return Row(
               children: [
-                Radio<int>(
-                  value: optionIndex,
-                  groupValue: responses[questionIndex],
+                Radio<String>(
+                  value: option,
+                  groupValue: answers[questionIndex],
                   onChanged: (value) {
                     setState(() {
-                      responses[questionIndex] = value!;
+                      answers[questionIndex] = value!;
                     });
                   },
                 ),
-                Text(
-                  options[optionIndex], // 將選項文字顯示
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color.fromRGBO(147, 129, 108, 1),
+                Expanded(
+                  child: Text(
+                    option,
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      color: const Color.fromRGBO(147, 129, 108, 1),
+                    ),
                   ),
                 ),
               ],
-            ),
-          ),
+            );
+          }).toList(),
         ),
-        const Divider(color: Colors.grey), // 分隔線
+        Divider(color: Colors.grey, thickness: 1),
       ],
     );
   }
 
-  Future<bool> _saveAnswersToFirebase() async {
+  Future<void> _saveAnswersToFirebase() async {
     try {
+      final Map<String, String?> formattedAnswers = answers.map(
+        (key, value) => MapEntry(key.toString(), value),
+      );
+
       final CollectionReference userResponses = FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
           .collection("questions");
 
       await userResponses.doc('melancholy').set({
-        'responses': responses,
+        'answers': formattedAnswers,
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      logger.i("✅ 問卷已成功儲存！");
-      return true;
+      logger.i("✅ 憂鬱量表問卷已成功儲存！");
     } catch (e) {
-      logger.e("❌ 儲存問卷時發生錯誤：$e");
-      return false;
+      logger.e("❌ 儲存憂鬱量表問卷時發生錯誤：$e");
     }
   }
 }
