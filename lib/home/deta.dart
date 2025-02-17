@@ -10,9 +10,16 @@ class DetaWidget extends StatefulWidget {
 }
 
 class _DetaWidgetState extends State<DetaWidget> {
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController birthDateController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
+  final TextEditingController emergencyName1 = TextEditingController();
+  final TextEditingController emergencyName2 = TextEditingController();
+  final TextEditingController emergencyRelation1 = TextEditingController();
+  final TextEditingController emergencyRelation2 = TextEditingController();
+  final TextEditingController emergencyPhone1 = TextEditingController();
+  final TextEditingController emergencyPhone2 = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +54,8 @@ class _DetaWidgetState extends State<DetaWidget> {
             // **姓名與生日**
             _buildLabel(screenWidth, screenHeight * 0.15, 0.05, '姓名'),
             _buildLabel(screenWidth, screenHeight * 0.15, 0.55, '生日'),
-            _buildTextField(screenWidth, screenHeight * 0.19, 0.05, 0.4),
+            _buildTextField(
+                nameController, screenWidth, screenHeight * 0.19, 0.05, 0.4),
             _buildDatePickerField(screenWidth, screenHeight * 0.19, 0.55, 0.4,
                 birthDateController),
 
@@ -61,20 +69,31 @@ class _DetaWidgetState extends State<DetaWidget> {
 
             // **緊急聯絡人**
             _buildLabel(screenWidth, screenHeight * 0.43, 0.05, '新增緊急聯絡人'),
+
+            // 聯絡人姓名
             _buildLabel(screenWidth, screenHeight * 0.48, 0.05, '姓名'),
             _buildLabel(screenWidth, screenHeight * 0.48, 0.55, '姓名'),
-            _buildTextField(screenWidth, screenHeight * 0.52, 0.05, 0.4),
-            _buildTextField(screenWidth, screenHeight * 0.52, 0.55, 0.4),
+            _buildTextField(
+                emergencyName1, screenWidth, screenHeight * 0.52, 0.05, 0.4),
+            _buildTextField(
+                emergencyName2, screenWidth, screenHeight * 0.52, 0.55, 0.4),
 
+            // 聯絡人關係
             _buildLabel(screenWidth, screenHeight * 0.58, 0.05, '關係'),
             _buildLabel(screenWidth, screenHeight * 0.58, 0.55, '關係'),
-            _buildTextField(screenWidth, screenHeight * 0.62, 0.05, 0.4),
-            _buildTextField(screenWidth, screenHeight * 0.62, 0.55, 0.4),
+            _buildTextField(emergencyRelation1, screenWidth,
+                screenHeight * 0.62, 0.05, 0.4),
+            _buildTextField(emergencyRelation2, screenWidth,
+                screenHeight * 0.62, 0.55, 0.4),
 
+            // 聯絡人電話
             _buildLabel(screenWidth, screenHeight * 0.68, 0.05, '電話'),
             _buildLabel(screenWidth, screenHeight * 0.68, 0.55, '電話'),
-            _buildTextField(screenWidth, screenHeight * 0.72, 0.05, 0.4),
-            _buildTextField(screenWidth, screenHeight * 0.72, 0.55, 0.4),
+            _buildTextField(
+                emergencyPhone1, screenWidth, screenHeight * 0.72, 0.05, 0.4),
+            _buildTextField(
+                emergencyPhone2, screenWidth, screenHeight * 0.72, 0.55, 0.4),
+
             // **返回按鈕**
             Positioned(
               top: screenHeight * 0.75,
@@ -132,8 +151,8 @@ class _DetaWidgetState extends State<DetaWidget> {
   }
 
   // **輸入框 Widget**
-  Widget _buildTextField(
-      double screenWidth, double top, double left, double widthFactor) {
+  Widget _buildTextField(TextEditingController controller, double screenWidth,
+      double top, double left, double widthFactor) {
     return Positioned(
       top: top,
       left: screenWidth * left,
@@ -141,10 +160,16 @@ class _DetaWidgetState extends State<DetaWidget> {
         width: screenWidth * widthFactor,
         height: 35,
         child: TextField(
-          decoration: const InputDecoration(
+          controller: controller,
+          decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(5),
+              borderSide: BorderSide(color: Colors.grey.shade400),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           ),
         ),
       ),
@@ -171,7 +196,8 @@ class _DetaWidgetState extends State<DetaWidget> {
           }
         },
         child: AbsorbPointer(
-          child: _buildTextField(screenWidth, top, left, widthFactor),
+          child:
+              _buildTextField(controller, screenWidth, top, left, widthFactor),
         ),
       ),
     );
@@ -186,7 +212,8 @@ class _DetaWidgetState extends State<DetaWidget> {
       child: GestureDetector(
         onTap: () => _showPicker(context, controller, 80, 150, " cm"),
         child: AbsorbPointer(
-          child: _buildTextField(screenWidth, top, left, widthFactor),
+          child:
+              _buildTextField(controller, screenWidth, top, left, widthFactor),
         ),
       ),
     );
@@ -201,7 +228,8 @@ class _DetaWidgetState extends State<DetaWidget> {
       child: GestureDetector(
         onTap: () => _showPicker(context, controller, 0, 20, " kg"),
         child: AbsorbPointer(
-          child: _buildTextField(screenWidth, top, left, widthFactor),
+          child:
+              _buildTextField(controller, screenWidth, top, left, widthFactor),
         ),
       ),
     );
