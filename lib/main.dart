@@ -19,6 +19,7 @@ import 'package:doctor_2/questionGroup/knowledge_widget.dart';
 import 'package:doctor_2/questionGroup/melancholy.dart';
 import 'package:doctor_2/questionGroup/painscale.dart';
 import 'package:doctor_2/questionGroup/production.dart';
+import 'package:doctor_2/questionGroup/roommate.dart';
 import 'package:doctor_2/questionGroup/sleep.dart';
 import 'package:doctor_2/questionGroup/sleep2.dart';
 import 'package:doctor_2/register/iam.dart';
@@ -233,6 +234,13 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => PainScaleWidget(userId: userId),
           );
         }
+        if (settings.name == '/RoommateWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => RoommateWidget(userId: userId),
+          );
+        }
+
         return null;
       },
     );

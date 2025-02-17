@@ -66,7 +66,7 @@ class QuestionWidget extends StatelessWidget {
             _buildSurveyButton(context, screenWidth, screenHeight, 0.68,
                 '睡眠評估問卷', '/SleepWidget', logger),
             _buildSurveyButton(context, screenWidth, screenHeight, 0.78,
-                '親子同室情況', '/home7', logger),
+                '親子同室情況', '/RoommateWidget', logger),
 
             // **返回按鈕**
             Positioned(
