@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:logger/logger.dart';
 import 'dart:math' as math;
 
+final Logger logger = Logger();
+
 class DetaWidget extends StatefulWidget {
-  const DetaWidget({super.key});
+  final String userId; // 🔹 從登入或註冊時傳入的 userId
+  const DetaWidget({super.key, required this.userId});
 
   @override
   State<DetaWidget> createState() => _DetaWidgetState();
@@ -121,8 +126,16 @@ class _DetaWidgetState extends State<DetaWidget> {
                     Navigator.pushNamed(context, '/DeleteWidget');
                   }),
                   const SizedBox(height: 20),
-                  _buildButton('修改確認', Colors.grey.shade400, () {
-                    Navigator.pushNamed(context, '/ReviseWidget');
+                  _buildButton('修改確認', Colors.grey.shade400, () async {
+                    await _updateUserData(); // 🔹 先更新 Firebase
+
+                    // ✅ 確保 context 仍然有效
+                    if (!context.mounted) return;
+                    Navigator.pushNamed(
+                      context,
+                      '/ReviseWidget',
+                      arguments: widget.userId, // ✅ 傳遞 userId
+                    );
                   }),
                 ],
               ),
@@ -131,6 +144,60 @@ class _DetaWidgetState extends State<DetaWidget> {
         ),
       ),
     );
+  }
+
+  Future<void> _updateUserData() async {
+    try {
+      CollectionReference users =
+          FirebaseFirestore.instance.collection('users');
+
+      // 🔹 先獲取 Firestore 內的原始資料
+      DocumentSnapshot userSnapshot = await users.doc(widget.userId).get();
+
+      // 🔹 取得原始資料（轉成 Map 格式）
+      Map<String, dynamic> existingData =
+          userSnapshot.data() as Map<String, dynamic>;
+
+      // 🔹 準備要更新的資料（只更新有填寫的欄位，其他欄位保留原值）
+      Map<String, dynamic> updatedData = {
+        "名字": nameController.text.isNotEmpty
+            ? nameController.text
+            : existingData["名字"],
+        "生日": birthDateController.text.isNotEmpty
+            ? birthDateController.text
+            : existingData["生日"],
+        "身高": heightController.text.isNotEmpty
+            ? heightController.text
+            : existingData["身高"],
+        "目前體重": weightController.text.isNotEmpty
+            ? weightController.text
+            : existingData["目前體重"],
+        "緊急聯絡人1_姓名": emergencyName1.text.isNotEmpty
+            ? emergencyName1.text
+            : existingData["緊急聯絡人1_姓名"],
+        "緊急聯絡人1_關係": emergencyRelation1.text.isNotEmpty
+            ? emergencyRelation1.text
+            : existingData["緊急聯絡人1_關係"],
+        "緊急聯絡人1_電話": emergencyPhone1.text.isNotEmpty
+            ? emergencyPhone1.text
+            : existingData["緊急聯絡人1_電話"],
+        "緊急聯絡人2_姓名": emergencyName2.text.isNotEmpty
+            ? emergencyName2.text
+            : existingData["緊急聯絡人2_姓名"],
+        "緊急聯絡人2_關係": emergencyRelation2.text.isNotEmpty
+            ? emergencyRelation2.text
+            : existingData["緊急聯絡人2_關係"],
+        "緊急聯絡人2_電話": emergencyPhone2.text.isNotEmpty
+            ? emergencyPhone2.text
+            : existingData["緊急聯絡人2_電話"],
+      };
+
+      // 🔹 更新 Firestore，只影響有變動的資料
+      await users.doc(widget.userId).update(updatedData);
+      logger.i("✅ 使用者資料成功更新：users/${widget.userId}");
+    } catch (e) {
+      logger.e("❌ 更新使用者資料時發生錯誤：$e");
+    }
   }
 
   // **標籤 Widget**
@@ -210,7 +277,7 @@ class _DetaWidgetState extends State<DetaWidget> {
       top: top,
       left: screenWidth * left,
       child: GestureDetector(
-        onTap: () => _showPicker(context, controller, 80, 150, " cm"),
+        onTap: () => _showPicker(context, controller, 150, 200, " cm"),
         child: AbsorbPointer(
           child:
               _buildTextField(controller, screenWidth, top, left, widthFactor),
@@ -226,7 +293,7 @@ class _DetaWidgetState extends State<DetaWidget> {
       top: top,
       left: screenWidth * left,
       child: GestureDetector(
-        onTap: () => _showPicker(context, controller, 0, 20, " kg"),
+        onTap: () => _showPicker(context, controller, 30, 100, " kg"),
         child: AbsorbPointer(
           child:
               _buildTextField(controller, screenWidth, top, left, widthFactor),

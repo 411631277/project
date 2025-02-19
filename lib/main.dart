@@ -12,6 +12,7 @@ import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/baby_acc.dart';
 import 'package:doctor_2/home/delete.dart';
 import 'package:doctor_2/home/delete_acc.dart';
+import 'package:doctor_2/home/deta.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/home/revise.dart';
 import 'package:doctor_2/questionGroup/attachment.dart';
@@ -88,7 +89,6 @@ class _MyAppState extends State<MyApp> {
       routes: {
         '/': (context) => const MainScreenWidget(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
-        '/ReviseWidget': (context) => const ReviseWidget(),
         '/DeleteWidget': (context) => const DeleteWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
@@ -238,6 +238,18 @@ class _MyAppState extends State<MyApp> {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => RoommateWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/DetaWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => DetaWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/ReviseWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => ReviseWidget(userId: userId),
           );
         }
 

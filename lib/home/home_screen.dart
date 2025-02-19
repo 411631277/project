@@ -108,7 +108,9 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const SettingWidget(),
+                      builder: (context) => SettingWidget(
+                        userId: widget.userId,
+                      ),
                     ),
                   );
                 },

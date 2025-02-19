@@ -8,10 +8,19 @@ import 'deta.dart';
 import 'phone.dart';
 import 'sign_out.dart';
 import 'privacy.dart';
+import 'package:logger/logger.dart';
 
-class SettingWidget extends StatelessWidget {
-  const SettingWidget({super.key});
+final Logger logger = Logger();
 
+class SettingWidget extends StatefulWidget {
+  final String userId; // 🔹 從登入或註冊時傳入的 userId
+  const SettingWidget({super.key, required this.userId});
+
+  @override
+  SettingWidgetState createState() => SettingWidgetState();
+}
+
+class SettingWidgetState extends State<SettingWidget> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -113,7 +122,7 @@ class SettingWidget extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const DetaWidget(),
+                      builder: (context) => DetaWidget(userId: widget.userId),
                     ),
                   );
                 },

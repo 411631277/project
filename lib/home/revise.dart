@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+
+final Logger logger = Logger();
 
 class ReviseWidget extends StatelessWidget {
-  const ReviseWidget({super.key});
+  final String userId; // ✅ 接收 userId
+  const ReviseWidget({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +50,7 @@ class ReviseWidget extends StatelessWidget {
               ),
             ),
             // **返回按鈕**
+            // **返回按鈕**
             Positioned(
               top: screenHeight * 0.47,
               left: screenWidth * 0.37,
@@ -63,7 +68,10 @@ class ReviseWidget extends StatelessWidget {
                   onPressed: () {
                     // **返回跳轉頁面**
                     Navigator.pushNamed(
-                        context, '/HomeScreenWidget'); // 替換成你的頁面路徑
+                      context,
+                      '/HomeScreenWidget',
+                      arguments: userId,
+                    ); // 替換成你的頁面路徑
                   },
                   child: Text(
                     '返回',
