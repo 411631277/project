@@ -47,13 +47,14 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   }
 
   // 讀取最後輸入的寶寶名稱
+  // 讀取最後輸入的寶寶名稱
   Future<void> _loadBabyName() async {
     try {
       QuerySnapshot babySnapshot = await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
           .collection('baby')
-          .orderBy('createdAt', descending: true) // 按照建立時間排序，最新的在最前
+          .orderBy('填寫時間', descending: true) // 按照建立時間排序，最新的在最前
           .get();
 
       if (babySnapshot.docs.isNotEmpty) {
@@ -62,7 +63,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
         });
       } else {
         setState(() {
-          babyName = "小寶"; // 若沒有寶寶資料，顯示預設值
+          babyName = "未註冊寶寶"; // 若沒有寶寶資料，顯示預設值
         });
       }
     } catch (e) {

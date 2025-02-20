@@ -86,7 +86,7 @@ class DeleteAccWidget extends StatelessWidget {
         child: Text(
           text,
           style: const TextStyle(
-            color: Colors.white,
+            color: Color.fromARGB(255, 255, 255, 255),
             fontSize: 18,
             fontFamily: 'Inter',
           ),

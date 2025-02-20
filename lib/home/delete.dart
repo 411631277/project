@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:logger/logger.dart';
+
+final Logger logger = Logger();
 
 class DeleteWidget extends StatelessWidget {
-  const DeleteWidget({super.key});
+  final String userId; // ✅ 從上一頁傳入 userId
+  const DeleteWidget({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -44,12 +49,12 @@ class DeleteWidget extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildButton(context, '是', Colors.red.shade400, () {
-                          Navigator.pushNamed(
-                              context, '/DeleteAccWidget'); // 確認刪除並跳轉
+                        _buildButton(context, '是', Colors.red.shade400,
+                            () async {
+                          await _deleteUserData(context, userId); // ✅ 傳入 userId
                         }),
                         _buildButton(context, '否', Colors.grey.shade400, () {
-                          Navigator.pop(context); // 返回上一頁
+                          Navigator.pop(context);
                         }),
                       ],
                     ),
@@ -61,6 +66,45 @@ class DeleteWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // **🔹 刪除使用者資料**
+  Future<void> _deleteUserData(BuildContext context, String userId) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      DocumentReference userDoc = firestore.collection('users').doc(userId);
+
+      // 🔹 先刪除該使用者的所有子集合
+      await _deleteSubcollections(userDoc);
+
+      // 🔹 刪除主文件
+      await userDoc.delete();
+
+      logger.i("✅ 使用者 $userId 的帳號已成功刪除");
+
+      // ✅ 確保 context 存在後執行
+      if (context.mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+            context, '/DeleteAccWidget', (route) => false);
+      }
+    } catch (e) {
+      logger.e("❌ 刪除帳號失敗: $e");
+    }
+  }
+
+  // 🔹 遞迴刪除子集合的方法
+  Future<void> _deleteSubcollections(DocumentReference userDoc) async {
+    try {
+      QuerySnapshot subcollections = await userDoc.collection('baby').get();
+
+      for (QueryDocumentSnapshot doc in subcollections.docs) {
+        await userDoc.collection('baby').doc(doc.id).delete();
+      }
+
+      logger.i("✅ 已刪除 user ${userDoc.id} 的所有子集合");
+    } catch (e) {
+      logger.e("❌ 刪除子集合時發生錯誤: $e");
+    }
   }
 
   // **按鈕樣式**

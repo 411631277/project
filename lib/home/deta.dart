@@ -123,7 +123,11 @@ class _DetaWidgetState extends State<DetaWidget> {
               child: Column(
                 children: [
                   _buildButton('刪除帳號', Colors.grey.shade400, () {
-                    Navigator.pushNamed(context, '/DeleteWidget');
+                    Navigator.pushNamed(
+                      context,
+                      '/DeleteWidget',
+                      arguments: widget.userId,
+                    );
                   }),
                   const SizedBox(height: 20),
                   _buildButton('修改確認', Colors.grey.shade400, () async {

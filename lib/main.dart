@@ -89,13 +89,18 @@ class _MyAppState extends State<MyApp> {
       routes: {
         '/': (context) => const MainScreenWidget(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
-        '/DeleteWidget': (context) => const DeleteWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
       },
 
       onGenerateRoute: (settings) {
         //接收userID放這裡
+        if (settings.name == '/DeleteWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => DeleteWidget(userId: userId),
+          );
+        }
         if (settings.name == '/SuccessWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
