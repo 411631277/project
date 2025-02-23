@@ -10,7 +10,8 @@ import 'package:doctor_2/first_question/nowfeeding.dart';
 import 'package:doctor_2/first_question/yesyet.dart';
 import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/baby_acc.dart';
-import 'package:doctor_2/home/delete.dart';
+import 'package:doctor_2/home/delate.dart';
+import 'package:doctor_2/home/delete2.dart';
 import 'package:doctor_2/home/delete_acc.dart';
 import 'package:doctor_2/home/deta.dart';
 import 'package:doctor_2/home/home_screen.dart';
@@ -87,7 +88,9 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       routes: {
-        '/': (context) => const MainScreenWidget(), // 主畫面
+        '/': (context) => const HomeScreenWidget(
+              userId: '1',
+            ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
@@ -99,6 +102,12 @@ class _MyAppState extends State<MyApp> {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => DeleteWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/Delete2Widget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => Delete2Widget(userId: userId),
           );
         }
         if (settings.name == '/SuccessWidget') {

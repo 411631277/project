@@ -2,6 +2,7 @@ import 'package:doctor_2/extensions.dart';
 import 'package:doctor_2/home/mate.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'home_screen.dart';
 import 'language.dart';
 import 'notify.dart';
 import 'deta.dart';
@@ -314,7 +315,13 @@ class SettingWidgetState extends State<SettingWidget> {
               left: screenWidth * 0.1,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          HomeScreenWidget(userId: widget.userId),
+                    ),
+                  );
                 },
                 child: Transform.rotate(
                   angle: math.pi,
