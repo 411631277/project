@@ -12,7 +12,8 @@ class RobotWidget extends StatefulWidget {
 class _RobotWidgetState extends State<RobotWidget> {
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String>> _messages = [];
-  final String apiUrl = "180.176.211.159:8000/static/index.html"; // 聊天記錄
+  final String apiUrl = "http://180.176.211.159:8000/query";
+  // 聊天記錄
 
   @override
   void initState() {
@@ -24,39 +25,35 @@ class _RobotWidgetState extends State<RobotWidget> {
   Future<void> _sendMessage(String message) async {
     if (message.isNotEmpty) {
       setState(() {
-        _messages.add({'sender': 'user', 'text': message}); // 用戶訊息
+        _messages.add({'sender': 'user', 'text': message});
+        _messages.add({'sender': 'chatgpt', 'text': '正在思考...'});
       });
 
       try {
-        // 發送 API 請求
         final response = await http.post(
           Uri.parse(apiUrl),
           headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'question': message}),
+          body: jsonEncode({'query': message}),
         );
 
         if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          final reply = data['answer'] ?? '抱歉，我不太明白您的問題。';
+          // **直接處理為純文字，無需解析 JSON**
+          final reply = response.body.trim().replaceAll("\n", " ");
 
-          // 更新 ChatGPT 的回應
           setState(() {
-            _messages.add({'sender': 'chatgpt', 'text': reply});
+            _messages.last['text'] = reply; // 更新「正在思考...」的訊息
           });
         } else {
-          // API 錯誤處理
           setState(() {
-            _messages.add({'sender': 'chatgpt', 'text': '抱歉，系統出現了一些問題。'});
+            _messages.last['text'] = '伺服器錯誤，請稍後再試。';
           });
         }
       } catch (e) {
-        // 網路錯誤處理
         setState(() {
-          _messages.add({'sender': 'chatgpt', 'text': '無法連接到服務器，請稍後再試。'});
+          _messages.last['text'] = '無法連接到伺服器，請檢查網路或稍後再試。';
         });
       }
 
-      // 清空輸入框
       _messageController.clear();
     }
   }
@@ -119,6 +116,9 @@ class _RobotWidgetState extends State<RobotWidget> {
                           child: Text(
                             message['text']!,
                             softWrap: true, // 確保文字自動換行
+                            maxLines: null, // 允許無限行，不會被限制
+                            overflow: TextOverflow.visible, // 確保不會省略文字
+                            textAlign: TextAlign.left, // 文字靠左對齊
                             style: TextStyle(
                               fontSize: 14,
                               color: isUser ? Colors.black : Colors.white,
