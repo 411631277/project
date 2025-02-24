@@ -422,7 +422,7 @@ class _BabyWidgetState extends State<BabyWidget> {
       BuildContext context, TextEditingController controller) {
     int selectedHeight = controller.text.isNotEmpty
         ? int.parse(controller.text.replaceAll(' cm', ''))
-        : 115; // 預設值改為 115cm
+        : 50; // 預設值改為 115cm
 
     showModalBottomSheet(
       context: context,
@@ -435,15 +435,15 @@ class _BabyWidgetState extends State<BabyWidget> {
                 height: 200,
                 child: CupertinoPicker(
                   scrollController: FixedExtentScrollController(
-                    initialItem: selectedHeight - 80, // 偏移值改為從 80 開始
+                    initialItem: selectedHeight - 20, // 偏移值改為從 80 開始
                   ),
                   itemExtent: 40,
                   onSelectedItemChanged: (int index) {
-                    selectedHeight = index + 80; // 偏移值改為 +80
+                    selectedHeight = index + 20; // 偏移值改為 +80
                   },
                   children: List<Widget>.generate(71, (int index) {
                     return Center(
-                        child: Text('${index + 80} cm')); // 生成 80~150 的選項
+                        child: Text('${index + 20} cm')); // 生成 80~150 的選項
                   }),
                 ),
               ),
@@ -464,9 +464,13 @@ class _BabyWidgetState extends State<BabyWidget> {
 // 體重選擇功能
   void _showWeightPicker(
       BuildContext context, TextEditingController controller) {
-    int selectedWeight = controller.text.isNotEmpty
-        ? int.parse(controller.text.replaceAll(' kg', ''))
-        : 10; // 預設值改為 10kg
+    double selectedWeight = controller.text.isNotEmpty
+        ? double.parse(controller.text.replaceAll(' kg', ''))
+        : 3.0; // 預設值改為 3.0 kg
+
+    final List<String> weightOptions = List.generate(71, (index) {
+      return (index / 10).toStringAsFixed(1); // 生成 0.0 ~ 7.0 (0.1 間隔)
+    });
 
     showModalBottomSheet(
       context: context,
@@ -479,21 +483,21 @@ class _BabyWidgetState extends State<BabyWidget> {
                 height: 200,
                 child: CupertinoPicker(
                   scrollController: FixedExtentScrollController(
-                    initialItem: selectedWeight, // 假設數值從 0 開始
+                    initialItem: (selectedWeight * 10).round(), // 對應至0.1間隔
                   ),
                   itemExtent: 40,
                   onSelectedItemChanged: (int index) {
-                    selectedWeight = index; // 新範圍直接對應 index
+                    selectedWeight = index / 10; // 轉為小數點後一位
                   },
-                  children: List<Widget>.generate(21, (int index) {
-                    return Center(child: Text('$index kg')); // 生成 0~20 的選項
-                  }),
+                  children: weightOptions
+                      .map((weight) => Center(child: Text('$weight kg')))
+                      .toList(),
                 ),
               ),
               ElevatedButton(
                 onPressed: () {
-                  controller.text = '$selectedWeight kg'; // 更新控制器的值
-                  Navigator.pop(context); // 關閉彈出視窗
+                  controller.text = '${selectedWeight.toStringAsFixed(1)} kg';
+                  Navigator.pop(context);
                 },
                 child: const Text("確定"),
               ),

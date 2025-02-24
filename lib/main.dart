@@ -14,6 +14,7 @@ import 'package:doctor_2/home/delate.dart';
 import 'package:doctor_2/home/delete2.dart';
 import 'package:doctor_2/home/delete_acc.dart';
 import 'package:doctor_2/home/deta.dart';
+import 'package:doctor_2/home/fa_home_screen.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/home/revise.dart';
 import 'package:doctor_2/questionGroup/attachment.dart';
@@ -24,6 +25,7 @@ import 'package:doctor_2/questionGroup/production.dart';
 import 'package:doctor_2/questionGroup/roommate.dart';
 import 'package:doctor_2/questionGroup/sleep.dart';
 import 'package:doctor_2/questionGroup/sleep2.dart';
+import 'package:doctor_2/register/fa_success.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/main.screen.dart';
@@ -98,6 +100,18 @@ class _MyAppState extends State<MyApp> {
 
       onGenerateRoute: (settings) {
         //接收userID放這裡
+        if (settings.name == '/FaHomeScreenWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => FaHomeScreenWidget(userId: userId),
+          );
+        }
+        if (settings.name == '/FaSuccessWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => FaSuccessWidget(userId: userId),
+          );
+        }
         if (settings.name == '/DeleteWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
