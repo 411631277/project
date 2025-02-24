@@ -234,7 +234,10 @@ class _LoginWidgetState extends State<LoginWidget> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeScreenWidget(userId: userId), // 一般使用者頁面
+            builder: (context) => HomeScreenWidget(
+              userId: userId,
+              isManUser: true,
+            ), // 一般使用者頁面
           ),
         );
         return;
@@ -254,8 +257,10 @@ class _LoginWidgetState extends State<LoginWidget> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                FaHomeScreenWidget(userId: userId), // Man_users 專用頁面
+            builder: (context) => FaHomeScreenWidget(
+              userId: userId,
+              isManUser: true,
+            ), // Man_users 專用頁面
           ),
         );
       } else {

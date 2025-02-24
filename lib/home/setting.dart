@@ -2,6 +2,7 @@ import 'package:doctor_2/extensions.dart';
 import 'package:doctor_2/home/mate.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'fa_home_screen.dart';
 import 'home_screen.dart';
 import 'language.dart';
 import 'notify.dart';
@@ -15,7 +16,9 @@ final Logger logger = Logger();
 
 class SettingWidget extends StatefulWidget {
   final String userId; // 🔹 從登入或註冊時傳入的 userId
-  const SettingWidget({super.key, required this.userId});
+  final bool isManUser;
+  const SettingWidget(
+      {super.key, required this.userId, required this.isManUser});
 
   @override
   SettingWidgetState createState() => SettingWidgetState();
@@ -316,12 +319,18 @@ class SettingWidgetState extends State<SettingWidget> {
               child: GestureDetector(
                 onTap: () {
                   Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          HomeScreenWidget(userId: widget.userId),
-                    ),
-                  );
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => widget.isManUser
+                            ? FaHomeScreenWidget(
+                                userId: widget.userId,
+                                isManUser: true, // ⭐ 傳遞身份
+                              )
+                            : HomeScreenWidget(
+                                userId: widget.userId,
+                                isManUser: false, // ⭐ 傳遞身份
+                              ),
+                      ));
                 },
                 child: Transform.rotate(
                   angle: math.pi,

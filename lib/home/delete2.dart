@@ -58,8 +58,8 @@ class Delete2Widget extends StatelessWidget {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  SettingWidget(userId: userId),
+                              builder: (context) => SettingWidget(
+                                  userId: userId, isManUser: false),
                             ),
                           );
                         }),

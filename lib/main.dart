@@ -92,6 +92,7 @@ class _MyAppState extends State<MyApp> {
       routes: {
         '/': (context) => const HomeScreenWidget(
               userId: '1',
+              isManUser: false,
             ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
@@ -103,7 +104,10 @@ class _MyAppState extends State<MyApp> {
         if (settings.name == '/FaHomeScreenWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
-            builder: (context) => FaHomeScreenWidget(userId: userId),
+            builder: (context) => FaHomeScreenWidget(
+              userId: userId,
+              isManUser: true,
+            ),
           );
         }
         if (settings.name == '/FaSuccessWidget') {
@@ -205,7 +209,10 @@ class _MyAppState extends State<MyApp> {
         if (settings.name == '/HomeScreenWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
-            builder: (context) => HomeScreenWidget(userId: userId),
+            builder: (context) => HomeScreenWidget(
+              userId: userId,
+              isManUser: false,
+            ),
           );
         }
         if (settings.name == '/BabyWidget') {

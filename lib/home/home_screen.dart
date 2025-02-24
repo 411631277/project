@@ -15,7 +15,9 @@ final Logger logger = Logger();
 
 class HomeScreenWidget extends StatefulWidget {
   final String userId; // 🔹 從登入或註冊時傳入的 userId
-  const HomeScreenWidget({super.key, required this.userId});
+  final bool isManUser;
+  const HomeScreenWidget(
+      {super.key, required this.userId, required this.isManUser});
 
   @override
   State<HomeScreenWidget> createState() => _HomeScreenWidgetState();
@@ -157,6 +159,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                         MaterialPageRoute(
                           builder: (context) => SettingWidget(
                             userId: widget.userId,
+                            isManUser: false,
                           ),
                         ),
                       );
@@ -308,7 +311,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => BabyWidget(
-                                userId: widget.userId, isManUser: true),
+                                userId: widget.userId, isManUser: false),
                           ),
                         );
                       },

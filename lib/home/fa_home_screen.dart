@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:doctor_2/home/baby.dart';
-import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/robot.dart';
 import 'package:doctor_2/home/setting.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -14,7 +13,9 @@ final Logger logger = Logger();
 
 class FaHomeScreenWidget extends StatefulWidget {
   final String userId; // 🔹 從登入或註冊時傳入的 userId
-  const FaHomeScreenWidget({super.key, required this.userId});
+  final bool isManUser;
+  const FaHomeScreenWidget(
+      {super.key, required this.userId, required this.isManUser});
 
   @override
   State<FaHomeScreenWidget> createState() => _FaHomeScreenWidgetState();
@@ -156,6 +157,7 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
                         MaterialPageRoute(
                           builder: (context) => SettingWidget(
                             userId: widget.userId,
+                            isManUser: true,
                           ),
                         ),
                       );
@@ -172,33 +174,7 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
                     ),
                   ),
                 ),
-                // 問題按鈕
-                Positioned(
-                  top: screenHeight * 0.05,
-                  left: screenWidth * 0.6,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => QuestionWidget(
-                            userId: widget.userId,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      width: screenWidth * 0.12,
-                      height: screenHeight * 0.08,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('assets/images/Question.png'),
-                          fit: BoxFit.fitWidth,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+
                 // 用戶名稱
                 Positioned(
                   top: screenHeight * 0.07,
