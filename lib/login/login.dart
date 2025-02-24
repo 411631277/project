@@ -3,7 +3,7 @@ import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/login/forget.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-
+import 'package:doctor_2/home/fa_home_screen.dart';
 import '../l10n/generated/l10n.dart';
 
 final Logger logger = Logger();
@@ -220,35 +220,48 @@ class _LoginWidgetState extends State<LoginWidget> {
     }
 
     try {
-      // **查詢 Firestore，匹配帳號與密碼**
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      // 先查詢 users 集合
+      QuerySnapshot userQuery = await FirebaseFirestore.instance
           .collection('users')
           .where('帳號', isEqualTo: account)
           .where('密碼', isEqualTo: password)
           .get();
 
-      // **檢查是否仍然掛載**
       if (!mounted) return;
 
-      if (querySnapshot.docs.isNotEmpty) {
-        // **取得 userId**
-        String userId = querySnapshot.docs.first.id;
+      if (userQuery.docs.isNotEmpty) {
+        String userId = userQuery.docs.first.id;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreenWidget(userId: userId), // 一般使用者頁面
+          ),
+        );
+        return;
+      }
 
-        // **登入成功，跳轉到主畫面**
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomeScreenWidget(userId: userId),
-            ),
-          );
-        }
+      // 如果 users 查不到，再查詢 Man_users 集合
+      QuerySnapshot manUserQuery = await FirebaseFirestore.instance
+          .collection('Man_users')
+          .where('帳號', isEqualTo: account)
+          .where('密碼', isEqualTo: password)
+          .get();
+
+      if (!mounted) return;
+
+      if (manUserQuery.docs.isNotEmpty) {
+        String userId = manUserQuery.docs.first.id;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                FaHomeScreenWidget(userId: userId), // Man_users 專用頁面
+          ),
+        );
       } else {
-        if (mounted) {
-          setState(() {
-            errorMessage = "帳號或密碼錯誤";
-          });
-        }
+        setState(() {
+          errorMessage = "帳號或密碼錯誤";
+        });
       }
     } catch (e) {
       if (mounted) {

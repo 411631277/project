@@ -72,7 +72,7 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
   Future<void> _loadUserName() async {
     try {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection('Man_users')
           .doc(widget.userId)
           .get();
 
@@ -91,7 +91,7 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
   Future<void> _loadBabyName() async {
     try {
       QuerySnapshot babySnapshot = await FirebaseFirestore.instance
-          .collection('users')
+          .collection('Man_users')
           .doc(widget.userId)
           .collection('baby')
           .orderBy('填寫時間', descending: true) // 按照建立時間排序，最新的在最前
@@ -136,7 +136,7 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
                           image: _profileImageUrl != null
                               ? NetworkImage(
                                   _profileImageUrl!) // 使用 Firebase Storage 讀取的圖片
-                              : const AssetImage('assets/images/Picture.png')
+                              : const AssetImage('assets/images/man.png')
                                   as ImageProvider,
                           fit: BoxFit.cover, // 確保圖片填滿但不變形
                         ),

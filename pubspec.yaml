@@ -35,6 +35,7 @@ flutter:
   generate: true
   assets:
     - assets/images/back.png
+    - assets/images/man.png
     - assets/images/data.png
     - assets/images/language.png
     - assets/images/notify.png
