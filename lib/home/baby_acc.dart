@@ -4,8 +4,10 @@ import 'package:logger/logger.dart';
 final Logger logger = Logger();
 
 class BabyAccWidget extends StatelessWidget {
-  final String userId; // 🔹 從登入或註冊時傳入的 userId
-  const BabyAccWidget({super.key, required this.userId});
+  final String userId;
+  final bool isManUser; // 🔹 從登入或註冊時傳入的 userId
+  const BabyAccWidget(
+      {super.key, required this.userId, required this.isManUser});
 
   @override
   Widget build(BuildContext context) {
@@ -57,10 +59,12 @@ class BabyAccWidget extends StatelessWidget {
               left: screenWidth * 0.3,
               child: _buildButton(context, '下一步', Colors.brown.shade400, () {
                 logger.i(
-                    "🟢 SuccessWidget 正在導航到 HomeScreenWidget，userId: $userId");
+                    "🟢 SuccessWidget 正在導航，userId: $userId, isManUser: $isManUser");
                 Navigator.pushNamed(
                   context,
-                  '/HomeScreenWidget', // ✅ 改用 routes 導航
+                  isManUser
+                      ? '/FaHomeScreenWidget'
+                      : '/HomeScreenWidget', // 根據參數跳轉
                   arguments: userId, // ✅ 傳遞 userId
                 );
               }),

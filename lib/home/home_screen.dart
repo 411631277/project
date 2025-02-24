@@ -307,8 +307,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                BabyWidget(userId: widget.userId),
+                            builder: (context) => BabyWidget(
+                                userId: widget.userId, isManUser: true),
                           ),
                         );
                       },

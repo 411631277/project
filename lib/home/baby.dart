@@ -14,7 +14,8 @@ final TextEditingController babyHeightController = TextEditingController();
 
 class BabyWidget extends StatefulWidget {
   final String userId; // 🔹 從登入或註冊時傳入的 userId
-  const BabyWidget({super.key, required this.userId});
+  final bool isManUser;
+  const BabyWidget({super.key, required this.userId, required this.isManUser});
 
   @override
   State<BabyWidget> createState() => _BabyWidgetState();
@@ -167,6 +168,7 @@ class _BabyWidgetState extends State<BabyWidget> {
               child: _buildButton(context, '填寫完成', Colors.brown.shade400, () {
                 _saveBabyData(
                     widget.userId, // ✅ 傳入 userId
+                    widget.isManUser,
                     babyNameController.text,
                     babyBirthController,
                     babyGenderController,
@@ -562,6 +564,7 @@ class _BabyWidgetState extends State<BabyWidget> {
 
 void _saveBabyData(
     String userId,
+    bool isManUser,
     String babyName,
     TextEditingController babyBirthController,
     TextEditingController babyGenderController,
@@ -576,7 +579,7 @@ void _saveBabyData(
         : DateTime.now().millisecondsSinceEpoch.toString();
 
     await FirebaseFirestore.instance
-        .collection('users') // 🔹 進入 users collection
+        .collection(isManUser ? 'Man_users' : 'users') // 🔹 進入 users collection
         .doc(userId) // 🔹 指定使用者 ID
         .collection('baby') // 🔹 **在該使用者底下建立 baby 子 collection**
         .doc(babyId) // ✅ **使用 babyName 作為 docId**

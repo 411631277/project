@@ -211,13 +211,14 @@ class _MyAppState extends State<MyApp> {
         if (settings.name == '/BabyWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
-            builder: (context) => BabyWidget(userId: userId),
+            builder: (context) => BabyWidget(userId: userId, isManUser: true),
           );
         }
         if (settings.name == '/BabyAccWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
-            builder: (context) => BabyAccWidget(userId: userId),
+            builder: (context) =>
+                BabyAccWidget(userId: userId, isManUser: true),
           );
         }
         if (settings.name == '/KnowledgeWidget') {
