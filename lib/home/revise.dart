@@ -5,7 +5,9 @@ final Logger logger = Logger();
 
 class ReviseWidget extends StatelessWidget {
   final String userId; // ✅ 接收 userId
-  const ReviseWidget({super.key, required this.userId});
+  final bool isManUser;
+  const ReviseWidget(
+      {super.key, required this.userId, required this.isManUser});
 
   @override
   Widget build(BuildContext context) {
@@ -66,12 +68,12 @@ class ReviseWidget extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // **返回跳轉頁面**
-                    Navigator.pushNamed(
-                      context,
-                      '/HomeScreenWidget',
-                      arguments: userId,
-                    ); // 替換成你的頁面路徑
+                    Navigator.pushNamed(context,
+                        isManUser ? '/HomeScreenWidget' : '/FaHomeScreenWidget',
+                        arguments: {
+                          'userId': userId,
+                          'isManUser': isManUser,
+                        }); // 替換成你的頁面路徑
                   },
                   child: Text(
                     '返回',

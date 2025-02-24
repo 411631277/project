@@ -8,7 +8,8 @@ final Logger logger = Logger();
 
 class DetaWidget extends StatefulWidget {
   final String userId; // 🔹 從登入或註冊時傳入的 userId
-  const DetaWidget({super.key, required this.userId});
+  final bool isManUser;
+  const DetaWidget({super.key, required this.userId, required this.isManUser});
 
   @override
   State<DetaWidget> createState() => _DetaWidgetState();
@@ -135,11 +136,11 @@ class _DetaWidgetState extends State<DetaWidget> {
 
                     // ✅ 確保 context 仍然有效
                     if (!context.mounted) return;
-                    Navigator.pushNamed(
-                      context,
-                      '/ReviseWidget',
-                      arguments: widget.userId, // ✅ 傳遞 userId
-                    );
+                    Navigator.pushNamed(context, '/ReviseWidget', arguments: {
+                      'userId': widget.userId,
+                      'isManUser': true,
+                    } // ✅ 傳遞 userId
+                        );
                   }),
                 ],
               ),
@@ -152,8 +153,9 @@ class _DetaWidgetState extends State<DetaWidget> {
 
   Future<void> _updateUserData() async {
     try {
-      CollectionReference users =
-          FirebaseFirestore.instance.collection('users');
+      CollectionReference users = FirebaseFirestore.instance.collection(
+        widget.isManUser ? 'Man_users' : 'users',
+      );
 
       // 🔹 先獲取 Firestore 內的原始資料
       DocumentSnapshot userSnapshot = await users.doc(widget.userId).get();
@@ -198,7 +200,8 @@ class _DetaWidgetState extends State<DetaWidget> {
 
       // 🔹 更新 Firestore，只影響有變動的資料
       await users.doc(widget.userId).update(updatedData);
-      logger.i("✅ 使用者資料成功更新：users/${widget.userId}");
+      logger.i(
+          "✅ 使用者資料成功更新：${widget.isManUser ? 'Man_users' : 'users'}/${widget.userId}");
     } catch (e) {
       logger.e("❌ 更新使用者資料時發生錯誤：$e");
     }

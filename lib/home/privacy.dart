@@ -14,16 +14,20 @@ class PrivacyPolicyPage extends StatelessWidget {
         width: screenWidth,
         height: screenHeight,
         color: const Color.fromRGBO(233, 227, 213, 1),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Stack(
           children: [
-            // **隱私政策內容**
-            Positioned.fill(
+            // 隱私政策內容（重點修改在這裡）
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: screenHeight * 0.1, // 明確留出底部空間，避免與按鈕重疊
               child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const <Widget>[
-                    SizedBox(height: 80), // 預留空間
+                    SizedBox(height: 80),
                     Text(
                       '非常歡迎您光臨內政部全球資訊網(以下簡稱本網站)，'
                       '為了讓您能夠安心的使用本網站的各項服務與資訊，特此向您說明本網站的隱私權保護政策，以保障您的權益，請您詳閱下列內容：\n',
@@ -87,32 +91,30 @@ class PrivacyPolicyPage extends StatelessWidget {
                     ),
                     Text(
                       '六、隱私權保護政策之修正\n'
-                      '本網站隱私權保護政策將因應需求隨時進行修正，修正後的條款將刊登於網站上。\n\n\n',
+                      '本網站隱私權保護政策將因應需求隨時進行修正，修正後的條款將刊登於網站上。',
                       style: TextStyle(
                         fontSize: 16,
                         color: Color.fromRGBO(147, 129, 108, 1),
                         height: 1.5,
                       ),
                     ),
-                    SizedBox(height: 100), // 避免返回按鈕被遮擋
+                    SizedBox(height: 100),
                   ],
                 ),
               ),
             ),
-
-            // **返回按鈕**
             Positioned(
-              bottom: screenHeight * 0.05, // 設置在底部 5% 高度
-              left: screenWidth * 0.1,
+              bottom: 20, // 固定距離螢幕底部20
+              left: 16,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.pop(context); // 返回上一頁
+                  Navigator.pop(context);
                 },
                 child: Transform.rotate(
                   angle: math.pi,
                   child: Container(
                     width: screenWidth * 0.15,
-                    height: screenHeight * 0.15,
+                    height: screenHeight * 0.08,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/images/back.png'),

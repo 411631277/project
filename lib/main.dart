@@ -102,11 +102,11 @@ class _MyAppState extends State<MyApp> {
       onGenerateRoute: (settings) {
         //接收userID放這裡
         if (settings.name == '/FaHomeScreenWidget') {
-          final userId = settings.arguments as String;
+          final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => FaHomeScreenWidget(
-              userId: userId,
-              isManUser: true,
+              userId: args['userId'],
+              isManUser: args['isManUser'],
             ),
           );
         }
@@ -123,9 +123,12 @@ class _MyAppState extends State<MyApp> {
           );
         }
         if (settings.name == '/Delete2Widget') {
-          final userId = settings.arguments as String;
+          final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => Delete2Widget(userId: userId),
+            builder: (context) => Delete2Widget(
+              userId: args['userId'],
+              isManUser: args['isManUser'],
+            ),
           );
         }
         if (settings.name == '/SuccessWidget') {
@@ -207,11 +210,11 @@ class _MyAppState extends State<MyApp> {
           );
         }
         if (settings.name == '/HomeScreenWidget') {
-          final userId = settings.arguments as String;
+          final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => HomeScreenWidget(
-              userId: userId,
-              isManUser: false,
+              userId: args['userId'],
+              isManUser: args['isManUser'],
             ),
           );
         }
@@ -222,11 +225,12 @@ class _MyAppState extends State<MyApp> {
           );
         }
         if (settings.name == '/BabyAccWidget') {
-          final userId = settings.arguments as String;
+          final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) =>
-                BabyAccWidget(userId: userId, isManUser: true),
-          );
+              builder: (context) => BabyAccWidget(
+                    userId: args['userId'],
+                    isManUser: args['isManUser'],
+                  ));
         }
         if (settings.name == '/KnowledgeWidget') {
           final userId = settings.arguments as String;
@@ -277,15 +281,21 @@ class _MyAppState extends State<MyApp> {
           );
         }
         if (settings.name == '/DetaWidget') {
-          final userId = settings.arguments as String;
+          final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => DetaWidget(userId: userId),
+            builder: (context) => DetaWidget(
+              userId: args['userId'],
+              isManUser: args['isManUser'],
+            ),
           );
         }
         if (settings.name == '/ReviseWidget') {
-          final userId = settings.arguments as String;
+          final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => ReviseWidget(userId: userId),
+            builder: (context) => ReviseWidget(
+              userId: args['userId'],
+              isManUser: args['isManUser'],
+            ),
           );
         }
 

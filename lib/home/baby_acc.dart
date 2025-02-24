@@ -53,20 +53,19 @@ class BabyAccWidget extends StatelessWidget {
               ),
             ),
 
-            // **返回按鈕**
+            // **下一步按鈕**
             Positioned(
               top: screenHeight * 0.45,
               left: screenWidth * 0.3,
               child: _buildButton(context, '下一步', Colors.brown.shade400, () {
                 logger.i(
                     "🟢 SuccessWidget 正在導航，userId: $userId, isManUser: $isManUser");
-                Navigator.pushNamed(
-                  context,
-                  isManUser
-                      ? '/FaHomeScreenWidget'
-                      : '/HomeScreenWidget', // 根據參數跳轉
-                  arguments: userId, // ✅ 傳遞 userId
-                );
+                Navigator.pushNamed(context,
+                    isManUser ? '/FaHomeScreenWidget' : '/HomeScreenWidget',
+                    arguments: {
+                      'userId': userId,
+                      'isManUser': isManUser,
+                    });
               }),
             ),
           ],

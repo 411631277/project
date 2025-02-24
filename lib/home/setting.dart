@@ -126,7 +126,10 @@ class SettingWidgetState extends State<SettingWidget> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => DetaWidget(userId: widget.userId),
+                      builder: (context) => DetaWidget(
+                        userId: widget.userId,
+                        isManUser: widget.isManUser,
+                      ),
                     ),
                   );
                 },

@@ -57,8 +57,10 @@ class DeleteWidget extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    Delete2Widget(userId: userId),
+                                builder: (context) => Delete2Widget(
+                                  userId: userId,
+                                  isManUser: true,
+                                ),
                               ),
                             );
                           },

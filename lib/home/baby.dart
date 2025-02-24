@@ -178,11 +178,11 @@ class _BabyWidgetState extends State<BabyWidget> {
                     specialConditionController);
 
                 // ✅ **確保這裡傳遞的是 widget.userId**
-                Navigator.pushNamed(
-                  context,
-                  '/BabyAccWidget',
-                  arguments: widget.userId, // ✅ **改為 widget.userId**
-                );
+                Navigator.pushNamed(context, '/BabyAccWidget', arguments: {
+                  'userId': widget.userId,
+                  'isManUser': widget.isManUser,
+                } // ✅ **改為 widget.userId**
+                    );
               }),
             ),
 
