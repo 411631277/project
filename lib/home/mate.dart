@@ -1,8 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
+import 'package:logger/logger.dart';
 
-class MateWidget extends StatelessWidget {
-  const MateWidget({super.key});
+final Logger logger = Logger();
+
+class MateWidget extends StatefulWidget {
+  final String userId; // 🔹 從上一頁傳來的 userId
+
+  const MateWidget({super.key, required this.userId});
+
+  @override
+  State<MateWidget> createState() => _MateWidgetState();
+}
+
+class _MateWidgetState extends State<MateWidget> {
+  String pairingCode = "載入中..."; // 預設顯示狀態
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPairingCode(); // 🔹 讀取配對碼
+  }
+
+  // 🔹 從 Firebase Firestore 獲取配對碼
+  Future<void> fetchPairingCode() async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          pairingCode = userDoc['配對碼'] ?? "未設定"; // 🔹 如果沒有配對碼，顯示「未設定」
+        });
+      } else {
+        setState(() {
+          pairingCode = "無效的用戶";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        pairingCode = "載入錯誤";
+      });
+      logger.e("❌ 讀取配對碼錯誤: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,24 +113,21 @@ class MateWidget extends StatelessWidget {
               left: screenWidth * 0.42,
               child: Container(
                 width: screenWidth * 0.4,
-                height: screenHeight * 0.03,
+                height: screenHeight * 0.04,
                 decoration: const BoxDecoration(
                   color: Color.fromRGBO(255, 255, 255, 1),
                 ),
-              ),
-            ),
-            // 分享碼文字
-            Positioned(
-              top: screenHeight * 0.352,
-              left: screenWidth * 0.55,
-              child: Text(
-                '758902',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Poppins',
-                  fontSize: screenWidth * 0.045,
-                  fontWeight: FontWeight.normal,
+                child: Center(
+                  child: Text(
+                    pairingCode, // 🔹 顯示 Firebase 讀取的配對碼
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: const Color.fromRGBO(147, 129, 108, 1),
+                      fontFamily: 'Poppins',
+                      fontSize: screenWidth * 0.045,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),

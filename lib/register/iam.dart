@@ -1,5 +1,5 @@
+import 'package:doctor_2/register/inputcode.dart';
 import 'package:doctor_2/register/register.dart';
-import 'package:doctor_2/register/fa_register.dart';
 import 'package:flutter/material.dart';
 
 //註解已完成
@@ -57,7 +57,9 @@ class IamWidget extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const FaRegisterWidget(),
+                        builder: (context) => const InputcodeWidget(
+                          role: '爸爸',
+                        ),
                       ),
                     );
                   },
@@ -91,7 +93,9 @@ class IamWidget extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const RegisterWidget(),
+                        builder: (context) => const RegisterWidget(
+                          role: "媽媽",
+                        ),
                       ),
                     );
                   },

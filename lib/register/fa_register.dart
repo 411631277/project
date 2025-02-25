@@ -13,7 +13,7 @@ final FirestoreService firestoreService = FirestoreService();
 final Logger logger = Logger();
 
 class FaRegisterWidget extends StatefulWidget {
-  const FaRegisterWidget({super.key});
+  const FaRegisterWidget({super.key, required String role});
 
   @override
   FaRegisterWidgetState createState() => FaRegisterWidgetState();

@@ -71,11 +71,11 @@ class FinishWidget extends StatelessWidget {
                   onPressed: () {
                     logger.i(
                         "🟢 FinishWidget 正在導航到 HomeScreenWidget，userId: $userId");
-                    Navigator.pushNamed(
-                      context,
-                      '/HomeScreenWidget', // ✅ 改用 routes 導航
-                      arguments: userId, // ✅ 傳遞 userId
-                    );
+
+                    Navigator.pushNamed(context, '/HomeScreenWidget',
+                        arguments: {
+                          'userId': userId, 'isManUser': false, // ✅ 傳遞 userId
+                        });
                   },
                   child: const Text(
                     '下一步',

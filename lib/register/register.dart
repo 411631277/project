@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:doctor_2/main.screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/services/firestore_service.dart';
@@ -13,7 +16,9 @@ final FirestoreService firestoreService = FirestoreService();
 final Logger logger = Logger();
 
 class RegisterWidget extends StatefulWidget {
-  const RegisterWidget({super.key});
+  final String role;
+
+  const RegisterWidget({super.key, required this.role});
 
   @override
   RegisterWidgetState createState() => RegisterWidgetState();
@@ -320,6 +325,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
         'answers': answers,
         '是否有慢性病': hasChronicDisease,
         '慢性病症狀': selectedChronicDiseases,
+        '配對碼': generatePairingCode(),
       });
       logger.i("✅ 使用者資料已存入 Firestore，ID：$userId");
       return userId; //回傳 userId
@@ -476,6 +482,42 @@ void _showWeightPicker(BuildContext context, TextEditingController controller) {
       );
     },
   );
+}
+
+String generatePairingCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  final random = Random();
+  String code = String.fromCharCodes(Iterable.generate(
+      6, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
+
+  logger.i('🔹 產生的配對碼: $code'); // ✅ 確保它真的有產生
+  return code;
+}
+
+void registerUser(String email, String password, String role) async {
+  try {
+    UserCredential userCredential = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
+
+    String userId = userCredential.user!.uid;
+
+    // **如果是媽媽，產生隨機配對碼**
+    String? pairingCode;
+    if (role == "媽媽") {
+      pairingCode = generatePairingCode();
+    }
+
+    // 儲存到 Firestore
+    await FirebaseFirestore.instance.collection('users').doc(userId).set({
+      '帳號': email,
+      '角色': role,
+      '配對碼': pairingCode ?? "", // 只有媽媽有配對碼
+    }, SetOptions(merge: true)); // ✅ 避免覆蓋其他欄位
+
+    logger.i('✅ 註冊成功，配對碼：$pairingCode');
+  } catch (e) {
+    logger.e("❌ 註冊失敗: $e");
+  }
 }
 
 //身高選項功能
