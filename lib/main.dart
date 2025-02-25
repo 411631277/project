@@ -90,9 +90,9 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       routes: {
-        '/': (context) => const HomeScreenWidget(
-              userId: '1',
-              isManUser: false,
+        '/': (context) => const FaHomeScreenWidget(
+              userId: '6',
+              isManUser: true,
             ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),

@@ -191,88 +191,24 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
                 // 今日心情文字
                 Positioned(
                   top: screenHeight * 0.25,
-                  left: screenWidth * 0.1,
-                  child: Text(
-                    '今天心情還好嗎?一切都會越來越好喔!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: const Color.fromRGBO(165, 146, 125, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.05,
+                  left: screenWidth * 0.08,
+                  child: SizedBox(
+                    width: screenWidth * 0.84, // 設定文字區域的寬度
+                    child: Text(
+                      '當爸爸不容易，但你的陪伴與支持，'
+                      '對伴侶來說是無可取代的力量。\n\n'
+                      '每一次的擁抱、每一句溫暖的話語，都是她最堅強的後盾。\n\n'
+                      '你不需要完美，只要願意一起面對，一起學習，一起成長，這就是最好的愛。',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: const Color.fromRGBO(165, 146, 125, 1),
+                        fontFamily: 'Inter',
+                        fontSize: screenWidth * 0.05,
+                      ),
                     ),
                   ),
                 ),
-                // 今日步數區塊
-                Positioned(
-                  top: screenHeight * 0.45,
-                  left: screenWidth * 0.05,
-                  child: Text(
-                    '今日步數',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(165, 146, 125, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.045,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: screenHeight * 0.49,
-                  left: screenWidth * 0.05,
-                  child: Text(
-                    '步數未達標!',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(165, 146, 125, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.045,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: screenHeight * 0.45,
-                  left: screenWidth * 0.5,
-                  child: Text(
-                    '昨日步數',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(165, 146, 125, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.045,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: screenHeight * 0.41,
-                  left: screenWidth * 0.35,
-                  child: Divider(
-                    color: const Color.fromRGBO(147, 129, 108, 1),
-                    thickness: 1,
-                  ),
-                ),
-                // 今日步數數值
-                Positioned(
-                  top: screenHeight * 0.45,
-                  left: screenWidth * 0.3,
-                  child: Text(
-                    '8623',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(147, 129, 108, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.045,
-                    ),
-                  ),
-                ),
-                // 昨日步數數值
-                Positioned(
-                  top: screenHeight * 0.45,
-                  left: screenWidth * 0.75,
-                  child: Text(
-                    '8380',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(147, 129, 108, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.045,
-                    ),
-                  ),
-                ),
+
                 // Baby 圖片
                 Positioned(
                   top: screenHeight * 0.70,
