@@ -13,7 +13,9 @@ final FirestoreService firestoreService = FirestoreService();
 final Logger logger = Logger();
 
 class FaRegisterWidget extends StatefulWidget {
-  const FaRegisterWidget({super.key, required String role});
+  final String pairingCode;
+  const FaRegisterWidget(
+      {super.key, required String role, required this.pairingCode});
 
   @override
   FaRegisterWidgetState createState() => FaRegisterWidgetState();
@@ -322,6 +324,20 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
         'answers': answers,
         '是否有慢性病': hasChronicDisease,
         '慢性病症狀': selectedChronicDiseases,
+        '配對碼': widget.pairingCode,
+      });
+      // **標記媽媽的配對碼為已使用**
+      await FirebaseFirestore.instance
+          .collection('users')
+          .where('配對碼', isEqualTo: widget.pairingCode)
+          .limit(1)
+          .get()
+          .then((querySnapshot) {
+        if (querySnapshot.docs.isNotEmpty) {
+          querySnapshot.docs.first.reference.update({
+            '配對碼已使用': true, // 🟢 更新 Firestore
+          });
+        }
       });
       logger.i("✅ 使用者資料已存入 Firestore，ID：$userId");
       return userId; //回傳 userId

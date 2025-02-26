@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
 
-final Logger logger = Logger(); // ✅ 確保 Logger 存在
+final Logger logger = Logger();
 
 class InputcodeWidget extends StatefulWidget {
-  // ✅ 接收 userId
   const InputcodeWidget({super.key, required String role});
 
   @override
@@ -16,7 +15,7 @@ class InputcodeWidget extends StatefulWidget {
 
 class _InputcodeWidgetState extends State<InputcodeWidget> {
   late TextEditingController pairingCodeController;
-  String errorMessage = ""; // 錯誤訊息
+  String errorMessage = "";
 
   @override
   void initState() {
@@ -160,29 +159,29 @@ class _InputcodeWidgetState extends State<InputcodeWidget> {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('配對碼', isEqualTo: inputCode)
+          .where('配對碼已使用', isEqualTo: false) // 只檢查未使用的配對碼
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        // **成功匹配，進入下一步**
-        logger.i("✅ 配對碼正確，進入下一步");
-        if (!mounted) return;
+        logger.i("✅ 配對碼正確，進入註冊頁面");
 
         if (context.mounted) {
+          if (!mounted) return;
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => FaRegisterWidget(
+                pairingCode: inputCode,
                 role: '爸爸',
-              ),
+              ), // 🟢 傳遞配對碼
             ),
           );
         }
       } else {
-        // **配對碼不正確**
         setState(() {
-          errorMessage = "配對碼錯誤，請重新輸入";
+          errorMessage = "配對碼錯誤或已被使用，請重新輸入";
         });
-        logger.e("❌ 配對碼錯誤");
+        logger.e("❌ 配對碼錯誤或已被使用");
       }
     } catch (e) {
       setState(() {

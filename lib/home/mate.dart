@@ -15,7 +15,8 @@ class MateWidget extends StatefulWidget {
 }
 
 class _MateWidgetState extends State<MateWidget> {
-  String pairingCode = "載入中..."; // 預設顯示狀態
+  String pairingCode = "載入中..."; // 預設顯示
+  bool isPairingUsed = false; // **配對碼是否已使用**
 
   @override
   void initState() {
@@ -23,7 +24,7 @@ class _MateWidgetState extends State<MateWidget> {
     fetchPairingCode(); // 🔹 讀取配對碼
   }
 
-  // 🔹 從 Firebase Firestore 獲取配對碼
+  // **🔹 從 Firebase 讀取配對碼與使用狀態**
   Future<void> fetchPairingCode() async {
     try {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
@@ -33,7 +34,8 @@ class _MateWidgetState extends State<MateWidget> {
 
       if (userDoc.exists) {
         setState(() {
-          pairingCode = userDoc['配對碼'] ?? "未設定"; // 🔹 如果沒有配對碼，顯示「未設定」
+          pairingCode = userDoc['配對碼'] ?? "未設定";
+          isPairingUsed = userDoc['配對碼已使用'] ?? false; // **讀取配對碼是否已使用**
         });
       } else {
         setState(() {
@@ -92,7 +94,7 @@ class _MateWidgetState extends State<MateWidget> {
                 ),
               ),
             ),
-            // 配偶分享碼文字
+            // 配偶分享碼標籤
             Positioned(
               top: screenHeight * 0.35,
               left: screenWidth * 0.1,
@@ -107,22 +109,29 @@ class _MateWidgetState extends State<MateWidget> {
                 ),
               ),
             ),
-            // 分享碼背景框
+            // **配對碼顯示區塊**
             Positioned(
               top: screenHeight * 0.35,
               left: screenWidth * 0.42,
               child: Container(
                 width: screenWidth * 0.4,
                 height: screenHeight * 0.04,
-                decoration: const BoxDecoration(
-                  color: Color.fromRGBO(255, 255, 255, 1),
+                decoration: BoxDecoration(
+                  color: isPairingUsed
+                      ? Colors.red[100] // **已使用則背景變紅**
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(5),
                 ),
                 child: Center(
                   child: Text(
-                    pairingCode, // 🔹 顯示 Firebase 讀取的配對碼
+                    isPairingUsed
+                        ? "配對碼已使用"
+                        : pairingCode, // **顯示已使用 or 正常配對碼**
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: const Color.fromRGBO(147, 129, 108, 1),
+                      color: isPairingUsed
+                          ? Colors.red // **已使用則文字變紅**
+                          : const Color.fromRGBO(147, 129, 108, 1),
                       fontFamily: 'Poppins',
                       fontSize: screenWidth * 0.045,
                       fontWeight: FontWeight.bold,
@@ -131,7 +140,7 @@ class _MateWidgetState extends State<MateWidget> {
                 ),
               ),
             ),
-            // 返回按鈕
+            // **返回按鈕**
             Positioned(
               top: screenHeight * 0.75,
               left: screenWidth * 0.1,
