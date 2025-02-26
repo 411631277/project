@@ -44,11 +44,16 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
       String downloadUrl = await FirebaseStorage.instance
           .ref('profile_pictures/${widget.userId}.jpg')
           .getDownloadURL();
+
       setState(() {
         _profileImageUrl = downloadUrl;
       });
     } catch (e) {
-      logger.e("❌ 無法載入圖片: $e");
+      // 如果 Firebase Storage 找不到圖片，則使用預設圖片
+      logger.e("❌ 無法載入圖片，使用預設圖片: $e");
+      setState(() {
+        _profileImageUrl = null; // 設為 null，這樣 UI 會載入 `picture.png`
+      });
     }
   }
 

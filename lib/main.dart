@@ -103,14 +103,17 @@ class _MyAppState extends State<MyApp> {
           return MaterialPageRoute(
             builder: (context) => FaHomeScreenWidget(
               userId: args['userId'],
-              isManUser: args['isManUser'],
+              isManUser: (args['isManUser'] as bool?) ?? false,
             ),
           );
         }
         if (settings.name == '/FaSuccessWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
-            builder: (context) => FaSuccessWidget(userId: userId),
+            builder: (context) => FaSuccessWidget(
+              userId: userId,
+              isManUser: true,
+            ),
           );
         }
         if (settings.name == '/DeleteWidget') {

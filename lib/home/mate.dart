@@ -35,7 +35,11 @@ class _MateWidgetState extends State<MateWidget> {
       if (userDoc.exists) {
         setState(() {
           pairingCode = userDoc['配對碼'] ?? "未設定";
-          isPairingUsed = userDoc['配對碼已使用'] ?? false; // **讀取配對碼是否已使用**
+
+          // **如果 Firestore 裡沒有 "配對碼已使用"，就預設為 false**
+          isPairingUsed = userDoc.data().toString().contains('配對碼已使用')
+              ? (userDoc['配對碼已使用'] ?? false)
+              : false;
         });
       } else {
         setState(() {

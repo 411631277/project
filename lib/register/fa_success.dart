@@ -7,7 +7,8 @@ final Logger logger = Logger();
 
 class FaSuccessWidget extends StatelessWidget {
   final String userId; //帶入ID
-  const FaSuccessWidget({super.key, required this.userId});
+  const FaSuccessWidget(
+      {super.key, required this.userId, required bool isManUser});
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +62,7 @@ class FaSuccessWidget extends StatelessWidget {
                     Navigator.pushNamed(
                       context,
                       '/FaHomeScreenWidget', // ✅ 改用 routes 導航
-                      arguments: userId, // ✅ 傳遞 userId
+                      arguments: {'userId': userId}, // ✅ 傳遞 userId
                     );
                   },
                   child: const Text(

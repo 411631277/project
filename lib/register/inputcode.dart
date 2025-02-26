@@ -155,33 +155,47 @@ class _InputcodeWidgetState extends State<InputcodeWidget> {
     }
 
     try {
-      // **搜尋 Firestore，檢查是否有配對碼相符的用戶**
+      // **搜尋 Firestore，先獲取配對碼**
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('配對碼', isEqualTo: inputCode)
-          .where('配對碼已使用', isEqualTo: false) // 只檢查未使用的配對碼
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        logger.i("✅ 配對碼正確，進入註冊頁面");
+        // **取得第一筆符合的文件**
+        var userDoc = querySnapshot.docs.first;
 
-        if (context.mounted) {
-          if (!mounted) return;
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FaRegisterWidget(
-                pairingCode: inputCode,
-                role: '爸爸',
-              ), // 🟢 傳遞配對碼
-            ),
-          );
+        // **手動檢查 "配對碼已使用" 欄位**
+        bool isPairingUsed = userDoc.data().toString().contains('配對碼已使用')
+            ? (userDoc['配對碼已使用'] ?? false)
+            : false;
+
+        if (!isPairingUsed) {
+          logger.i("✅ 配對碼正確，進入註冊頁面");
+
+          if (context.mounted) {
+            if (!mounted) return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FaRegisterWidget(
+                  pairingCode: inputCode,
+                  role: '爸爸',
+                ), // 🟢 傳遞配對碼
+              ),
+            );
+          }
+        } else {
+          setState(() {
+            errorMessage = "配對碼已被使用，請重新輸入";
+          });
+          logger.e("❌ 配對碼已被使用");
         }
       } else {
         setState(() {
-          errorMessage = "配對碼錯誤或已被使用，請重新輸入";
+          errorMessage = "配對碼錯誤，請重新輸入";
         });
-        logger.e("❌ 配對碼錯誤或已被使用");
+        logger.e("❌ 配對碼錯誤");
       }
     } catch (e) {
       setState(() {

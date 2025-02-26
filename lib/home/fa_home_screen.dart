@@ -39,9 +39,11 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
   /// **🔹 讀取 Firebase Storage 內的圖片**
   Future<void> _loadProfilePicture() async {
     try {
+      String userType = widget.isManUser ? 'man_users' : 'users';
       String downloadUrl = await FirebaseStorage.instance
-          .ref('profile_pictures/${widget.userId}.jpg')
+          .ref('profile_pictures/$userType/${widget.userId}.jpg')
           .getDownloadURL();
+
       setState(() {
         _profileImageUrl = downloadUrl;
       });
@@ -57,7 +59,9 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
 
     try {
       File file = File(image.path);
-      String filePath = 'profile_pictures/${widget.userId}.jpg';
+      String userType =
+          widget.isManUser ? 'man_users' : 'users'; // 🔹 根據類別決定存儲位置
+      String filePath = 'profile_pictures/$userType/${widget.userId}.jpg';
 
       // **🔹 上傳到 Firebase Storage**
       await FirebaseStorage.instance.ref(filePath).putFile(file);
