@@ -69,7 +69,7 @@ class ReviseWidget extends StatelessWidget {
                   ),
                   onPressed: () {
                     Navigator.pushNamed(context,
-                        isManUser ? '/HomeScreenWidget' : '/FaHomeScreenWidget',
+                        isManUser ? '/FaHomeScreenWidget' : '/HomeScreenWidget',
                         arguments: {
                           'userId': userId,
                           'isManUser': isManUser,

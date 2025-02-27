@@ -138,7 +138,7 @@ class _DetaWidgetState extends State<DetaWidget> {
                     if (!context.mounted) return;
                     Navigator.pushNamed(context, '/ReviseWidget', arguments: {
                       'userId': widget.userId,
-                      'isManUser': true,
+                      'isManUser': widget.isManUser,
                     } // ✅ 傳遞 userId
                         );
                   }),
