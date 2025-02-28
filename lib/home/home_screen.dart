@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:doctor_2/home/baby.dart';
+import 'package:doctor_2/home/bluetooth.dart';
 import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/robot.dart';
 import 'package:doctor_2/home/setting.dart';
@@ -235,76 +236,28 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     ),
                   ),
                 ),
-                // 今日步數區塊
                 Positioned(
-                  top: screenHeight * 0.45,
-                  left: screenWidth * 0.05,
-                  child: Text(
-                    '今日步數',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(165, 146, 125, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.045,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: screenHeight * 0.49,
-                  left: screenWidth * 0.05,
-                  child: Text(
-                    '步數未達標!',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(165, 146, 125, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.045,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: screenHeight * 0.45,
-                  left: screenWidth * 0.5,
-                  child: Text(
-                    '昨日步數',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(165, 146, 125, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.045,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: screenHeight * 0.41,
-                  left: screenWidth * 0.35,
-                  child: Divider(
-                    color: const Color.fromRGBO(147, 129, 108, 1),
-                    thickness: 1,
-                  ),
-                ),
-                // 今日步數數值
-                Positioned(
-                  top: screenHeight * 0.45,
-                  left: screenWidth * 0.3,
-                  child: Text(
-                    '8623',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(147, 129, 108, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.045,
-                    ),
-                  ),
-                ),
-                // 昨日步數數值
-                Positioned(
-                  top: screenHeight * 0.45,
-                  left: screenWidth * 0.75,
-                  child: Text(
-                    '8380',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(147, 129, 108, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.045,
-                    ),
-                  ),
+                  top: screenHeight * 0.3,
+                  left: screenWidth * 0.08,
+                  child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BluetoothWidget(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: screenWidth * 0.13,
+                        height: screenHeight * 0.08,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/bluetooth.png'),
+                            fit: BoxFit.fitWidth,
+                          ),
+                        ),
+                      )),
                 ),
                 // Baby 圖片
                 Positioned(

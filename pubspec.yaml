@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    
   image_picker: ^1.0.4
   firebase_storage: ^12.4.3
   auto_size_text: ^3.0.0
@@ -23,6 +24,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   webview_flutter: ^4.10.0
+  flutter_blue_plus: ^1.16.0
 
 dev_dependencies:
   flutter_test:
@@ -51,4 +53,5 @@ flutter:
     - assets/images/pregnancy.png
     - assets/images/happy.png
     - assets/images/sad.png
+    - assets/images/bluetooth.png
 
