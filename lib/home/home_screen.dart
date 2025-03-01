@@ -36,7 +36,6 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
   int _stepCount = 0; // 🔹 計步數
   StreamSubscription<StepCount>? _stepSubscription; // 🔹 訂閱計步數據
-  int? _lastSavedSteps;
 
   @override
   void initState() {
@@ -44,10 +43,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     _loadUserName();
     _loadBabyName();
     _loadProfilePicture(); // 🔹 初始化時讀取使用者名稱
-
-    _stepCount = 0;
     _loadStepCountFromFirebase();
-
+    logger.i("初始化時 _stepCount: $_stepCount");
     requestPermission(); // 🔹 請求計步權限
     initPedometer(); // 🔹 初始化計步器
   }
@@ -113,15 +110,24 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     try {
       DocumentSnapshot doc = await FirebaseFirestore.instance
           .collection('users')
-          .doc(widget.userId)
+          .doc(widget.userId) // **不同使用者的 ID**
+          .collection('count')
+          .doc('steps')
           .get();
 
       if (doc.exists && doc.data() != null) {
+        int firebaseStepCount = (doc.data() as Map<String, dynamic>)['步數'] ?? 0;
+
         setState(() {
-          _lastSavedSteps = (doc.data() as Map<String, dynamic>)['步數'] ?? 0;
-          _stepCount = _lastSavedSteps!;
+          _stepCount = firebaseStepCount;
         });
-        logger.i("✅ 載入 Firebase 步數：$_stepCount");
+
+        logger.i("✅ 讀取 Firebase 步數（使用者: ${widget.userId}）: $_stepCount");
+      } else {
+        logger.w("⚠️ 找不到 ${widget.userId} 的步數資料，預設為 0");
+        setState(() {
+          _stepCount = 0;
+        });
       }
     } catch (e) {
       logger.e("❌ 讀取步數錯誤: $e");
@@ -171,9 +177,11 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
-          .set({'步數': _stepCount}, SetOptions(merge: true)); // ✅ 確保數據不被覆蓋
+          .collection('count') // **✅ 進入 count 子集合**
+          .doc('steps') // **✅ 固定文件名稱為 steps**
+          .set({'步數': _stepCount}); // **✅ 存步數數據**
 
-      logger.i("✅ 步數已更新至 Firebase: $_stepCount");
+      logger.i("✅ ${widget.userId} 的步數已更新至 Firebase: $_stepCount");
     } catch (e) {
       logger.e("❌ 步數更新失敗: $e");
     }
@@ -190,7 +198,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
   @override
   void dispose() {
-    _stepSubscription?.cancel(); // **🔹 取消監聽**
+    _stepSubscription?.cancel();
+    _stepCount = 0; // ✅ 確保切換帳號時步數被重置
     super.dispose();
   }
 

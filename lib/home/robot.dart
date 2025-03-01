@@ -28,20 +28,20 @@ class _RobotWidgetState extends State<RobotWidget> {
         _messages.add({'sender': 'user', 'text': message});
         _messages.add({'sender': 'chatgpt', 'text': '正在思考...'});
       });
+      _messageController.clear();
 
       try {
-        final response = await http.post(
-          Uri.parse(apiUrl),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'query': message}),
-        );
+        final response = await http.post(Uri.parse(apiUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'message': message}));
 
         if (response.statusCode == 200) {
           // **直接處理為純文字，無需解析 JSON**
-          final reply = response.body.trim().replaceAll("\n", " ");
+          final reply = utf8.decode(response.bodyBytes).trim();
 
           setState(() {
-            _messages.last['text'] = reply; // 更新「正在思考...」的訊息
+            _messages.last['text'] =
+                reply.replaceAll("\\n", "\n"); // 更新「正在思考...」的訊息
           });
         } else {
           setState(() {

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:doctor_2/main.screen.dart';
@@ -19,27 +18,12 @@ class SignoutWidget extends StatelessWidget {
   // **登出處理邏輯**
   Future<void> _handleLogout(BuildContext context) async {
     try {
-      // 先存入當前步數
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .update({'步數': stepCount});
+      logger.i("登出: $userId，但不重置步數");
 
-      logger.i("✅ 登出前已儲存步數: $stepCount");
+      // **清除本地端的變數**
 
-      // **步數歸零**
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .update({'步數': 0});
-
-      logger.i("🔄 登出時步數已歸零");
-
-      // **本地端重置步數**
-      updateStepCount(0);
-
-      // 跳轉到登入頁面
       if (!context.mounted) return;
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MainScreenWidget()),
