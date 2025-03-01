@@ -14,8 +14,14 @@ final Logger logger = Logger();
 class FaHomeScreenWidget extends StatefulWidget {
   final String userId; // 🔹 從登入或註冊時傳入的 userId
   final bool isManUser;
-  const FaHomeScreenWidget(
-      {super.key, required this.userId, required this.isManUser});
+  final Function(int) updateStepCount;
+
+  const FaHomeScreenWidget({
+    super.key,
+    required this.userId,
+    required this.isManUser,
+    required this.updateStepCount,
+  });
 
   @override
   State<FaHomeScreenWidget> createState() => _FaHomeScreenWidgetState();
@@ -162,6 +168,8 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
                           builder: (context) => SettingWidget(
                             userId: widget.userId,
                             isManUser: true,
+                            stepCount: 0,
+                            updateStepCount: (steps) {},
                           ),
                         ),
                       );

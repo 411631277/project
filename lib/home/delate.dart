@@ -6,7 +6,13 @@ final Logger logger = Logger();
 
 class DeleteWidget extends StatelessWidget {
   final String userId; // ✅ 從上一頁傳入 userId
-  const DeleteWidget({super.key, required this.userId});
+
+  final void Function(int) updateStepCount;
+  const DeleteWidget({
+    super.key,
+    required this.userId,
+    required this.updateStepCount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +66,8 @@ class DeleteWidget extends StatelessWidget {
                                 builder: (context) => Delete2Widget(
                                   userId: userId,
                                   isManUser: true,
+
+                                  updateStepCount: updateStepCount, // ✅ 傳遞更新函式
                                 ),
                               ),
                             );

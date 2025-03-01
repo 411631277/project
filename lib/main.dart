@@ -104,6 +104,7 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => FaHomeScreenWidget(
               userId: args['userId'],
               isManUser: (args['isManUser'] as bool?) ?? false,
+              updateStepCount: (steps) {},
             ),
           );
         }
@@ -119,7 +120,10 @@ class _MyAppState extends State<MyApp> {
         if (settings.name == '/DeleteWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
-            builder: (context) => DeleteWidget(userId: userId),
+            builder: (context) => DeleteWidget(
+              userId: userId,
+              updateStepCount: (steps) {},
+            ),
           );
         }
         if (settings.name == '/Delete2Widget') {
@@ -128,6 +132,7 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => Delete2Widget(
               userId: args['userId'],
               isManUser: args['isManUser'],
+              updateStepCount: (steps) {},
             ),
           );
         }

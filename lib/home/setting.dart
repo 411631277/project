@@ -17,8 +17,15 @@ final Logger logger = Logger();
 class SettingWidget extends StatefulWidget {
   final String userId; // 🔹 從登入或註冊時傳入的 userId
   final bool isManUser;
-  const SettingWidget(
-      {super.key, required this.userId, required this.isManUser});
+  final int stepCount;
+  final Function(int) updateStepCount;
+  const SettingWidget({
+    super.key,
+    required this.userId,
+    required this.isManUser,
+    required this.stepCount,
+    required this.updateStepCount,
+  });
 
   @override
   SettingWidgetState createState() => SettingWidgetState();
@@ -285,7 +292,11 @@ class SettingWidgetState extends State<SettingWidget> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const SignoutWidget(),
+                      builder: (context) => SignoutWidget(
+                        userId: widget.userId,
+                        stepCount: widget.stepCount,
+                        updateStepCount: widget.updateStepCount,
+                      ),
                     ),
                   );
                 },
@@ -328,6 +339,7 @@ class SettingWidgetState extends State<SettingWidget> {
                             ? FaHomeScreenWidget(
                                 userId: widget.userId,
                                 isManUser: true, // ⭐ 傳遞身份
+                                updateStepCount: (steps) {},
                               )
                             : HomeScreenWidget(
                                 userId: widget.userId,

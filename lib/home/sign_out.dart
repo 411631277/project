@@ -1,8 +1,53 @@
-import 'package:doctor_2/main.screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:doctor_2/main.screen.dart';
+
+final Logger logger = Logger();
 
 class SignoutWidget extends StatelessWidget {
-  const SignoutWidget({super.key});
+  final String userId; // 🔹 確保傳入使用者 ID
+  final int stepCount; // 🔹 確保傳入步數
+  final Function(int) updateStepCount;
+  const SignoutWidget({
+    super.key,
+    required this.userId,
+    required this.stepCount,
+    required this.updateStepCount,
+  });
+
+  // **登出處理邏輯**
+  Future<void> _handleLogout(BuildContext context) async {
+    try {
+      // 先存入當前步數
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .update({'步數': stepCount});
+
+      logger.i("✅ 登出前已儲存步數: $stepCount");
+
+      // **步數歸零**
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .update({'步數': 0});
+
+      logger.i("🔄 登出時步數已歸零");
+
+      // **本地端重置步數**
+      updateStepCount(0);
+
+      // 跳轉到登入頁面
+      if (!context.mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainScreenWidget()),
+      );
+    } catch (e) {
+      logger.e("❌ 登出時發生錯誤: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,14 +97,7 @@ class SignoutWidget extends StatelessWidget {
               top: screenHeight * 0.47,
               left: screenWidth * 0.22,
               child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MainScreenWidget(),
-                    ),
-                  );
-                },
+                onTap: () => _handleLogout(context), // ✅ **執行登出處理**
                 child: Container(
                   width: screenWidth * 0.2,
                   height: screenHeight * 0.05,
@@ -72,8 +110,8 @@ class SignoutWidget extends StatelessWidget {
                     '是',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      // ignore: deprecated_member_use
-                      color: Colors.black.withOpacity(0.36),
+                      color: Colors.black.withValues(
+                          alpha: (0.36 * 255).toDouble()), // ✅ 修正 withOpacity
                       fontFamily: 'Inter',
                       fontSize: screenWidth * 0.045,
                       fontWeight: FontWeight.normal,
@@ -102,8 +140,8 @@ class SignoutWidget extends StatelessWidget {
                     '否',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      // ignore: deprecated_member_use
-                      color: Colors.black.withOpacity(0.36),
+                      color: Colors.black.withValues(
+                          alpha: (0.36 * 255).toDouble()), // ✅ 修正 withOpacity
                       fontFamily: 'Inter',
                       fontSize: screenWidth * 0.045,
                       fontWeight: FontWeight.normal,

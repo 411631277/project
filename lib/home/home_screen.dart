@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:doctor_2/home/baby.dart';
-import 'package:doctor_2/home/bluetooth.dart';
 import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/robot.dart';
 import 'package:doctor_2/home/setting.dart';
@@ -10,7 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
+import 'dart:async';
 import 'dart:math' as math;
+
+import 'package:pedometer/pedometer.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 final Logger logger = Logger();
 
@@ -31,12 +34,22 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   String? _profileImageUrl;
   final ImagePicker _picker = ImagePicker();
 
+  int _stepCount = 0; // 🔹 計步數
+  StreamSubscription<StepCount>? _stepSubscription; // 🔹 訂閱計步數據
+  int? _lastSavedSteps;
+
   @override
   void initState() {
     super.initState();
     _loadUserName();
     _loadBabyName();
     _loadProfilePicture(); // 🔹 初始化時讀取使用者名稱
+
+    _stepCount = 0;
+    _loadStepCountFromFirebase();
+
+    requestPermission(); // 🔹 請求計步權限
+    initPedometer(); // 🔹 初始化計步器
   }
 
   /// **🔹 讀取 Firebase Storage 內的圖片**
@@ -95,8 +108,95 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     }
   }
 
+// **🔹 從 Firebase 載入該用戶的步數**
+  Future<void> _loadStepCountFromFirebase() async {
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .get();
+
+      if (doc.exists && doc.data() != null) {
+        setState(() {
+          _lastSavedSteps = (doc.data() as Map<String, dynamic>)['步數'] ?? 0;
+          _stepCount = _lastSavedSteps!;
+        });
+        logger.i("✅ 載入 Firebase 步數：$_stepCount");
+      }
+    } catch (e) {
+      logger.e("❌ 讀取步數錯誤: $e");
+    }
+  }
+
+// **🔹 請求計步權限**
+  Future<void> requestPermission() async {
+    try {
+      var status = await Permission.activityRecognition.request();
+      if (status.isGranted) {
+        logger.i("計步權限已允許");
+      } else if (status.isDenied) {
+        logger.w("計步權限被拒絕，功能可能無法使用");
+      } else if (status.isPermanentlyDenied) {
+        logger.e("計步權限被永久拒絕，請手動開啟權限");
+        openAppSettings();
+      }
+    } catch (e) {
+      logger.e("請求計步權限錯誤: $e");
+    }
+  }
+
+  // **🔹 初始化計步器**
+  void initPedometer() {
+    try {
+      _stepSubscription = Pedometer.stepCountStream.listen((StepCount event) {
+        if (!mounted) return;
+
+        int newSteps = event.steps;
+
+        // 只有當步數增加時，才更新 Firebase
+        if (newSteps > _stepCount) {
+          _updateStepCount(newSteps);
+        }
+      }, onError: (error) {
+        logger.e("計步器錯誤: $error");
+      });
+    } catch (e) {
+      logger.e("初始化計步器失敗: $e");
+    }
+  }
+
+  // **🔹 儲存步數到 Firebase**
+  Future<void> _saveStepCountToFirebase() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .set({'步數': _stepCount}, SetOptions(merge: true)); // ✅ 確保數據不被覆蓋
+
+      logger.i("✅ 步數已更新至 Firebase: $_stepCount");
+    } catch (e) {
+      logger.e("❌ 步數更新失敗: $e");
+    }
+  }
+
+  void _updateStepCount(int steps) {
+    setState(() {
+      _stepCount = steps;
+    });
+
+    // **⭐️ 每次更新步數時，存入 Firebase**
+    _saveStepCountToFirebase();
+  }
+
+  @override
+  void dispose() {
+    _stepSubscription?.cancel(); // **🔹 取消監聽**
+    super.dispose();
+  }
+
   // 讀取最後輸入的寶寶名稱
   // 讀取最後輸入的寶寶名稱
+
   Future<void> _loadBabyName() async {
     try {
       QuerySnapshot babySnapshot = await FirebaseFirestore.instance
@@ -153,7 +253,21 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     ),
                   ),
                 ),
-
+                Positioned(
+                  top: screenHeight * 0.3,
+                  left: screenWidth * 0.08,
+                  child: Column(
+                    children: [
+                      Text(
+                        "當前步數：$_stepCount", // **顯示計步數據**
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.05,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 // 設定按鈕
                 Positioned(
                   top: screenHeight * 0.05,
@@ -166,6 +280,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                           builder: (context) => SettingWidget(
                             userId: widget.userId,
                             isManUser: false,
+                            stepCount: _stepCount,
+                            updateStepCount: _updateStepCount,
                           ),
                         ),
                       );
@@ -236,29 +352,6 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     ),
                   ),
                 ),
-                Positioned(
-                  top: screenHeight * 0.3,
-                  left: screenWidth * 0.08,
-                  child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => BluetoothWidget(),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: screenWidth * 0.13,
-                        height: screenHeight * 0.08,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/bluetooth.png'),
-                            fit: BoxFit.fitWidth,
-                          ),
-                        ),
-                      )),
-                ),
                 // Baby 圖片
                 Positioned(
                   top: screenHeight * 0.70,
@@ -298,6 +391,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     ),
                   ),
                 ),
+
                 // Robot 圖片
                 Positioned(
                   top: screenHeight * 0.85,
@@ -354,6 +448,21 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     ),
                   ),
                 ),
+                Positioned(
+                  top: screenHeight * 0.3,
+                  left: screenWidth * 0.08,
+                  child: Column(
+                    children: [
+                      Text(
+                        "當前步數：$_stepCount", // 🔹 直接顯示計步數據
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.05,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
               ],
             )));
   }

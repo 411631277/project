@@ -260,6 +260,7 @@ class _LoginWidgetState extends State<LoginWidget> {
             builder: (context) => FaHomeScreenWidget(
               userId: userId,
               isManUser: true,
+              updateStepCount: (steps) {},
             ), // Man_users 專用頁面
           ),
         );
