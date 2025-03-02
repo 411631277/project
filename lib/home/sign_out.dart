@@ -18,12 +18,13 @@ class SignoutWidget extends StatelessWidget {
   // **登出處理邏輯**
   Future<void> _handleLogout(BuildContext context) async {
     try {
-      logger.i("登出: $userId，但不重置步數");
+      logger.i("📌 登出: $userId，但不重置 Firebase 步數");
 
-      // **清除本地端的變數**
+      // **清除本地端步數**
 
       if (!context.mounted) return;
 
+      // **回到登入畫面**
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MainScreenWidget()),
