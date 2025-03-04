@@ -42,8 +42,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   /// **記錄裝置計步器上次讀取的絕對值，用來計算增量**
   int? _lastDeviceSteps;
 
-  /// **記錄最後一次更新的日期 (YYYY-MM-DD)，用來判斷是否跨天歸零**
-  String _lastUpdated = "";
+  /// **記錄目前是哪一天 (YYYY-MM-DD)，對應到 Firebase docId**
+  String _currentDay = "";
 
   StreamSubscription<StepCount>? _stepSubscription;
 
@@ -54,8 +54,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     _loadBabyName();
     _loadProfilePicture();
 
-    // 先從 Firebase 載入當前使用者的「今天步數」資料
-    _loadStepsFromFirebase().then((_) {
+    // 載入「今天」的步數資料
+    _loadStepsForToday().then((_) {
       // 完成後再啟動計步器監聽
       initPedometer();
     });
@@ -63,76 +63,67 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     requestPermission(); // 請求計步權限
   }
 
-  /// **🔹 從 Firebase 讀取該使用者的「當天步數」與上次裝置計步器數值、最後更新日期**
-  Future<void> _loadStepsFromFirebase() async {
+  /// **🔹 從 Firebase 讀取「今天」的步數資料**
+  Future<void> _loadStepsForToday() async {
     try {
-      String today = DateTime.now().toString().substring(0, 10);
+      // 以 YYYY-MM-DD 作為 docId
+      _currentDay = DateTime.now().toString().substring(0, 10);
 
       DocumentSnapshot doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
           .collection('count')
-          .doc('stepData')
+          .doc(_currentDay) // ← 直接以 "2025-03-09" 之類當 docId
           .get(GetOptions(source: Source.server)); // 強制從伺服器讀取
 
       if (doc.exists && doc.data() != null) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         int firebaseSteps = data['步數'] ?? 0;
         int firebaseLastDeviceSteps = data['lastDeviceSteps'] ?? 0;
-        String firebaseDate = data['lastUpdated'] ?? "";
 
-        // 若記錄的日期 != 今天 => 表示跨天，需要歸零
-        if (firebaseDate != today) {
-          setState(() {
-            _stepCount = 0; // 今天重新計算
-            _lastDeviceSteps = null; // 等 pedometer 第一次事件來設定
-            _lastUpdated = today;
-          });
-          await _saveStepsToFirebase();
-          logger.i("非今天資料，已重置為 0 步，_lastDeviceSteps=null, lastUpdated=$today");
-        } else {
-          // 今天的資料，保留
-          setState(() {
-            _stepCount = firebaseSteps;
-            _lastDeviceSteps =
-                (firebaseLastDeviceSteps != 0) ? firebaseLastDeviceSteps : null;
-            _lastUpdated = firebaseDate;
-          });
-          logger.i(
-              "載入今天資料: 步數 $_stepCount, lastDeviceSteps=$_lastDeviceSteps, lastUpdated=$_lastUpdated");
-        }
+        setState(() {
+          _stepCount = firebaseSteps;
+          _lastDeviceSteps =
+              (firebaseLastDeviceSteps != 0) ? firebaseLastDeviceSteps : null;
+        });
+        logger.i(
+            "載入今天 $_currentDay 的步數: $_stepCount, lastDeviceSteps=$_lastDeviceSteps");
       } else {
-        // 該使用者沒有資料 => 初始化為今天 0 步
+        // 該日期沒有資料 => 初始化
         setState(() {
           _stepCount = 0;
           _lastDeviceSteps = null;
-          _lastUpdated = today;
         });
-        await _saveStepsToFirebase();
-        logger.i("無資料，初始化: 步數=0, lastDeviceSteps=null, lastUpdated=$today");
+        // 存回 Firebase，避免下次取不到
+        await _saveStepsForToday();
+        logger.i("今天 $_currentDay 尚無資料，已初始化: 步數=0, lastDeviceSteps=null");
       }
     } catch (e) {
       logger.e("❌ 讀取 Firebase 步數錯誤: $e");
     }
   }
 
-  /// **🔹 監聽裝置計步器事件，每天只計算「今天新增的步數」**
+  /// **🔹 監聽裝置計步器事件，若跨天就存檔到前一天，再切換到新的一天 doc**
   void initPedometer() {
     try {
       _stepSubscription = Pedometer.stepCountStream.listen((StepCount event) {
         if (!mounted) return;
 
         String today = DateTime.now().toString().substring(0, 10);
-        // 若日期變更 => 表示跨天，歸零
-        if (_lastUpdated != today) {
+
+        // 若日期變更 => 表示跨天
+        if (_currentDay != today) {
+          // 先把舊日最終步數存檔
+          _saveStepsForToday();
+
+          // 切換到新的一天
           setState(() {
+            _currentDay = today;
             _stepCount = 0;
             _lastDeviceSteps = event.steps; // 以當前裝置值作為新基準
-            _lastUpdated = today;
           });
-          _saveStepsToFirebase();
-          logger.i(
-              "跨天重置: _stepCount=0, _lastDeviceSteps=${event.steps}, lastUpdated=$today");
+          _saveStepsForToday();
+          logger.i("跨天: 由 $_currentDay 切換到 $today, 步數歸0, 基準=${event.steps}");
           return;
         }
 
@@ -144,7 +135,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
           setState(() {
             _lastDeviceSteps = currentDeviceSteps;
           });
-          _saveStepsToFirebase();
+          _saveStepsForToday();
           logger.i("第一次事件 => 設定基準: _lastDeviceSteps=$currentDeviceSteps");
           return;
         }
@@ -156,14 +147,14 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
             _stepCount += difference;
             _lastDeviceSteps = currentDeviceSteps;
           });
-          _saveStepsToFirebase();
+          _saveStepsForToday();
           logger.i("步數增加 +$difference => 總步數 $_stepCount");
         } else if (difference < 0) {
           // 如果計步器被重置或手機重開機 => 重新設定基準
           setState(() {
             _lastDeviceSteps = currentDeviceSteps;
           });
-          _saveStepsToFirebase();
+          _saveStepsForToday();
           logger.w("計步器歸零/重開機，重設基準為 $currentDeviceSteps");
         }
       }, onError: (error) {
@@ -174,22 +165,21 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     }
   }
 
-  /// **🔹 將當前的 _stepCount、_lastDeviceSteps、_lastUpdated 儲存到 Firebase**
-  Future<void> _saveStepsToFirebase() async {
+  /// **🔹 將當前的 _stepCount、_lastDeviceSteps 存到「當天 doc」中**
+  Future<void> _saveStepsForToday() async {
     try {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
           .collection('count')
-          .doc('stepData')
+          .doc(_currentDay)
           .set({
         '步數': _stepCount,
         'lastDeviceSteps': _lastDeviceSteps ?? 0,
-        'lastUpdated': _lastUpdated,
       }, SetOptions(merge: true));
 
-      logger.i("✅ 已更新 ${widget.userId} 的步數至 Firebase => "
-          "步數: $_stepCount, lastDeviceSteps: $_lastDeviceSteps, lastUpdated: $_lastUpdated");
+      logger.i(
+          "✅ 已更新 ${widget.userId} => $_currentDay, 步數: $_stepCount, 基準: $_lastDeviceSteps");
     } catch (e) {
       logger.e("❌ 步數更新失敗: $e");
     }
@@ -301,7 +291,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
         color: const Color.fromRGBO(233, 227, 213, 1),
         child: Stack(
           children: <Widget>[
-            // (1) 個人頭像
+            // 頭像
             Positioned(
               top: screenHeight * 0.03,
               left: screenWidth * 0.07,
@@ -324,9 +314,9 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
 
-            // (2) 顯示當前步數
+            // 顯示當前步數
             Positioned(
-              top: screenHeight * 0.3,
+              top: screenHeight * 0.40,
               left: screenWidth * 0.08,
               child: Column(
                 children: [
@@ -334,14 +324,14 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     "當前步數：$_stepCount",
                     style: TextStyle(
                       fontSize: screenWidth * 0.05,
-                      color: Colors.black,
+                      color: const Color.fromRGBO(165, 146, 125, 1),
                     ),
                   ),
                 ],
               ),
             ),
 
-            // (3) 設定按鈕
+            // 設定按鈕
             Positioned(
               top: screenHeight * 0.05,
               left: screenWidth * 0.77,
@@ -352,13 +342,13 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     MaterialPageRoute(
                       builder: (context) => SettingWidget(
                         userId: widget.userId,
-                        isManUser: false,
+                        isManUser: widget.isManUser,
                         stepCount: _stepCount,
                         updateStepCount: (val) {
                           setState(() {
                             _stepCount = val;
                           });
-                          _saveStepsToFirebase();
+                          _saveStepsForToday();
                         },
                       ),
                     ),
@@ -377,7 +367,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
 
-            // (4) 問題按鈕
+            // 問題按鈕
             Positioned(
               top: screenHeight * 0.05,
               left: screenWidth * 0.6,
@@ -405,7 +395,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
 
-            // (5) 用戶名稱
+            // 用戶名稱
             Positioned(
               top: screenHeight * 0.07,
               left: screenWidth * 0.32,
@@ -419,22 +409,25 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
 
-            // (6) 今日心情文字
+            // 今日心情文字
             Positioned(
-              top: screenHeight * 0.25,
-              left: screenWidth * 0.1,
-              child: Text(
-                '今天心情還好嗎?一切都會越來越好喔!',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: const Color.fromRGBO(165, 146, 125, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.05,
-                ),
+              top: screenHeight * 0.20,
+              left: screenWidth * 0.08,
+              child: SizedBox(
+                width: screenWidth * 0.84,
+                child: Text(
+                    '今天心情還好嗎?一切都會越來越好喔!\n\n'
+                    '別擔心，你已經做得很好了！每一天都是新的學習與成長，請相信自己，也別忘了好好照顧自己 ',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: const Color.fromRGBO(165, 146, 125, 1),
+                      fontFamily: 'Inter',
+                      fontSize: screenWidth * 0.05,
+                    )),
               ),
             ),
 
-            // (7) Baby 圖片
+            // Baby 圖片
             Positioned(
               top: screenHeight * 0.70,
               left: screenWidth * 0.08,
@@ -461,7 +454,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
 
-            // (8) 小寶文字
+            // 小寶文字
             Positioned(
               top: screenHeight * 0.72,
               left: screenWidth * 0.25,
@@ -476,7 +469,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
 
-            // (9) Robot 圖片
+            // Robot 圖片
             Positioned(
               top: screenHeight * 0.85,
               left: screenWidth * 0.8,
@@ -502,7 +495,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
 
-            // (10) 需要協助嗎 區塊
+            // 需要協助嗎 區塊
             Positioned(
               top: screenHeight * 0.8,
               left: screenWidth * 0.43,
@@ -530,23 +523,6 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                   fontFamily: 'Inter',
                   fontSize: screenWidth * 0.045,
                 ),
-              ),
-            ),
-
-            // (11) 再度顯示當前步數
-            Positioned(
-              top: screenHeight * 0.3,
-              left: screenWidth * 0.08,
-              child: Column(
-                children: [
-                  Text(
-                    "當前步數：$_stepCount",
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.05,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
               ),
             ),
           ],
