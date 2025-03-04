@@ -35,7 +35,7 @@ class _BreastfeedingDurationWidgetState
           children: <Widget>[
             Positioned(
               top: screenHeight * 0.25,
-              left: screenWidth * 0.15,
+              left: screenWidth * 0.18,
               child: Text(
                 '前胎哺乳持續大概幾個月?',
                 textAlign: TextAlign.center,

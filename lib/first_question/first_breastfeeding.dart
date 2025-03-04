@@ -33,7 +33,7 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
           children: <Widget>[
             Positioned(
               top: screenHeight * 0.3,
-              left: screenWidth * 0.15 - 5,
+              left: screenWidth * 0.20,
               child: const Text(
                 '目前預期純哺乳哺餵時長為\n幾個月?',
                 textAlign: TextAlign.center,

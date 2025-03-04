@@ -27,7 +27,7 @@ class BornWidget extends StatelessWidget {
           children: <Widget>[
             Positioned(
               top: screenHeight * 0.25,
-              left: screenWidth * 0.15,
+              left: screenWidth * 0.18,
               child: Text(
                 '請問寶寶出生了嗎?',
                 textAlign: TextAlign.center,

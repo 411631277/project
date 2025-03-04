@@ -108,11 +108,7 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
                     child: _buildWeightPickerField(
                         context, '目前體重', weightController),
                   ),
-                  SizedBox(width: screenWidth * 0.05),
-                  Expanded(
-                    child: _buildWeightPickerField(
-                        context, '孕前體重', prePregnancyWeightController),
-                  ),
+                  SizedBox(width: screenWidth * 0.015),
                 ],
               ),
               // 🔹 帳號&密碼&信箱&電話

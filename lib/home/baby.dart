@@ -92,7 +92,7 @@ class _BabyWidgetState extends State<BabyWidget> {
 
             Positioned(
               top: screenHeight * 0.60, // 調整文字的垂直位置
-              left: screenWidth * 0.2,
+              left: screenWidth * 0.25,
               child: const Text(
                 '寶寶出生是否有特殊狀況',
                 style: TextStyle(
@@ -224,7 +224,7 @@ class _BabyWidgetState extends State<BabyWidget> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: screenWidth * 0.40, // Label 寬度（固定比例）
+            width: screenWidth * 0.36, // Label 寬度（固定比例）
             child: Text(
               label,
               style: const TextStyle(
@@ -235,7 +235,7 @@ class _BabyWidgetState extends State<BabyWidget> {
             ),
           ),
           SizedBox(
-            width: screenWidth * 0.4, // TextField 寬度（固定比例）
+            width: screenWidth * 0.44 + 0.5, // TextField 寬度（固定比例）
             height: 32, // TextField 高度
             child: TextField(
               controller: controller,
