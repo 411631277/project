@@ -262,7 +262,7 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
                 ),
                 // Robot 圖片
                 Positioned(
-                  top: screenHeight * 0.85,
+                  top: screenHeight * 0.82,
                   left: screenWidth * 0.8,
                   child: GestureDetector(
                     onTap: () {

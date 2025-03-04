@@ -39,6 +39,9 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   /// **顯示給使用者的「當天累積步數」**
   int _stepCount = 0;
 
+  /// **目標步數 (本地變數)**
+  int _targetSteps = 5000; // 您可自訂預設值
+
   /// **記錄裝置計步器上次讀取的絕對值，用來計算增量**
   int? _lastDeviceSteps;
 
@@ -50,10 +53,11 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   @override
   void initState() {
     super.initState();
+    _currentDay = DateTime.now().toString().substring(0, 10);
     _loadUserName();
     _loadBabyName();
     _loadProfilePicture();
-
+    _loadTargetStepsFromFirebase();
     // 載入「今天」的步數資料
     _loadStepsForToday().then((_) {
       // 完成後再啟動計步器監聽
@@ -63,18 +67,53 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     requestPermission(); // 請求計步權限
   }
 
+  Future<void> _saveTargetStepsToFirebase(int newTarget) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('count')
+          .doc(_currentDay)
+          .set({'目標步數': newTarget}, SetOptions(merge: true)); // 或 set() 也行
+      logger.i("✅ 已將目標步數更新為 $newTarget");
+    } catch (e) {
+      logger.e("❌ 更新目標步數失敗: $e");
+    }
+  }
+
+  Future<void> _loadTargetStepsFromFirebase() async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('count')
+          .doc(_currentDay)
+          .get();
+
+      if (userDoc.exists && userDoc.data() != null) {
+        Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+        int firebaseTarget = data['targetSteps'] ?? 8000; // 預設 8000
+        setState(() {
+          _targetSteps = firebaseTarget;
+        });
+        logger.i("載入目標步數: $_targetSteps");
+      }
+    } catch (e) {
+      logger.e("❌ 載入目標步數失敗: $e");
+    }
+  }
+
   /// **🔹 從 Firebase 讀取「今天」的步數資料**
   Future<void> _loadStepsForToday() async {
     try {
-      // 以 YYYY-MM-DD 作為 docId
       _currentDay = DateTime.now().toString().substring(0, 10);
 
       DocumentSnapshot doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
           .collection('count')
-          .doc(_currentDay) // ← 直接以 "2025-03-09" 之類當 docId
-          .get(GetOptions(source: Source.server)); // 強制從伺服器讀取
+          .doc(_currentDay)
+          .get(GetOptions(source: Source.server));
 
       if (doc.exists && doc.data() != null) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
@@ -89,12 +128,11 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
         logger.i(
             "載入今天 $_currentDay 的步數: $_stepCount, lastDeviceSteps=$_lastDeviceSteps");
       } else {
-        // 該日期沒有資料 => 初始化
+        // 沒有資料 => 初始化
         setState(() {
           _stepCount = 0;
           _lastDeviceSteps = null;
         });
-        // 存回 Firebase，避免下次取不到
         await _saveStepsForToday();
         logger.i("今天 $_currentDay 尚無資料，已初始化: 步數=0, lastDeviceSteps=null");
       }
@@ -208,7 +246,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     super.dispose();
   }
 
-  // ============== 以下為 UI 相關程式碼，保持原樣即可 ==============
+  // ============== 以下為 UI 相關程式碼，增加目標步數功能 ==============
 
   Future<void> _loadProfilePicture() async {
     try {
@@ -281,10 +319,122 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     }
   }
 
+  void _showProfilePreviewDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true, // 點擊對話框外部可關閉
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent, // 讓對話框背景透明
+          insetPadding: EdgeInsets.all(10), // 可調整預覽視窗在畫面的邊距
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context), // 點擊背景關閉
+            child: Container(
+              color: Colors.black54, // 半透明背景
+              child: Center(
+                // 用 Center 讓內容置中
+                child: GestureDetector(
+                  // **阻擋往外層的 onTap**，避免按到預覽區域就關閉
+                  onTap: () {},
+                  child: Container(
+                    width: 300,
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white, // 預覽框底色
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // **預覽大頭貼**
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: (_profileImageUrl != null)
+                              ? Image.network(
+                                  _profileImageUrl!,
+                                  width: 200,
+                                  height: 200,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.asset(
+                                  'assets/images/Picture.png',
+                                  width: 200,
+                                  height: 200,
+                                  fit: BoxFit.cover,
+                                ),
+                        ),
+                        const SizedBox(height: 16),
+                        // **更換大頭貼按鈕**
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            // 關閉預覽視窗後，再執行選圖流程
+                            _pickAndUploadImage();
+                          },
+                          child: const Text("更換大頭貼"),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// **彈出對話框，讓使用者輸入新的目標步數**
+  Future<void> _showTargetStepsDialog() async {
+    final controller = TextEditingController(text: _targetSteps.toString());
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("設定目標步數"),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: "請輸入目標步數",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("取消"),
+            ),
+            TextButton(
+              onPressed: () {
+                final input = controller.text.trim();
+                if (input.isNotEmpty) {
+                  final newTarget = int.tryParse(input);
+                  if (newTarget != null && newTarget > 0) {
+                    setState(() {
+                      _targetSteps = newTarget;
+                    });
+                    // **同步更新到 Firebase**
+                    _saveTargetStepsToFirebase(newTarget);
+                  }
+                }
+                Navigator.pop(context);
+              },
+              child: const Text("確定"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
+    // 根據當前步數與目標步數，決定顯示文字
+    String statusText = (_stepCount >= _targetSteps) ? "今日步數已達標" : "今日步數未達標";
 
     return Scaffold(
       body: Container(
@@ -296,7 +446,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               top: screenHeight * 0.03,
               left: screenWidth * 0.07,
               child: GestureDetector(
-                onTap: _pickAndUploadImage,
+                onTap: () => _showProfilePreviewDialog(),
                 child: Container(
                   width: screenWidth * 0.20,
                   height: screenHeight * 0.12,
@@ -314,17 +464,47 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
 
-            // 顯示當前步數
+            // **顯示當前步數 & 目標步數 (可點擊)**
             Positioned(
               top: screenHeight * 0.40,
               left: screenWidth * 0.08,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 第一行: 當前步數 & 目標步數
+                  Row(
+                    children: [
+                      Text(
+                        "當前步數：$_stepCount",
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.05,
+                          color: const Color.fromRGBO(165, 146, 125, 1),
+                        ),
+                      ),
+                      SizedBox(width: screenWidth * 0.15),
+                      GestureDetector(
+                        onTap: _showTargetStepsDialog, // 點擊修改目標步數
+                        child: Text(
+                          "目標步數：$_targetSteps",
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.05,
+                            color: const Color.fromRGBO(165, 146, 125, 1),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: screenHeight * 0.02),
+
+                  // 第二行: 已達標 / 未達標
                   Text(
-                    "當前步數：$_stepCount",
+                    statusText,
                     style: TextStyle(
-                      fontSize: screenWidth * 0.05,
-                      color: const Color.fromRGBO(165, 146, 125, 1),
+                      fontSize: screenWidth * 0.045,
+                      color: (_stepCount >= _targetSteps)
+                          ? Colors.green
+                          : Colors.red,
                     ),
                   ),
                 ],
@@ -416,20 +596,21 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               child: SizedBox(
                 width: screenWidth * 0.84,
                 child: Text(
-                    '今天心情還好嗎?一切都會越來越好喔!\n\n'
-                    '別擔心，你已經做得很好了！每一天都是新的學習與成長，請相信自己，也別忘了好好照顧自己 ',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: const Color.fromRGBO(165, 146, 125, 1),
-                      fontFamily: 'Inter',
-                      fontSize: screenWidth * 0.05,
-                    )),
+                  '今天心情還好嗎?一切都會越來越好喔!\n\n'
+                  '別擔心，你已經做得很好了！每一天都是新的學習與成長，請相信自己，也別忘了好好照顧自己 ',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: const Color.fromRGBO(165, 146, 125, 1),
+                    fontFamily: 'Inter',
+                    fontSize: screenWidth * 0.05,
+                  ),
+                ),
               ),
             ),
 
             // Baby 圖片
             Positioned(
-              top: screenHeight * 0.70,
+              top: screenHeight * 0.75,
               left: screenWidth * 0.08,
               child: GestureDetector(
                 onTap: () {
@@ -456,7 +637,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
             // 小寶文字
             Positioned(
-              top: screenHeight * 0.72,
+              top: screenHeight * 0.77,
               left: screenWidth * 0.25,
               child: Text(
                 babyName,
@@ -471,7 +652,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
             // Robot 圖片
             Positioned(
-              top: screenHeight * 0.85,
+              top: screenHeight * 0.82,
               left: screenWidth * 0.8,
               child: GestureDetector(
                 onTap: () {
@@ -514,8 +695,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
             Positioned(
-              top: screenHeight * 0.82,
-              left: screenWidth * 0.48,
+              top: screenHeight * 0.81,
+              left: screenWidth * 0.52,
               child: Text(
                 '需要協助嗎?',
                 style: TextStyle(
