@@ -27,6 +27,8 @@ dependencies:
   flutter_blue_plus: ^1.16.0
   pedometer: ^4.0.2
   permission_handler: ^11.4.0
+  google_maps_flutter: ^2.10.1
+  geolocator: ^9.0.2
 
 dev_dependencies:
   flutter_test:
@@ -57,4 +59,5 @@ flutter:
     - assets/images/sad.png
     - assets/images/bluetooth.png
     - assets/images/tgos.png
+    - assets/tgos_map.html
 

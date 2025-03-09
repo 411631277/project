@@ -3,7 +3,7 @@ import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/robot.dart';
 import 'package:doctor_2/home/setting.dart';
-import 'package:doctor_2/home/tgospage.dart';
+import 'package:doctor_2/home/tgos.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -716,7 +716,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TgosTestPage(),
+                      builder: (context) => TgosMapWithGooglePage(),
                     ),
                   );
                 },

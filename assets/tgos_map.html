@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- 引入 Tgos Map API JS -->
+  <script src="https://api.tgos.tw/TGOS_API/tgloader.js"></script>
+  <style>
+    html, body {
+      margin: 0; 
+      padding: 0; 
+      height: 100%;
+    }
+    #map_div {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body onload="initMap()">
+  <div id="map_div"></div>
+
+  <script>
+    let map;
+
+    // 初始化地圖
+    function initMap() {
+      // TGCoordSys.EPSG3857 (或其他座標系統)
+      const mapOpts = {
+        // 中心點經緯度可自訂
+        center: new TGOS.TGPoint(121.5654, 25.0378), 
+        zoom: 12,
+        mapTypeId: TGOS.TGOnlineMapType.RASTER,
+      };
+
+      // 在 #map_div 容器建立 TGOnlineMap
+      map = new TGOS.TGOnlineMap(
+        document.getElementById('map_div'),
+        TGOS.TGCoordSys.EPSG3857,
+        mapOpts
+      );
+    }
+
+    // 範例：透過 JavaScript 將訊息回傳給 Flutter (選用)
+    function sendMessageToFlutter(msg) {
+      if (window.SendMessageChannel) {
+        window.SendMessageChannel.postMessage(msg);
+      }
+    }
+  </script>
+</body>
+</html>
