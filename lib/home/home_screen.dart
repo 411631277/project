@@ -3,6 +3,7 @@ import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/robot.dart';
 import 'package:doctor_2/home/setting.dart';
+import 'package:doctor_2/home/tgospage.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -522,7 +523,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     MaterialPageRoute(
                       builder: (context) => SettingWidget(
                         userId: widget.userId,
-                        isManUser: widget.isManUser,
+                        isManUser: false,
                         stepCount: _stepCount,
                         updateStepCount: (val) {
                           setState(() {
@@ -610,7 +611,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
             // Baby 圖片
             Positioned(
-              top: screenHeight * 0.75,
+              top: screenHeight * 0.65,
               left: screenWidth * 0.08,
               child: GestureDetector(
                 onTap: () {
@@ -637,7 +638,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
             // 小寶文字
             Positioned(
-              top: screenHeight * 0.77,
+              top: screenHeight * 0.67,
               left: screenWidth * 0.25,
               child: Text(
                 babyName,
@@ -652,7 +653,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
             // Robot 圖片
             Positioned(
-              top: screenHeight * 0.82,
+              top: screenHeight * 0.77,
               left: screenWidth * 0.8,
               child: GestureDetector(
                 onTap: () {
@@ -678,7 +679,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
             // 需要協助嗎 區塊
             Positioned(
-              top: screenHeight * 0.8,
+              top: screenHeight * 0.75,
               left: screenWidth * 0.43,
               child: Transform.rotate(
                 angle: -5.56 * (math.pi / 180),
@@ -695,7 +696,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
             Positioned(
-              top: screenHeight * 0.81,
+              top: screenHeight * 0.76,
               left: screenWidth * 0.52,
               child: Text(
                 '需要協助嗎?',
@@ -703,6 +704,31 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                   color: const Color.fromRGBO(255, 255, 255, 1),
                   fontFamily: 'Inter',
                   fontSize: screenWidth * 0.045,
+                ),
+              ),
+            ),
+            //tgos
+            Positioned(
+              top: screenHeight * 0.77,
+              left: screenWidth * 0.1,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TgosTestPage(),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: screenWidth * 0.35,
+                  height: screenHeight * 0.25,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/tgos.png'),
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
                 ),
               ),
             ),

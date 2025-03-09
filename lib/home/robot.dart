@@ -109,7 +109,7 @@ class _RobotWidgetState extends State<RobotWidget> {
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                             color: isUser
-                                ? Colors.blue.shade100
+                                ? const Color.fromARGB(255, 13, 13, 13)
                                 : Colors.brown.shade100,
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -121,7 +121,9 @@ class _RobotWidgetState extends State<RobotWidget> {
                             textAlign: TextAlign.left, // 文字靠左對齊
                             style: TextStyle(
                               fontSize: 14,
-                              color: isUser ? Colors.black : Colors.white,
+                              color: isUser
+                                  ? Colors.black
+                                  : const Color.fromARGB(255, 0, 0, 0),
                             ),
                           ),
                         ),
