@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <!-- 引入 Tgos Map API JS -->
+  <!-- 引入 Tgos Map API 主程式 (TGOS_API 3) -->
   <script src="https://api.tgos.tw/TGOS_API/tgloader.js"></script>
   <style>
     html, body {
@@ -22,17 +22,16 @@
   <script>
     let map;
 
-    // 初始化地圖
+    // ✅ 初始化 Tgos 地圖
     function initMap() {
-      // TGCoordSys.EPSG3857 (或其他座標系統)
+      // TGCoordSys.EPSG3857 或其他座標系統
       const mapOpts = {
-        // 中心點經緯度可自訂
-        center: new TGOS.TGPoint(121.5654, 25.0378), 
+        center: new TGOS.TGPoint(121.5654, 25.0378), // 台北市座標
         zoom: 12,
-        mapTypeId: TGOS.TGOnlineMapType.RASTER,
+        mapTypeId: TGOS.TGOnlineMapType.RASTER
       };
 
-      // 在 #map_div 容器建立 TGOnlineMap
+      // 在 #map_div 建立 Tgos 地圖
       map = new TGOS.TGOnlineMap(
         document.getElementById('map_div'),
         TGOS.TGCoordSys.EPSG3857,
@@ -40,11 +39,33 @@
       );
     }
 
-    // 範例：透過 JavaScript 將訊息回傳給 Flutter (選用)
+    // ✅ 範例：機器人函式，可讓 JS 回傳訊息給 Flutter (選用)
     function sendMessageToFlutter(msg) {
       if (window.SendMessageChannel) {
         window.SendMessageChannel.postMessage(msg);
       }
+    }
+
+    // ✅ 範例：查詢 POI
+    // 依需求使用 TGPoiService 或 TGLocateService
+    function searchPoi(keyword) {
+      // 這裡示範 TGPoiService (可能需要金鑰 or 參數)
+      // TGPoiService API 寫法請參考 Tgos 官方文件
+      // (以下僅示範結構)
+      const param = new TGOS.TGPoiParam();
+      param.baseLayer = TGOS.TGCoordSys.EPSG3857;
+      param.keyword = keyword;
+      // ... 其他參數
+
+      const poiService = new TGOS.TGPoiService();
+      poiService.poiQuery(param, function(result, status) {
+        if (status === 0) {
+          // result 可能包含 poiList
+          // 這裡可透過 sendMessageToFlutter(JSON.stringify(result)) 傳回 Flutter
+        } else {
+          sendMessageToFlutter('POI查詢失敗, status=' + status);
+        }
+      });
     }
   </script>
 </body>
