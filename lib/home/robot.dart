@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logger/logger.dart';
+
+final Logger logger = Logger();
 
 class RobotWidget extends StatefulWidget {
   const RobotWidget({super.key});
@@ -41,7 +44,7 @@ class _RobotWidgetState extends State<RobotWidget> {
         final prefs = await SharedPreferences.getInstance();
         String sessionId = prefs.getString('session_id') ?? "anonymous_user";
 
-        print("📡 發送請求，session_id: $sessionId");
+        logger.e("📡 發送請求，session_id: $sessionId");
 
         final response = await http.post(
           Uri.parse(apiUrl),
