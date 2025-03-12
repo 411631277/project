@@ -16,7 +16,7 @@ class _TgosMapPageState extends State<TgosMapPage> {
     super.initState();
     controller = WebViewController()
       ..loadRequest(
-        Uri.parse('https://flutter.dev'), // 替換為你想顯示的網站
+        Uri.parse('https://www.tgos.tw/tgos'), // 替換為你想顯示的網站
       );
   }
 
@@ -24,7 +24,7 @@ class _TgosMapPageState extends State<TgosMapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter WebView'),
+        title: const Text('TGOS 地圖平台'),
       ),
       body: WebViewWidget(
         controller: controller,
