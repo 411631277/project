@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RobotWidget extends StatefulWidget {
   const RobotWidget({super.key});
@@ -14,6 +15,10 @@ class _RobotWidgetState extends State<RobotWidget> {
   final List<Map<String, String>> _messages = [];
   final String apiUrl = "http://180.176.211.159:8000/query";
   // 聊天記錄
+  Future<String> getSessionId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('session_id') ?? "anonymous_user";
+  }
 
   @override
   void initState() {
@@ -26,31 +31,42 @@ class _RobotWidgetState extends State<RobotWidget> {
     if (message.isNotEmpty) {
       setState(() {
         _messages.add({'sender': 'user', 'text': message});
-        _messages.add({'sender': 'chatgpt', 'text': '正在思考...'});
+        _messages.add({'sender': 'chatgpt', 'text': '🤖 正在思考...'});
       });
+
       _messageController.clear();
 
       try {
-        final response = await http.post(Uri.parse(apiUrl),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'message': message}));
+        //  讀取 session_id
+        final prefs = await SharedPreferences.getInstance();
+        String sessionId = prefs.getString('session_id') ?? "anonymous_user";
+
+        print("📡 發送請求，session_id: $sessionId");
+
+        final response = await http.post(
+          Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'message': message,
+            'session_id': sessionId, //確保發送 session_id
+          }),
+        );
 
         if (response.statusCode == 200) {
           // **直接處理為純文字，無需解析 JSON**
           final reply = utf8.decode(response.bodyBytes).trim();
 
           setState(() {
-            _messages.last['text'] =
-                reply.replaceAll("\\n", "\n"); // 更新「正在思考...」的訊息
+            _messages.last['text'] = reply.replaceAll("\\n", "\n");
           });
         } else {
           setState(() {
-            _messages.last['text'] = '伺服器錯誤，請稍後再試。';
+            _messages.last['text'] = '⚠️ 伺服器錯誤，請稍後再試。';
           });
         }
       } catch (e) {
         setState(() {
-          _messages.last['text'] = '無法連接到伺服器，請檢查網路或稍後再試。';
+          _messages.last['text'] = '⚠️ 無法連接到伺服器，請檢查網路或稍後再試。';
         });
       }
 
@@ -109,7 +125,7 @@ class _RobotWidgetState extends State<RobotWidget> {
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                             color: isUser
-                                ? const Color.fromARGB(255, 13, 13, 13)
+                                ? Colors.blue.shade100
                                 : Colors.brown.shade100,
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -121,9 +137,7 @@ class _RobotWidgetState extends State<RobotWidget> {
                             textAlign: TextAlign.left, // 文字靠左對齊
                             style: TextStyle(
                               fontSize: 14,
-                              color: isUser
-                                  ? Colors.black
-                                  : const Color.fromARGB(255, 0, 0, 0),
+                              color: isUser ? Colors.black : const Color.fromARGB(255, 0, 0, 0),
                             ),
                           ),
                         ),
