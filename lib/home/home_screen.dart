@@ -467,7 +467,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
             // **顯示當前步數 & 目標步數 (可點擊)**
             Positioned(
-              top: screenHeight * 0.40,
+              top: screenHeight * 0.45,
               left: screenWidth * 0.08,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -104,6 +104,11 @@ class _Sleep2Widget extends State<Sleep2Widget> {
                       ),
                       for (int i = 0; i < questions.length; i++)
                         TableRow(
+                          decoration: BoxDecoration(
+      color: answers[i] != null
+          ? const Color.fromARGB(255, 241, 215, 237) // 已回答時
+          :  Color.fromRGBO(233, 227, 213, 1)  ,          // 未回答時
+    ),
                           children: [
                             Text("${i + 1}. ${questions[i]}",
                                 style: const TextStyle(fontSize: 14)),
