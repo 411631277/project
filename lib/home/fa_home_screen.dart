@@ -337,7 +337,10 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => RobotWidget(),
+                      builder: (context) => RobotWidget(
+                        userId: widget.userId,
+                        isManUser: true,
+                      ),
                     ),
                   );
                 },

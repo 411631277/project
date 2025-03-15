@@ -660,7 +660,10 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => RobotWidget(),
+                      builder: (context) => RobotWidget(
+                        userId: widget.userId,
+                        isManUser: false,
+                      ),
                     ),
                   );
                 },

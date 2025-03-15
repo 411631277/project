@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
 
 final Logger logger = Logger();
 
 class RobotWidget extends StatefulWidget {
-  const RobotWidget({super.key});
+  final String userId; // 直接從外部傳入
+  final bool isManUser; // 傳入是否為 manUser
+
+  const RobotWidget({
+    super.key,
+    required this.userId,
+    required this.isManUser,
+  });
 
   @override
   State<RobotWidget> createState() => _RobotWidgetState();
@@ -16,50 +22,52 @@ class RobotWidget extends StatefulWidget {
 class _RobotWidgetState extends State<RobotWidget> {
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String>> _messages = [];
+
+  // 改成 userId + isManUser
   final String apiUrl = "http://180.176.211.159:8000/query";
-  // 聊天記錄
-  Future<String> getSessionId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('session_id') ?? "anonymous_user";
-  }
 
   @override
   void initState() {
     super.initState();
-    // 頁面初始化時，ChatGPT 自動發送初始訊息
-    _messages.add({'sender': 'chatgpt', 'text': '你好，請問有需要幫助什麼嗎?'});
+    // 初始化聊天時，ChatGPT 自動發送一句話
+    _messages.add({
+      'sender': 'chatgpt',
+      'text': '你好，請問有需要幫助什麼嗎?',
+    });
   }
 
   Future<void> _sendMessage(String message) async {
     if (message.isNotEmpty) {
       setState(() {
+        // 1. 加入使用者訊息
         _messages.add({'sender': 'user', 'text': message});
+        // 2. 加入機器人「思考中」提示
         _messages.add({'sender': 'chatgpt', 'text': '🤖 正在思考...'});
       });
 
       _messageController.clear();
 
       try {
-        //  讀取 session_id
-        final prefs = await SharedPreferences.getInstance();
-        String sessionId = prefs.getString('session_id') ?? "anonymous_user";
-
-        logger.e("📡 發送請求，session_id: $sessionId");
+        // 直接使用 widget.userId + widget.isManUser
+        logger.i(
+            "📡 發送請求給 API: user_id=${widget.userId}, isManUser=${widget.isManUser}");
 
         final response = await http.post(
           Uri.parse(apiUrl),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'message': message,
-            'session_id': sessionId, //確保發送 session_id
+            'user_id': widget.userId, // 取代 session_id
+            'is_man_user': widget.isManUser, // 傳送是否 manUser
           }),
         );
 
         if (response.statusCode == 200) {
-          // **直接處理為純文字，無需解析 JSON**
+          // 直接處理為純文字
           final reply = utf8.decode(response.bodyBytes).trim();
 
           setState(() {
+            // 將最後一則 "🤖 正在思考..." 改為真正回覆
             _messages.last['text'] = reply.replaceAll("\\n", "\n");
           });
         } else {
@@ -72,8 +80,6 @@ class _RobotWidgetState extends State<RobotWidget> {
           _messages.last['text'] = '⚠️ 無法連接到伺服器，請檢查網路或稍後再試。';
         });
       }
-
-      _messageController.clear();
     }
   }
 
@@ -96,7 +102,7 @@ class _RobotWidgetState extends State<RobotWidget> {
         color: const Color.fromRGBO(233, 227, 213, 1),
         child: Column(
           children: [
-            // 顯示聊天內容
+            // 聊天內容
             Expanded(
               child: ListView.builder(
                 padding:
@@ -116,7 +122,7 @@ class _RobotWidgetState extends State<RobotWidget> {
                         Container(
                           margin: const EdgeInsets.only(right: 10),
                           child: Image.asset(
-                            'assets/images/Robot.png', // 替換為你的機器人圖片路徑
+                            'assets/images/Robot.png',
                             width: 30,
                             height: 30,
                           ),
@@ -134,13 +140,13 @@ class _RobotWidgetState extends State<RobotWidget> {
                           ),
                           child: Text(
                             message['text']!,
-                            softWrap: true, // 確保文字自動換行
-                            maxLines: null, // 允許無限行，不會被限制
-                            overflow: TextOverflow.visible, // 確保不會省略文字
-                            textAlign: TextAlign.left, // 文字靠左對齊
+                            softWrap: true,
+                            maxLines: null,
+                            overflow: TextOverflow.visible,
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               fontSize: 14,
-                              color: isUser ? Colors.black : const Color.fromARGB(255, 0, 0, 0),
+                              color: Colors.black,
                             ),
                           ),
                         ),
