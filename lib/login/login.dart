@@ -219,63 +219,98 @@ class _LoginWidgetState extends State<LoginWidget> {
       return;
     }
 
-    try {
-      // 先查詢 users 集合
-      QuerySnapshot userQuery = await FirebaseFirestore.instance
-          .collection('users')
-          .where('帳號', isEqualTo: account)
-          .where('密碼', isEqualTo: password)
-          .get();
+      try {
+    // 先檢查是否在 freeze -> user
+    final freezeUserQuery = await FirebaseFirestore.instance
+        .collection('freeze')
+        .doc('user')
+        .collection('user')
+        .where('帳號', isEqualTo: account)
+        .where('密碼', isEqualTo: password)
+        .get();
 
-      if (!mounted) return;
-
-      if (userQuery.docs.isNotEmpty) {
-        String userId = userQuery.docs.first.id;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreenWidget(
-              userId: userId,
-              isManUser: true,
-            ), // 一般使用者頁面
-          ),
-        );
-        return;
-      }
-
-      // 如果 users 查不到，再查詢 Man_users 集合
-      QuerySnapshot manUserQuery = await FirebaseFirestore.instance
-          .collection('Man_users')
-          .where('帳號', isEqualTo: account)
-          .where('密碼', isEqualTo: password)
-          .get();
-
-      if (!mounted) return;
-
-      if (manUserQuery.docs.isNotEmpty) {
-        String userId = manUserQuery.docs.first.id;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => FaHomeScreenWidget(
-              userId: userId,
-              isManUser: true,
-              updateStepCount: (steps) {},
-            ), // Man_users 專用頁面
-          ),
-        );
-      } else {
-        setState(() {
-          errorMessage = "帳號或密碼錯誤";
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          errorMessage = "登入失敗，請稍後再試";
-        });
-      }
-      logger.e("❌ 登入錯誤: $e");
+    if (freezeUserQuery.docs.isNotEmpty) {
+      // 如果在 freeze -> user 找到 => 此帳號已凍結
+      setState(() {
+        errorMessage = "此帳號已遭到凍結";
+      });
+      return;
     }
+
+    // 再檢查是否在 freeze -> man_user
+    final freezeManQuery = await FirebaseFirestore.instance
+        .collection('freeze')
+        .doc('man_user')
+        .collection('man_user')
+        .where('帳號', isEqualTo: account)
+        .where('密碼', isEqualTo: password)
+        .get();
+
+    if (freezeManQuery.docs.isNotEmpty) {
+      setState(() {
+        errorMessage = "此帳號已遭到凍結";
+      });
+      return;
+    }
+
+    // ★ 若都沒有在 freeze 裡 => 繼續原本流程：查 users
+    QuerySnapshot userQuery = await FirebaseFirestore.instance
+        .collection('users')
+        .where('帳號', isEqualTo: account)
+        .where('密碼', isEqualTo: password)
+        .get();
+
+    if (!mounted) return;
+
+    if (userQuery.docs.isNotEmpty) {
+      String userId = userQuery.docs.first.id;
+      // 這裡注意 isManUser 參數是否為 false
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreenWidget(
+            userId: userId,
+            isManUser: false, // 這裡要確定傳對
+          ),
+        ),
+      );
+      return;
+    }
+
+    // ★ 如果 users 查不到，再查 Man_users
+    QuerySnapshot manUserQuery = await FirebaseFirestore.instance
+        .collection('Man_users')
+        .where('帳號', isEqualTo: account)
+        .where('密碼', isEqualTo: password)
+        .get();
+
+    if (!mounted) return;
+
+    if (manUserQuery.docs.isNotEmpty) {
+      String userId = manUserQuery.docs.first.id;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FaHomeScreenWidget(
+            userId: userId,
+            isManUser: true,
+            updateStepCount: (steps) {},
+          ),
+        ),
+      );
+    } else {
+      // ★ 都沒有 => 帳號或密碼錯誤
+      setState(() {
+        errorMessage = "帳號或密碼錯誤";
+      });
+    }
+  } catch (e) {
+    if (mounted) {
+      setState(() {
+        errorMessage = "登入失敗，請稍後再試";
+      });
+    }
+    logger.e("❌ 登入錯誤: $e");
   }
+}
 }
