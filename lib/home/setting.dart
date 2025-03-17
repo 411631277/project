@@ -94,7 +94,7 @@ class SettingWidgetState extends State<SettingWidget> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const NotifyWidget(),
+                      builder: (context) => NotifyWidget(userId: widget.userId, isManUser: widget.isManUser,),
                     ),
                   );
                 },

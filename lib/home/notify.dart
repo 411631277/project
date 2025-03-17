@@ -1,17 +1,44 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotifyWidget extends StatefulWidget {
-  const NotifyWidget({super.key});
+  final String userId;
+  final bool isManUser;
+  const NotifyWidget({super.key, required this.userId , required this.isManUser});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _NotifyWidgetState createState() => _NotifyWidgetState();
+  NotifyWidgetState createState() => NotifyWidgetState();
 }
 
-class _NotifyWidgetState extends State<NotifyWidget> {
-  bool isBodyDataReminderOn = false; // 運動提醒的開關狀態
- 
+class NotifyWidgetState extends State<NotifyWidget> {
+  bool isBodyDataReminderOn = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSwitchState(); 
+  }
+
+   Future<void> _loadSwitchState() async {
+    final prefs = await SharedPreferences.getInstance();
+    // 依據 isManUser 產生不同 key
+    final typeKey = widget.isManUser ? 'man' : 'woman';
+    final key = 'exerciseReminder_${typeKey}_${widget.userId}';
+
+    bool storedValue = prefs.getBool(key) ?? true;
+    setState(() {
+      isBodyDataReminderOn = storedValue;
+    });
+  }
+
+   Future<void> _saveSwitchState(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    final typeKey = widget.isManUser ? 'man' : 'woman';
+    final key = 'exerciseReminder_${typeKey}_${widget.userId}';
+
+    await prefs.setBool(key, value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +69,7 @@ class _NotifyWidgetState extends State<NotifyWidget> {
                 ),
               ),
             ),
-            // 身體數據量測提醒
+            // 運動提醒
             Positioned(
               top: screenHeight * 0.38,
               left: screenWidth * 0.1,
@@ -67,17 +94,18 @@ class _NotifyWidgetState extends State<NotifyWidget> {
                   setState(() {
                     isBodyDataReminderOn = newValue;
                   });
+                  _saveSwitchState(newValue); // 同步儲存到 SharedPreferences
                 },
               ),
             ),
-           
+
             // 返回按鈕
             Positioned(
               top: screenHeight * 0.75,
               left: screenWidth * 0.1,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.pop(context); // 返回上一頁
+                  Navigator.pop(context);
                 },
                 child: Transform.rotate(
                   angle: math.pi,
