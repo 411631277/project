@@ -6,12 +6,12 @@ final Logger logger = Logger();
 
 class DeleteWidget extends StatelessWidget {
   final String userId; // ✅ 從上一頁傳入 userId
-
+  final bool isManUser;
   final void Function(int) updateStepCount;
   const DeleteWidget({
     super.key,
     required this.userId,
-    required this.updateStepCount,
+    required this.updateStepCount, required this.isManUser,
   });
 
   @override
@@ -65,7 +65,7 @@ class DeleteWidget extends StatelessWidget {
                               MaterialPageRoute(
                                 builder: (context) => Delete2Widget(
                                   userId: userId,
-                                  isManUser: true,
+                                  isManUser: isManUser,
 
                                   updateStepCount: updateStepCount, // ✅ 傳遞更新函式
                                 ),

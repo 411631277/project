@@ -36,6 +36,7 @@ import 'function/firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/l10n.dart';
 import 'package:logger/logger.dart';
+import 'package:flutter/services.dart';
 
 //註解已完成
 
@@ -46,6 +47,12 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+   await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,    // 直式向上
+    DeviceOrientation.portraitDown,  // 直式向下 (可選，通常也一起加)
+  ]);
+
   runApp(const MyApp());
 }
 
@@ -91,7 +98,7 @@ Locale _locale = const Locale('zh', 'TW'); // 默認語言為繁體中文
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      
+
       //路由
       routes: {
         '/': (context) => const MainScreenWidget(), // 主畫面
@@ -122,10 +129,11 @@ Locale _locale = const Locale('zh', 'TW'); // 默認語言為繁體中文
           );
         }
         if (settings.name == '/DeleteWidget') {
-          final userId = settings.arguments as String;
+         final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => DeleteWidget(
-              userId: userId,
+              userId: args['userId'],
+              isManUser: args['isManUser'],
               updateStepCount: (steps) {},
             ),
           );

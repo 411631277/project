@@ -31,7 +31,7 @@ class DeleteAccWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
                     Text(
-                      '帳號刪除成功!!!',
+                      '此帳號已暫時凍結',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
@@ -42,7 +42,7 @@ class DeleteAccWidget extends StatelessWidget {
                     ),
                     SizedBox(height: 15),
                     Text(
-                      '下次登入請重新註冊帳號',
+                      '7天後將會自動刪除帳號',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
