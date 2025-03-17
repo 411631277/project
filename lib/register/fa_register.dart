@@ -1,4 +1,4 @@
-import 'package:doctor_2/main.screen.dart';
+import 'package:doctor_2/function/main.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/services/firestore_service.dart';
@@ -9,20 +9,21 @@ import 'package:intl/intl.dart';
 //註解已完成
 
 final FirestoreService firestoreService = FirestoreService();
-
 final Logger logger = Logger();
+
 
 class FaRegisterWidget extends StatefulWidget {
   final String pairingCode;
-  const FaRegisterWidget(
-      {super.key, required String role, required this.pairingCode});
+  const FaRegisterWidget( {super.key, required String role, required this.pairingCode} );
 
   @override
   FaRegisterWidgetState createState() => FaRegisterWidgetState();
-}
-
-// 🔹 用戶輸入控制器
-class FaRegisterWidgetState extends State<FaRegisterWidget> {
+  }
+  
+  bool _obscurePassword = true;
+  
+  // 🔹 用戶輸入控制器
+  class FaRegisterWidgetState extends State<FaRegisterWidget> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController birthController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
@@ -33,8 +34,10 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController accountController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
+  
   // 🔹 用戶選擇資料
+  String? _accountCheckMessage;
+  Color _accountCheckColor = Colors.transparent;
   String? maritalStatus;
   bool isEmailPreferred = false;
   bool isPhonePreferred = false;
@@ -44,7 +47,7 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
     "是否會吸菸?": null,
     "是否會嚼食檳榔": null,
   };
-  bool? hasChronicDisease; // 是否有慢性病 (是/否)
+  bool? hasChronicDisease;   // 是否有慢性病 (是/否)
   Map<String, bool> chronicDiseaseOptions = {
     "糖尿病": false,
     "高血壓": false,
@@ -59,9 +62,21 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
   TextEditingController otherDiseaseController =
       TextEditingController(); // 具體選項
 
+@override
+  void initState() {
+    super.initState();
+    // 當使用者修改「帳號」欄位時，清除檢查結果，避免舊提示誤導
+    accountController.addListener(() {
+      setState(() {
+        _accountCheckMessage = null;
+        _accountCheckColor = Colors.transparent;
+      });
+    });
+  }
+
+// 釋放控制器，避免記憶體洩漏
   @override
   void dispose() {
-    // 釋放控制器，避免記憶體洩漏
     nameController.dispose();
     birthController.dispose();
     heightController.dispose();
@@ -69,6 +84,8 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
     prePregnancyWeightController.dispose();
     emailController.dispose();
     phoneController.dispose();
+    accountController.dispose();
+    passwordController.dispose();
     super.dispose();
   }
 
@@ -94,9 +111,7 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
                   SizedBox(width: screenWidth * 0.05),
                   Expanded(child: _buildDatePickerField('生日', birthController)),
                   SizedBox(width: screenWidth * 0.05),
-                  Expanded(
-                      child: _buildheightPickerField(
-                          context, '身高', heightController)),
+                  Expanded(child: _buildheightPickerField(context, '身高', heightController)),
                   SizedBox(width: screenWidth * 0.05),
                 ],
               ),
@@ -106,16 +121,16 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
                 children: [
                   Expanded(
                     child: _buildWeightPickerField(
-                        context, '目前體重', weightController),
+                    context, '目前體重', weightController),
                   ),
                   SizedBox(width: screenWidth * 0.015),
                 ],
               ),
+
               // 🔹 帳號&密碼&信箱&電話
               SizedBox(height: screenHeight * 0.02),
-              _buildLabeledTextField('帳號', accountController),
-              _buildLabeledTextField('密碼', passwordController,
-                  obscureText: true),
+               _buildAccountRow(), //帳號
+              _buildPasswordField(),
               _buildLabeledTextField('E-Mail', emailController),
               _buildLabeledTextField('電話', phoneController),
 
@@ -123,15 +138,17 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
               _buildLabel('聯絡偏好設定'),
               Row(
                 children: [
-                  Expanded(
+                Expanded(
                     child: _buildCheckbox("E-Mail", isEmailPreferred, (value) {
-                      setState(() => isEmailPreferred = value ?? false);
-                    }),
-                  ),
-                  Expanded(
+                    setState(() => isEmailPreferred = value ?? false);
+                    }
+                    ),
+                    ),
+                Expanded(
                     child: _buildCheckbox("電話", isPhonePreferred, (value) {
                       setState(() => isPhonePreferred = value ?? false);
-                    }),
+                    }
+                    ),
                   ),
                 ],
               ),
@@ -150,7 +167,7 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
                     value: hasChronicDisease ?? false,
                     onChanged: (value) {
                       setState(() {
-                        hasChronicDisease = value;
+                      hasChronicDisease = value;
                       });
                     },
                     controlAffinity: ListTileControlAffinity.leading, // 讓勾選框靠左
@@ -173,46 +190,50 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
                             ListTileControlAffinity.leading, // 讓勾選框靠左
                       );
                     }),
+
                     // **如果勾選「其他」，顯示輸入框**
                     if (chronicDiseaseOptions["其他"] == true)
                       Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: TextField(
-                              controller: otherDiseaseController,
-                              decoration: const InputDecoration(
+                          controller: otherDiseaseController,
+                          decoration: const InputDecoration(
                                 labelText: "請輸入其他慢性病",
                                 border: OutlineInputBorder(),
                                 filled: true, // 開啟填充背景
                                 fillColor: Colors.white,
-                              )))
-                  ],
-                ],
-              ),
+                              )
+                            )
+                          )
+                        ],
+                      ],
+                     ),
+
               // 🔹 婚姻狀況
               _buildLabel('目前婚姻狀況'),
               DropdownButtonFormField<String>(
                 value: maritalStatus,
                 decoration: _inputDecoration(),
                 hint: const Text('選擇婚姻狀況',
-                    style: TextStyle(fontSize: 16, color: Colors.grey)),
+                style: TextStyle(fontSize: 16, color: Colors.grey)),
                 items: ['結婚', '未婚', '離婚', '喪偶']
                     .map((status) =>
-                        DropdownMenuItem(value: status, child: Text(status)))
+                    DropdownMenuItem(value: status, child: Text(status)))
                     .toList(),
                 onChanged: (value) => setState(() => maritalStatus = value),
               ),
 
-              // 🔹 是否為新手媽媽
+              // 🔹 是否為新手爸爸
               SizedBox(height: screenHeight * 0.02),
               _buildLabel('是否為新手爸爸'),
               Row(
                 children: [
-                  Expanded(
-                      child: _buildCheckbox("是", isNewMom == true,
-                          (value) => setState(() => isNewMom = true))),
-                  Expanded(
-                      child: _buildCheckbox("否", isNewMom == false,
-                          (value) => setState(() => isNewMom = false))),
+                Expanded(
+                child: _buildCheckbox("是", isNewMom == true,
+                (value) => setState(() => isNewMom = true))),
+                Expanded(
+                child: _buildCheckbox("否", isNewMom == false,
+                (value) => setState(() => isNewMom = false))),
                 ],
               ),
 
@@ -222,16 +243,17 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildButton('返回', Colors.grey, () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const MainScreenWidget()),
+                _buildButton('返回', Colors.grey, () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MainScreenWidget()),
                     );
-                  }),
+                  }
+                  ),
                   _buildButton('下一步', Colors.blue, () async {
                     final String? userId =
-                        await _saveUserData(); // ✅ 儲存資料並獲取 userId
+                    await _saveUserData(); // ✅ 儲存資料並獲取 userId
                     if (!context.mounted) return;
                     if (userId != null && mounted) {
                       // 只有當 Widget 仍然掛載時，才導航到成功頁面
@@ -241,7 +263,8 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
                         arguments: userId, //傳遞'userId'
                       );
                     }
-                  }),
+                  }
+                  ),
                 ],
               ),
             ],
@@ -249,6 +272,104 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
         ),
       ),
     );
+     }
+
+ Widget _buildAccountRow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel('帳號'),
+        Row(
+        children: [
+            // 帳號輸入框
+            Expanded(
+            child: TextField(
+            controller: accountController,
+            decoration: _inputDecoration(),
+            ),
+            ),
+
+          const SizedBox(width: 8),
+          
+          //檢查帳號按鈕
+          ElevatedButton(
+          style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+          ),
+          backgroundColor: const Color.fromARGB(255, 148, 235, 235),
+          ),
+          onPressed: _checkAccountDuplicate,
+          child: const Text("檢查"),
+          )
+          ],
+          ),
+        
+          // 若有檢查結果，顯示提示文字
+          if (_accountCheckMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(
+            _accountCheckMessage!,
+            style: TextStyle(color: _accountCheckColor),
+            ),
+           ),
+           ],
+           );
+           }
+
+  Future<void> _checkAccountDuplicate() async {
+  final acc = accountController.text.trim();
+  if (acc.isEmpty) {
+    setState(() {
+    _accountCheckMessage = "請先輸入帳號";
+     _accountCheckColor = Colors.red;
+    });
+    return;
+  }
+
+  try {
+    final userQuery = await FirebaseFirestore.instance  // 先查 users
+        .collection('users')
+        .where('帳號', isEqualTo: acc)
+        .limit(1)
+        .get();
+
+      if (userQuery.docs.isNotEmpty) {        // 已有相同帳號
+      setState(() {
+        _accountCheckMessage = "很抱歉，此帳號已註冊";
+        _accountCheckColor = Colors.red;
+      });
+      return; // 直接結束
+    }
+
+    // 再查 man_users
+    final manUserQuery = await FirebaseFirestore.instance
+        .collection('Man_users')
+        .where('帳號', isEqualTo: acc)
+        .limit(1)
+        .get();
+
+    if (manUserQuery.docs.isNotEmpty) {
+      setState(() {
+        _accountCheckMessage = "很抱歉，此帳號已註冊";
+        _accountCheckColor = Colors.red;
+      });
+      return;
+    }
+
+    // 兩邊都沒有 => 帳號可以使用
+    setState(() {
+      _accountCheckMessage = "此帳號可以使用";
+      _accountCheckColor = Colors.green;
+    });
+  } catch (e) {
+    logger.e("檢查帳號錯誤: $e");
+    setState(() {
+      _accountCheckMessage = "檢查時發生錯誤，請稍後再試";
+      _accountCheckColor = Colors.red;
+    });
+  }
   }
 
   //日期選擇器
@@ -361,6 +482,35 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
       ],
     );
   }
+Widget _buildPasswordField() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _buildLabel("密碼"),
+      TextField(
+        controller: passwordController,
+        obscureText: _obscurePassword,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          border: const OutlineInputBorder(),
+          // 右側的眼睛圖示
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+            ),
+            onPressed: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
+          ),
+        ),
+      ),
+    ],
+  );
+}
+  
 
   Widget _buildYesNoRow(String question) {
     return Column(
@@ -371,10 +521,10 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
           children: [
             Expanded(
                 child: _buildCheckbox("是", answers[question] == true,
-                    (value) => setState(() => answers[question] = true))),
+                (value) => setState(() => answers[question] = true))),
             Expanded(
                 child: _buildCheckbox("否", answers[question] == false,
-                    (value) => setState(() => answers[question] = false))),
+                (value) => setState(() => answers[question] = false))),
           ],
         ),
         const Divider(),
@@ -433,9 +583,9 @@ Widget _buildWeightPickerField(
         controller: controller,
         readOnly: true,
         decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(),
         ),
         onTap: () {
           _showWeightPicker(context, controller);
@@ -464,22 +614,23 @@ void _showWeightPicker(BuildContext context, TextEditingController controller) {
                   height: 200,
                   child: CupertinoPicker(
                     scrollController: FixedExtentScrollController(
-                        initialItem: selectedWeight - 30),
+                    initialItem: selectedWeight - 30),
                     itemExtent: 40,
                     onSelectedItemChanged: (int index) {
-                      setModalState(() {
-                        selectedWeight = index + 30;
-                      });
+                    setModalState(() {
+                    selectedWeight = index + 30;
+                    });
                     },
                     children: List<Widget>.generate(121, (int index) {
-                      return Center(child: Text('${index + 30} kg'));
-                    }),
+                    return Center(child: Text('${index + 30} kg'));
+                    }
+                    ),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    controller.text = '$selectedWeight kg'; //更新controller.text
-                    Navigator.pop(context); //關閉彈出視窗
+                  controller.text = '$selectedWeight kg'; //更新controller.text
+                  Navigator.pop(context); //關閉彈出視窗
                   },
                   child: const Text("確定"),
                 ),
@@ -494,7 +645,7 @@ void _showWeightPicker(BuildContext context, TextEditingController controller) {
 
 //身高選項功能
 Widget _buildheightPickerField(
-    BuildContext context, String label, TextEditingController controller) {
+  BuildContext context, String label, TextEditingController controller) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -534,18 +685,20 @@ void _showheightPicker(BuildContext context, TextEditingController controller) {
                   height: 200,
                   child: CupertinoPicker(
                     scrollController: FixedExtentScrollController(
-                        initialItem: selectedHeight - 100),
+                    initialItem: selectedHeight - 100),
                     itemExtent: 40,
                     onSelectedItemChanged: (int index) {
-                      setModalState(() {
-                        selectedHeight = index + 100;
-                      });
-                    },
+                    setModalState(() {
+                    selectedHeight = index + 100;
+                      }
+                      );
+                      },
                     children: List<Widget>.generate(121, (int index) {
-                      return Center(child: Text('${index + 100} cm'));
-                    }),
-                  ),
-                ),
+                    return Center(child: Text('${index + 100} cm'));
+                    }
+                    ),
+                    ),
+                    ),
                 ElevatedButton(
                   onPressed: () {
                     controller.text = '$selectedHeight cm'; //更新controller.text

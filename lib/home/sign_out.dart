@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:doctor_2/main.screen.dart';
+import 'package:doctor_2/function/main.screen.dart';
 
 final Logger logger = Logger();
 

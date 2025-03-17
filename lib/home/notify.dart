@@ -10,8 +10,8 @@ class NotifyWidget extends StatefulWidget {
 }
 
 class _NotifyWidgetState extends State<NotifyWidget> {
-  bool isBodyDataReminderOn = false; // 身體數據量測提醒的開關狀態
-  bool isExerciseReminderOn = false; // 運動提醒的開關狀態
+  bool isBodyDataReminderOn = false; // 運動提醒的開關狀態
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,7 @@ class _NotifyWidgetState extends State<NotifyWidget> {
               top: screenHeight * 0.38,
               left: screenWidth * 0.1,
               child: Text(
-                '身體數據量測提醒',
+                '運動提醒',
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   color: const Color.fromRGBO(147, 129, 108, 1),
@@ -70,34 +70,7 @@ class _NotifyWidgetState extends State<NotifyWidget> {
                 },
               ),
             ),
-            // 運動提醒
-            Positioned(
-              top: screenHeight * 0.5,
-              left: screenWidth * 0.1,
-              child: Text(
-                '運動提醒',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.06,
-                  fontWeight: FontWeight.normal,
-                  height: 1,
-                ),
-              ),
-            ),
-            Positioned(
-              top: screenHeight * 0.48,
-              left: screenWidth * 0.7,
-              child: Switch(
-                value: isExerciseReminderOn,
-                onChanged: (bool newValue) {
-                  setState(() {
-                    isExerciseReminderOn = newValue;
-                  });
-                },
-              ),
-            ),
+           
             // 返回按鈕
             Positioned(
               top: screenHeight * 0.75,

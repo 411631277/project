@@ -28,11 +28,11 @@ import 'package:doctor_2/questionGroup/sleep2.dart';
 import 'package:doctor_2/register/fa_success.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
-import 'package:doctor_2/main.screen.dart';
+import 'package:doctor_2/function/main.screen.dart';
 import 'package:doctor_2/register/success.dart';
 import 'package:doctor_2/first_question/born.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'function/firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/l10n.dart';
 import 'package:logger/logger.dart';
@@ -62,13 +62,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Locale _locale = const Locale('zh', 'TW'); // 默認語言為繁體中文
+Locale _locale = const Locale('zh', 'TW'); // 默認語言為繁體中文
 
   void setLocale(Locale locale) {
-    logger.e('切換語言為: ${locale.languageCode}');
-    setState(() {
-      _locale = locale;
-    });
+  logger.e('切換語言為: ${locale.languageCode}');
+  setState(() {
+   _locale = locale;
+  });
   }
 
   @override
@@ -78,29 +78,30 @@ class _MyAppState extends State<MyApp> {
       title: 'Settings App',
       theme: ThemeData(primarySwatch: Colors.brown),
       locale: _locale, // 傳遞當前語言
+
       supportedLocales: const [
         Locale('zh', 'TW'),
         Locale('zh', 'CN'),
         Locale('en', 'US'),
       ],
+
       localizationsDelegates: [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      
+      //路由
       routes: {
-        '/': (context) => const HomeScreenWidget(
-              userId: '1',
-              isManUser: false,
-            ), // 主畫面
+        '/': (context) => const MainScreenWidget(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
       },
 
+      //接收userID放這裡
       onGenerateRoute: (settings) {
-        //接收userID放這裡
         if (settings.name == '/FaHomeScreenWidget') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(

@@ -1,4 +1,4 @@
-import 'package:doctor_2/agree.dart';
+import 'package:doctor_2/function/agree.dart';
 import 'package:doctor_2/login/login.dart';
 import 'package:flutter/material.dart';
 
