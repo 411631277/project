@@ -37,6 +37,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/l10n.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter/services.dart';
+import 'package:doctor_2/profile.dart';
 
 //註解已完成
 
@@ -48,9 +49,9 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-   await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,    // 直式向上
-    DeviceOrientation.portraitDown,  // 直式向下 (可選，通常也一起加)
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp, // 直式向上
+    DeviceOrientation.portraitDown, // 直式向下 (可選，通常也一起加)
   ]);
 
   runApp(const MyApp());
@@ -69,13 +70,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-Locale _locale = const Locale('zh', 'TW'); // 默認語言為繁體中文
+  Locale _locale = const Locale('zh', 'TW'); // 默認語言為繁體中文
 
   void setLocale(Locale locale) {
-  logger.e('切換語言為: ${locale.languageCode}');
-  setState(() {
-   _locale = locale;
-  });
+    logger.e('切換語言為: ${locale.languageCode}');
+    setState(() {
+      _locale = locale;
+    });
   }
 
   @override
@@ -101,7 +102,10 @@ Locale _locale = const Locale('zh', 'TW'); // 默認語言為繁體中文
 
       //路由
       routes: {
-        '/': (context) => const MainScreenWidget(), // 主畫面
+        '/': (context) => const ProfilePage(
+              userId: '1',
+              isManUser: false,
+            ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
@@ -129,7 +133,7 @@ Locale _locale = const Locale('zh', 'TW'); // 默認語言為繁體中文
           );
         }
         if (settings.name == '/DeleteWidget') {
-         final args = settings.arguments as Map<String, dynamic>;
+          final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => DeleteWidget(
               userId: args['userId'],
