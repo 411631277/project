@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:flutter/gestures.dart';
 
 final Logger logger = Logger();
 
 class RobotWidget extends StatefulWidget {
-  final String userId;    // 使用者ID
-  final bool isManUser;   // 是否 man_users
+  final String userId;
+  final bool isManUser;
 
   const RobotWidget({
     super.key,
@@ -19,45 +20,87 @@ class RobotWidget extends StatefulWidget {
   State<RobotWidget> createState() => _RobotWidgetState();
 }
 
+/// 允許滑鼠拖曳滾動
+class MouseDraggableScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+      };
+}
+
 class _RobotWidgetState extends State<RobotWidget> {
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String>> _messages = [];
-
-  // 您的後端 API
+  final ScrollController _scrollController = ScrollController();
   final String apiUrl = "http://180.176.211.159:8000/query";
 
-  // 三個快捷選項
-  final List<String> _quickReplies = ["產科住院環境資訊", "母乳哺餵的好處", "媽媽手冊-產前篇", "媽媽手冊-產後篇", "　產後衛教部分 ", "寶寶母乳需求量", "促進乳汁分泌方法", "父親衛教資訊"];
+  /// 第一組快速回覆
+  final List<String> _quickReplies = [
+    "產科住院環境資訊",
+    "母乳哺餵的好處",
+    "產後衛教部分",
+    "其他"
+  ];
 
-  // 🔹 用來控制「是否顯示快捷選項」
-  bool _showQuickReplies = true;
+  /// 第二組快速回覆
+  final List<String> _secondCardReplies = [
+    "媽媽手冊-產前篇",
+    "媽媽手冊-產後篇",
+    "父親衛教資訊",
+    "寶寶母乳需求量&促進乳汁分泌方法",
+  ];
+
+  /// 用來記錄「何時顯示第二組快速回覆」的位置
+  final List<int> _secondCardAfterIndexes = [];
 
   @override
   void initState() {
     super.initState();
-    // 初始化：機器人先發一句話
     _messages.add({
       'sender': 'chatgpt',
       'text': '你好，請問有需要幫助什麼嗎？',
     });
   }
 
-  /// 發送訊息給後端
-  Future<void> _sendMessage(String userInput) async {
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  /// 發送訊息給後端或顯示「其他資訊」
+  Future<void> _sendMessage(String userInput, {bool sendToBackend = true}) async {
     if (userInput.trim().isEmpty) return;
 
-    // 1. 加入使用者訊息
-    setState(() {
-      _messages.add({'sender': 'user', 'text': userInput});
-      // 加入機器人思考中...
-      _messages.add({'sender': 'chatgpt', 'text': '🤖 正在思考...'});
-    });
-
-    // 清空輸入框
     _messageController.clear();
 
+    // 如果使用者點選「其他」，則不送後端，直接顯示第二組選項
+    if (!sendToBackend) {
+      setState(() {
+        _messages.add({'sender': 'user', 'text': userInput});
+        _messages.add({'sender': 'chatgpt', 'text': '以下是其他資訊'});
+        _secondCardAfterIndexes.add(_messages.length); 
+        // 記錄在這個位置之後，顯示第二組快速回覆
+      });
+      _scrollToBottom();
+      return;
+    }
+
+    // 正常送給後端
+    setState(() {
+      _messages.add({'sender': 'user', 'text': userInput});
+      _messages.add({'sender': 'chatgpt', 'text': '🤖 正在思考...'});
+    });
+    _scrollToBottom();
+
     try {
-      logger.i("📡 發送請求給 API: user_id=${widget.userId}, isManUser=${widget.isManUser}");
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
@@ -69,11 +112,9 @@ class _RobotWidgetState extends State<RobotWidget> {
       );
 
       if (response.statusCode == 200) {
-        final reply = utf8.decode(response.bodyBytes).trim();
-
+        final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
         setState(() {
-          // 將最後一則「🤖 正在思考...」改為真正回覆
-          _messages.last['text'] = reply.replaceAll("\\n", "\n");
+          _messages.last['text'] = decodedResponse["answer"] ?? "🤖 無法取得回應";
         });
       } else {
         setState(() {
@@ -85,6 +126,49 @@ class _RobotWidgetState extends State<RobotWidget> {
         _messages.last['text'] = '⚠️ 無法連接到伺服器，請檢查網路或稍後再試。';
       });
     }
+    _scrollToBottom();
+  }
+
+  /// 建立快速回覆按鈕群組
+  Widget _buildQuickReplyCards(List<String> replies) {
+    return Container(
+      margin: const EdgeInsets.only(top: 5, bottom: 10, left: 40),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.brown.shade100,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: replies.map((text) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: SizedBox(
+              width: 200,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (text.trim() == "其他") {
+                    _sendMessage(text, sendToBackend: false);
+                  } else {
+                    _sendMessage(text);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 240, 238, 239),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  textStyle: const TextStyle(fontSize: 13),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(text, textAlign: TextAlign.center),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
   }
 
   @override
@@ -98,95 +182,68 @@ class _RobotWidgetState extends State<RobotWidget> {
           icon: const Icon(Icons.arrow_back, color: Colors.brown),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-    Row(
-      mainAxisSize: MainAxisSize.min, 
-      children: [
-        const Text("提示", style: TextStyle(color: Colors.brown)),
-        Switch(
-          value: _showQuickReplies,
-          onChanged: (bool newValue) {
-            setState(() {
-              _showQuickReplies = newValue;
-            });
-          },
-        ),
-      ],
-    ),
-  ],
-),
+      ),
       body: Container(
         color: const Color.fromRGBO(233, 227, 213, 1),
         child: Column(
           children: [
-            // 聊天訊息
             Expanded(
               child: ListView.builder(
+                controller: _scrollController,
                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = _messages[index];
                   final isUser = (message['sender'] == 'user');
-                  return Row(
+
+                  return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment:
-                        isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
                     children: [
-                      // 如果是機器人，就顯示機器人頭像
-                      if (!isUser)
-                        Container(
-                          margin: const EdgeInsets.only(right: 10),
-                          child: Image.asset(
-                            'assets/images/Robot.png',
-                            width: 30,
-                            height: 30,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: isUser
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
+                        children: [
+                          if (!isUser)
+                            Container(
+                              margin: const EdgeInsets.only(right: 10),
+                              child: Image.asset(
+                                'assets/images/Robot.png',
+                                width: 30,
+                                height: 30,
+                              ),
+                            ),
+                          Flexible(
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 5),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: isUser
+                                    ? Colors.blue.shade100
+                                    : Colors.brown.shade100,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                message['text'] ?? '',
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
                           ),
-                        ),
-                      Flexible(
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 5),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: isUser
-                                ? Colors.blue.shade100
-                                : Colors.brown.shade100,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            message['text'] ?? '',
-                            softWrap: true,
-                            maxLines: null,
-                            overflow: TextOverflow.visible,
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                        ),
+                        ],
                       ),
+
+                      // **第一則訊息後顯示 _quickReplies**
+                      if (index == 0) _buildQuickReplyCards(_quickReplies),
+
+                      // **在 _secondCardAfterIndexes 指定位置後顯示 _secondCardReplies**
+                      if (_secondCardAfterIndexes.contains(index + 1))
+                        _buildQuickReplyCards(_secondCardReplies),
                     ],
                   );
                 },
               ),
             ),
-
-            // 🔹 若 _showQuickReplies 為 true，才顯示快捷按鈕
-            if (_showQuickReplies)
-              Container(
-                color: const Color.fromRGBO(233, 227, 213, 1),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: Wrap(
-                  spacing: 8.0,
-                  children: _quickReplies.map((text) {
-                    return ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 240, 238, 239),
-                      ),
-                      onPressed: () => _sendMessage(text),
-                      child: Text(text, style: const TextStyle(color: Colors.black)),
-                    );
-                  }).toList(),
-                ),
-              ),
-
-            // 🔹 輸入欄
             Container(
               color: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

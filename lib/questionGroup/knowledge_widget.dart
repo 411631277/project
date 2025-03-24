@@ -167,7 +167,7 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
                       }
                     },
                     child: const Text(
-                      "下一步",
+                      "填答完成",
                       style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
