@@ -77,6 +77,30 @@ class _ProfilePageState extends State<ProfilePage> {
                         : (userData['是否有慢性病'] == false ? '否' : '未提供'),
                   ),
                   infoTile('婚姻狀況', userData['婚姻狀況'] ?? '未提供'),
+                  infoTile(
+                    '有抽菸?',
+                    userData['answers']?['是否會吸菸?'] == true
+                        ? '有'
+                        : (userData['answers']?['是否會吸菸?'] == false
+                            ? '否'
+                            : '未提供'),
+                  ),
+                  infoTile(
+                    '會喝酒?',
+                    userData['answers']?['是否會喝酒?'] == true
+                        ? '有'
+                        : (userData['answers']?['是否會喝酒?'] == false
+                            ? '否'
+                            : '未提供'),
+                  ),
+                  infoTile(
+                    '會嚼食檳榔?',
+                    userData['answers']?['是否會嚼食檳榔'] == true
+                        ? '有'
+                        : (userData['answers']?['是否會嚼食檳榔'] == false
+                            ? '否'
+                            : '未提供'),
+                  ),
                 ],
               ),
             ),

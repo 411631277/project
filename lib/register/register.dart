@@ -15,7 +15,6 @@ final FirestoreService firestoreService = FirestoreService();
 final Logger logger = Logger();
 
 class RegisterWidget extends StatefulWidget {
-  
   final String role;
   const RegisterWidget({super.key, required this.role});
 
@@ -24,6 +23,7 @@ class RegisterWidget extends StatefulWidget {
 }
 
 bool _obscurePassword = true;
+
 // 🔹 用戶輸入控制器
 class RegisterWidgetState extends State<RegisterWidget> {
   final TextEditingController nameController = TextEditingController();
@@ -63,7 +63,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
   TextEditingController otherDiseaseController =
       TextEditingController(); // 具體選項
 
- @override
+  @override
   void initState() {
     super.initState();
     // 當使用者修改「帳號」欄位時，清除檢查結果，避免舊提示誤導
@@ -133,10 +133,10 @@ class RegisterWidgetState extends State<RegisterWidget> {
                   ),
                 ],
               ),
-              
+
               // 🔹 帳號&密碼&信箱&電話
               SizedBox(height: screenHeight * 0.02),
-               _buildAccountRow(), //帳號
+              _buildAccountRow(), //帳號
               _buildPasswordField(),
               _buildLabeledTextField('E-Mail', emailController),
               _buildLabeledTextField('電話', phoneController),
@@ -153,9 +153,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
                   Expanded(
                     child: _buildCheckbox("電話", isPhonePreferred, (value) {
                       setState(() => isPhonePreferred = value ?? false);
-                    }
-                    ),
-                    
+                    }),
                   ),
                 ],
               ),
@@ -212,7 +210,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
                   ],
                 ],
               ),
-              
+
               // 🔹 婚姻狀況
               _buildLabel('目前婚姻狀況'),
               DropdownButtonFormField<String>(
@@ -276,7 +274,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
     );
   }
 
- Widget _buildAccountRow() {
+  Widget _buildAccountRow() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -293,18 +291,16 @@ class RegisterWidgetState extends State<RegisterWidget> {
             const SizedBox(width: 8),
             // 檢查按鈕
 
-          ElevatedButton(
-  style: ElevatedButton.styleFrom(
-    
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(5.0),
-    ),
-    backgroundColor: const Color.fromARGB(255, 148, 235, 235),
-
-  ),
-  onPressed: _checkAccountDuplicate,
-  child: const Text("檢查"),
-)
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+                backgroundColor: const Color.fromARGB(255, 148, 235, 235),
+              ),
+              onPressed: _checkAccountDuplicate,
+              child: const Text("檢查"),
+            )
           ],
         ),
         // 若有檢查結果，顯示提示文字
@@ -321,59 +317,59 @@ class RegisterWidgetState extends State<RegisterWidget> {
   }
 
   Future<void> _checkAccountDuplicate() async {
-  final acc = accountController.text.trim();
-  if (acc.isEmpty) {
-    setState(() {
-      _accountCheckMessage = "請先輸入帳號";
-      _accountCheckColor = Colors.red;
-    });
-    return;
-  }
-  try {
-    // 先查 users
-    final userQuery = await FirebaseFirestore.instance
-        .collection('users')
-        .where('帳號', isEqualTo: acc)
-        .limit(1)
-        .get();
-
-      if (userQuery.docs.isNotEmpty) {
-      // 已有相同帳號
+    final acc = accountController.text.trim();
+    if (acc.isEmpty) {
       setState(() {
-        _accountCheckMessage = "很抱歉，此帳號已註冊";
-        _accountCheckColor = Colors.red;
-      });
-      return; // 直接結束
-    }
-
-    // 再查 man_users
-    final manUserQuery = await FirebaseFirestore.instance
-        .collection('Man_users')
-        .where('帳號', isEqualTo: acc)
-        .limit(1)
-        .get();
-
-    if (manUserQuery.docs.isNotEmpty) {
-      setState(() {
-        _accountCheckMessage = "很抱歉，此帳號已註冊";
+        _accountCheckMessage = "請先輸入帳號";
         _accountCheckColor = Colors.red;
       });
       return;
     }
+    try {
+      // 先查 users
+      final userQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .where('帳號', isEqualTo: acc)
+          .limit(1)
+          .get();
 
-    // 兩邊都沒有 => 帳號可以使用
-    setState(() {
-      _accountCheckMessage = "此帳號可以使用";
-      _accountCheckColor = Colors.green;
-    });
-  } catch (e) {
-    logger.e("檢查帳號錯誤: $e");
-    setState(() {
-      _accountCheckMessage = "檢查時發生錯誤，請稍後再試";
-      _accountCheckColor = Colors.red;
-    });
+      if (userQuery.docs.isNotEmpty) {
+        // 已有相同帳號
+        setState(() {
+          _accountCheckMessage = "很抱歉，此帳號已註冊";
+          _accountCheckColor = Colors.red;
+        });
+        return; // 直接結束
+      }
+
+      // 再查 man_users
+      final manUserQuery = await FirebaseFirestore.instance
+          .collection('Man_users')
+          .where('帳號', isEqualTo: acc)
+          .limit(1)
+          .get();
+
+      if (manUserQuery.docs.isNotEmpty) {
+        setState(() {
+          _accountCheckMessage = "很抱歉，此帳號已註冊";
+          _accountCheckColor = Colors.red;
+        });
+        return;
+      }
+
+      // 兩邊都沒有 => 帳號可以使用
+      setState(() {
+        _accountCheckMessage = "此帳號可以使用";
+        _accountCheckColor = Colors.green;
+      });
+    } catch (e) {
+      logger.e("檢查帳號錯誤: $e");
+      setState(() {
+        _accountCheckMessage = "檢查時發生錯誤，請稍後再試";
+        _accountCheckColor = Colors.red;
+      });
+    }
   }
-}
 
   //日期選擇器
   Widget _buildDatePickerField(String label, TextEditingController controller) {
@@ -471,35 +467,34 @@ class RegisterWidgetState extends State<RegisterWidget> {
     );
   }
 
-Widget _buildPasswordField() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildLabel("密碼"),
-      TextField(
-        controller: passwordController,
-        obscureText: _obscurePassword,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.white,
-          border: const OutlineInputBorder(),
-          // 右側的眼睛圖示
-          suffixIcon: IconButton(
-            icon: Icon(
-              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+  Widget _buildPasswordField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel("密碼"),
+        TextField(
+          controller: passwordController,
+          obscureText: _obscurePassword,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            border: const OutlineInputBorder(),
+            // 右側的眼睛圖示
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
             ),
-            onPressed: () {
-              setState(() {
-                _obscurePassword = !_obscurePassword;
-              });
-            },
           ),
         ),
-      ),
-    ],
-  );
-}
-
+      ],
+    );
+  }
 
   Widget _buildYesNoRow(String question) {
     return Column(
