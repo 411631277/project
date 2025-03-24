@@ -3,8 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
 
-final Logger logger =
-    Logger(); //, required String userId, required String userId ✅ 確保 Logger 存在
+final Logger logger = Logger();
 
 class ProdutionWidget extends StatefulWidget {
   final String userId; // ✅ 接收 userId
@@ -37,131 +36,96 @@ class _ProdutionWidget extends State<ProdutionWidget> {
     "我有可以與之交談和分享經驗的人",
   ];
 
+  // 紀錄每題的作答結果
   final Map<int, String?> answers = {};
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-        body: Container(
-            color: const Color.fromRGBO(233, 227, 213, 1),
-            padding: const EdgeInsets.all(16),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text(
-                "生產支持知覺量表",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                ),
+      body: Container(
+        color: const Color.fromRGBO(233, 227, 213, 1),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "生產支持知覺量表",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color.fromRGBO(147, 129, 108, 1),
               ),
-              const SizedBox(height: 20),
-              // 問卷表格
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Table(
-                    columnWidths: {
-                      0: FlexColumnWidth(3),
-                      1: FlexColumnWidth(1),
-                      2: FlexColumnWidth(1),
-                      3: FlexColumnWidth(1),
-                    },
-                    border: TableBorder.symmetric(
-                      inside:
-                          BorderSide(color: const Color.fromARGB(255, 0, 0, 0)),
+            ),
+            const SizedBox(height: 20),
+
+            // 問卷表格
+            Expanded(
+              child: SingleChildScrollView(
+                child: Table(
+                  columnWidths: const {
+                    0: FlexColumnWidth(3),
+                    1: FlexColumnWidth(1),
+                    2: FlexColumnWidth(1),
+                    3: FlexColumnWidth(1),
+                  },
+                  border: const TableBorder.symmetric(
+                    inside: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+                  ),
+                  children: [
+                    // 表頭
+                    TableRow(
+                      decoration: const BoxDecoration(
+                        color: Color.fromRGBO(240, 240, 240, 1),
+                      ),
+                      children: [
+                        SizedBox(
+                          height: 40,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: Text(
+                                "問題",
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        _buildHeaderCell("完全可以"),
+                        _buildHeaderCell("偶爾可以"),
+                        _buildHeaderCell("需要協助"),
+                      ],
                     ),
-                    children: [
+                    // 題目列
+                    for (int i = 0; i < questions.length; i++)
                       TableRow(
-                        decoration: const BoxDecoration(
-                          color: Color.fromRGBO(240, 240, 240, 1),
+                        decoration: BoxDecoration(
+                          color: answers[i] != null
+                              ? const Color.fromARGB(255, 241, 215, 237)
+                              : const Color.fromRGBO(233, 227, 213, 1),
                         ),
                         children: [
-                          SizedBox(
-                            height: 40, // 確保高度一致
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Align(
-                                alignment: Alignment.topCenter, // 文字置中靠上
-                                child: const Text(
-                                  "問題",
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                              ),
-                            ),
+                          Text(
+                            "${i + 1}. ${questions[i]}",
+                            style: const TextStyle(fontSize: 14),
                           ),
-                          SizedBox(
-                            height: 40, // 確保高度一致
-                            child: const Center(
-                                child: Text("完全可以",
-                                    style: TextStyle(fontSize: 12))),
-                          ),
-                          SizedBox(
-                            height: 40, // 確保高度一致
-                            child: const Center(
-                                child: Text("偶爾可以",
-                                    style: TextStyle(fontSize: 12))),
-                          ),
-                          SizedBox(
-                            height: 40, // 確保高度一致
-                            child: const Center(
-                                child: Text("需要協助",
-                                    style: TextStyle(fontSize: 12))),
-                          ),
+                          _buildRadio(i, "完全可以"),
+                          _buildRadio(i, "偶爾可以"),
+                          _buildRadio(i, "需要協助"),
                         ],
                       ),
-                      for (int i = 0; i < questions.length; i++)
-                        TableRow(
-                          decoration: BoxDecoration(
-      color: answers[i] != null
-          ? const Color.fromARGB(255, 241, 215, 237) // 已回答時
-          :  Color.fromRGBO(233, 227, 213, 1)  ,          // 未回答時
-    ),
-                          children: [
-                            Text("${i + 1}. ${questions[i]}",
-                                style: const TextStyle(fontSize: 14)),
-                            Center(
-                              child: Radio<String>(
-                                value: "完全可以",
-                                groupValue: answers[i],
-                                onChanged: (value) {
-                                  setState(() {
-                                    answers[i] = value;
-                                  });
-                                },
-                              ),
-                            ),
-                            Center(
-                              child: Radio<String>(
-                                value: "偶爾可以",
-                                groupValue: answers[i],
-                                onChanged: (value) {
-                                  setState(() {
-                                    answers[i] = value;
-                                  });
-                                },
-                              ),
-                            ),
-                            Center(
-                              child: Radio<String>(
-                                value: "需要協助",
-                                groupValue: answers[i],
-                                onChanged: (value) {
-                                  setState(() {
-                                    answers[i] = value;
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
-              // 按鈕區域
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            ),
+            const SizedBox(height: 20),
+
+            // 按鈕區域
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
                 // 返回按鈕
                 GestureDetector(
                   onTap: () {
@@ -175,17 +139,22 @@ class _ProdutionWidget extends State<ProdutionWidget> {
                     ),
                   ),
                 ),
-                // 下一步按鈕（所有問題都回答後才會顯示）
+
+                // 下一步按鈕（所有題目都回答後才顯示）
                 if (answers.length == questions.length)
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 15),
+                        horizontal: 40,
+                        vertical: 15,
+                      ),
                       backgroundColor: Colors.brown.shade400,
                     ),
                     onPressed: () async {
-                      await _saveAnswersToFirebase();
-                      if (!context.mounted) return;
+                      final success = await _saveAnswersToFirebase();
+                      if (!context.mounted || !success) return;
+
+                      // 完成後跳轉 (可自行修改)
                       Navigator.pushNamed(
                         context,
                         '/FinishWidget',
@@ -197,18 +166,51 @@ class _ProdutionWidget extends State<ProdutionWidget> {
                       style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
-              ]),
-            ])));
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
+  /// 表頭的小工具
+  Widget _buildHeaderCell(String label) {
+    return SizedBox(
+      height: 40,
+      child: Center(
+        child: Text(label, style: const TextStyle(fontSize: 12)),
+      ),
+    );
+  }
+
+  /// 建立單題的選項 UI
+  Widget _buildRadio(int index, String value) {
+    return Center(
+      child: Radio<String>(
+        value: value,
+        groupValue: answers[index],
+        onChanged: (val) {
+          setState(() {
+            answers[index] = val;
+          });
+        },
+      ),
+    );
+  }
+
+  /// 儲存問卷並更新 produtionCompleted = true
   Future<bool> _saveAnswersToFirebase() async {
     try {
+      // 在 QuestionWidget 中對應的 key 是 'produtionCompleted'
       final String documentName = "ProductionWidget";
 
+      // 整理答案
       final Map<String, String?> formattedAnswers = answers.map(
         (key, value) => MapEntry(key.toString(), value),
       );
 
+      // 1. 儲存問卷到子集合
       await FirebaseFirestore.instance
           .collection("users")
           .doc(widget.userId)
@@ -219,7 +221,13 @@ class _ProdutionWidget extends State<ProdutionWidget> {
         "timestamp": Timestamp.now(),
       });
 
-      logger.i("✅ 問卷已成功儲存！");
+      // 2. 更新 produtionCompleted = true
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(widget.userId)
+          .update({"produtionCompleted": true});
+
+      logger.i("✅ 生產支持知覺量表問卷已成功儲存，並更新 produtionCompleted！");
       return true;
     } catch (e) {
       logger.e("❌ 儲存問卷時發生錯誤：$e");

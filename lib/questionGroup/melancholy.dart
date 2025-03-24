@@ -27,6 +27,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     '我會有傷害自己的想法',
   ];
 
+  /// 每題對應的選項
   final Map<int, List<String>> questionOptions = {
     0: ["同以前一樣", "沒有以前那麼多", "肯定比以前少", "完全不能"],
     1: ["同以前一樣", "沒有以前那麼多", "肯定比以前少", "完全不能"],
@@ -40,15 +41,17 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     9: ["相當多時候這樣", "有時候這樣", "很少這樣", "沒有這樣"],
   };
 
-  final Map<int, String?> answers = {}; // 存使用者選擇的答案
+  /// 紀錄每題選擇的答案
+  final Map<int, String?> answers = {};
 
+  /// 檢查是否所有題目都已作答
   bool _isAllQuestionsAnswered() {
     return answers.length == questions.length && !answers.containsValue(null);
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth  = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final double fontSize = screenWidth * 0.045; // 自適應字體大小
 
@@ -71,6 +74,8 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
               ),
             ),
             SizedBox(height: screenHeight * 0.02),
+
+            /// 顯示題目列表
             Expanded(
               child: ListView.builder(
                 itemCount: questions.length,
@@ -80,9 +85,12 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
               ),
             ),
             SizedBox(height: screenHeight * 0.02),
+
+            /// 按鈕區
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                /// 返回按鈕
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Transform.rotate(
@@ -93,17 +101,22 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
                     ),
                   ),
                 ),
+
+                /// 只有全部題目都回答後才顯示「下一步」按鈕
                 if (_isAllQuestionsAnswered())
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.08,
-                          vertical: screenHeight * 0.015),
+                        horizontal: screenWidth * 0.08,
+                        vertical:   screenHeight * 0.015,
+                      ),
                       backgroundColor: Colors.brown.shade400,
                     ),
                     onPressed: () async {
                       await _saveAnswersToFirebase();
                       if (!context.mounted) return;
+
+                      /// 完成後導頁，可自行更改
                       Navigator.pushNamed(
                         context,
                         '/FinishWidget',
@@ -127,8 +140,8 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     );
   }
 
-  Widget _buildQuestionRow(
-      int questionIndex, double screenWidth, double fontSize) {
+  /// 建立單題的選項 UI
+  Widget _buildQuestionRow(int questionIndex, double screenWidth, double fontSize) {
     List<String> options =
         questionOptions[questionIndex] ?? ["可以", "還行", "不行", "沒辦法"];
 
@@ -143,6 +156,8 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
           ),
         ),
         SizedBox(height: screenWidth * 0.02),
+
+        /// 顯示該題的所有選項
         Column(
           children: options.map((option) {
             return Row(
@@ -169,17 +184,20 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
             );
           }).toList(),
         ),
-        Divider(color: Colors.grey, thickness: 1),
+        const Divider(color: Colors.grey, thickness: 1),
       ],
     );
   }
 
+  /// 將作答結果儲存到 Firestore，並更新 melancholyCompleted = true
   Future<void> _saveAnswersToFirebase() async {
     try {
+      // 1. 整理使用者的作答
       final Map<String, String?> formattedAnswers = answers.map(
         (key, value) => MapEntry(key.toString(), value),
       );
 
+      // 2. 儲存到 users/{userId}/questions/melancholy
       final CollectionReference userResponses = FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
@@ -190,7 +208,13 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      logger.i("✅ 憂鬱量表問卷已成功儲存！");
+      // 3. 更新「melancholyCompleted = true」讓主問卷列表顯示已完成
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .update({"melancholyCompleted": true});
+
+      logger.i("✅ 憂鬱量表問卷已成功儲存，並更新 melancholyCompleted！");
     } catch (e) {
       logger.e("❌ 儲存憂鬱量表問卷時發生錯誤：$e");
     }

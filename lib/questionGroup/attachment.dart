@@ -225,29 +225,38 @@ class _AttachmentWidget extends State<AttachmentWidget> {
             ])));
   }
 
+
   Future<bool> _saveAnswersToFirebase() async {
-    try {
-      final String documentName = "AttachmentWidget";
+  try {
+    final String documentName = "AttachmentWidget";
 
-      final Map<String, String?> formattedAnswers = answers.map(
-        (key, value) => MapEntry(key.toString(), value),
-      );
+    final Map<String, String?> formattedAnswers = answers.map(
+      (key, value) => MapEntry(key.toString(), value),
+    );
 
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(widget.userId)
-          .collection("questions")
-          .doc(documentName)
-          .set({
-        "answers": formattedAnswers,
-        "timestamp": Timestamp.now(),
-      });
+    // 1. 儲存問卷答案到 users/{userId}/questions/{documentName}
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(widget.userId)
+        .collection("questions")
+        .doc(documentName)
+        .set({
+      "answers": formattedAnswers,
+      "timestamp": Timestamp.now(),
+    });
 
-      logger.i("✅ 問卷已成功儲存！");
-      return true;
-    } catch (e) {
-      logger.e("❌ 儲存問卷時發生錯誤：$e");
-      return false;
-    }
+    // 2. 在同一個 function 中，更新 attachmentCompleted = true
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(widget.userId)
+        .update({"attachmentCompleted": true});
+
+    logger.i("✅ 問卷已成功儲存，並更新 attachmentCompleted！");
+
+    return true;
+  } catch (e) {
+    logger.e("❌ 儲存問卷時發生錯誤：$e");
+    return false;
   }
+}
 }

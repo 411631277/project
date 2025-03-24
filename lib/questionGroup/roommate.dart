@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:logger/logger.dart';
 import 'dart:math' as math;
+import 'package:logger/logger.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 final Logger logger = Logger();
 
@@ -14,15 +14,15 @@ class RoommateWidget extends StatefulWidget {
 }
 
 class _RoommateWidgetState extends State<RoommateWidget> {
-  bool? isRoomingIn24Hours; // 24小時同室 (null = 未選擇, true = 是, false = 否)
-  bool? isLivingInPostpartumCenter; // 住月子中心 (null = 未選擇, true = 是, false = 否)
+  bool? isRoomingIn24Hours;         // 24小時同室 (null=未選, true=是, false=否)
+  bool? isLivingInPostpartumCenter; // 住月子中心 (null=未選, true=是, false=否)
 
   bool get _isAllAnswered =>
       isRoomingIn24Hours != null && isLivingInPostpartumCenter != null;
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth  = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final double fontSize = screenWidth * 0.045; // 自適應字體大小
 
@@ -47,27 +47,40 @@ class _RoommateWidgetState extends State<RoommateWidget> {
             SizedBox(height: screenHeight * 0.05),
 
             // **24 小時同室選項**
-            _buildQuestion("截至目前為止是否有24小時同室", isRoomingIn24Hours, (value) {
-              setState(() {
-                isRoomingIn24Hours = value;
-              });
-            }, screenHeight * 0.1, screenWidth * 0.03, screenWidth * 0.2),
-
+            _buildQuestion(
+              "截至目前為止是否有24小時同室",
+              isRoomingIn24Hours,
+              (value) {
+                setState(() {
+                  isRoomingIn24Hours = value;
+                });
+              },
+              screenHeight * 0.1,
+              screenWidth * 0.03,
+              screenWidth * 0.2,
+            ),
             SizedBox(height: screenHeight * 0.05),
 
             // **住月子中心選項**
-            _buildQuestion("產後是否有住在月子中心", isLivingInPostpartumCenter, (value) {
-              setState(() {
-                isLivingInPostpartumCenter = value;
-              });
-            }, screenHeight * 0.05, screenWidth * 0.03, screenWidth * 0.2),
-
+            _buildQuestion(
+              "產後是否有住在月子中心",
+              isLivingInPostpartumCenter,
+              (value) {
+                setState(() {
+                  isLivingInPostpartumCenter = value;
+                });
+              },
+              screenHeight * 0.05,
+              screenWidth * 0.03,
+              screenWidth * 0.2,
+            ),
             const Spacer(),
 
-            // **返回按鈕**
+            // **按鈕區域**
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // **返回按鈕**
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Transform.rotate(
@@ -84,13 +97,16 @@ class _RoommateWidgetState extends State<RoommateWidget> {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.08,
-                          vertical: screenHeight * 0.015),
+                        horizontal: screenWidth * 0.08,
+                        vertical:   screenHeight * 0.015,
+                      ),
                       backgroundColor: Colors.brown.shade400,
                     ),
                     onPressed: () async {
-                      await _saveAnswersToFirebase();
-                      if (!context.mounted) return;
+                      final success = await _saveAnswersToFirebase();
+                      if (!context.mounted || !success) return;
+
+                      // 跳轉到 FinishWidget，可自行更改
                       Navigator.pushNamed(
                         context,
                         '/FinishWidget',
@@ -111,20 +127,20 @@ class _RoommateWidgetState extends State<RoommateWidget> {
     );
   }
 
-  // **建立問題的 Checkbox 選項（手動調整位置 & 自適應畫面）**
+  /// 建立問題的選項 (「是 / 否」)
   Widget _buildQuestion(
     String questionText,
     bool? selectedValue,
     Function(bool) onChanged,
-    double textTopPadding, // 🔹 調整文字垂直間距
-    double checkboxLeftSpacing, // 🔹 調整勾選盒與「是」的間距
-    double checkboxRightSpacing, // 🔹 調整勾選盒與「否」的間距
+    double textTopPadding,
+    double checkboxLeftSpacing,
+    double checkboxRightSpacing,
   ) {
     return Column(
       children: [
-        // **問題標題（可調整上方間距）**
+        // **問題標題**
         Padding(
-          padding: EdgeInsets.only(top: textTopPadding), // 🔹 文字間距
+          padding: EdgeInsets.only(top: textTopPadding),
           child: Align(
             alignment: Alignment.center,
             child: Text(
@@ -137,17 +153,16 @@ class _RoommateWidgetState extends State<RoommateWidget> {
             ),
           ),
         ),
-
         // **選項區域**
         Padding(
-          padding: const EdgeInsets.only(top: 10), // 🔹 調整勾選框與標題的間距
+          padding: const EdgeInsets.only(top: 10),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center, // **選項區塊置中**
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // ✅ 選項 1: 是
+              // 「是」
               Row(
                 children: [
-                  SizedBox(width: checkboxLeftSpacing), // 🔹 調整「是」的勾選盒位置
+                  SizedBox(width: checkboxLeftSpacing),
                   Checkbox(
                     value: selectedValue == true,
                     onChanged: (value) => onChanged(true),
@@ -162,11 +177,10 @@ class _RoommateWidgetState extends State<RoommateWidget> {
                   ),
                 ],
               ),
-
-              // ✅ 選項 2: 否
+              // 「否」
               Row(
                 children: [
-                  SizedBox(width: checkboxRightSpacing), // 🔹 調整「否」的勾選盒位置
+                  SizedBox(width: checkboxRightSpacing),
                   Checkbox(
                     value: selectedValue == false,
                     onChanged: (value) => onChanged(false),
@@ -188,9 +202,10 @@ class _RoommateWidgetState extends State<RoommateWidget> {
     );
   }
 
-  // **儲存回答到 Firebase**
-  Future<void> _saveAnswersToFirebase() async {
+  /// 儲存回答到 Firestore，並更新 roommateCompleted = true
+  Future<bool> _saveAnswersToFirebase() async {
     try {
+      // 1. 儲存問卷到子集合
       final CollectionReference userResponses = FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
@@ -202,9 +217,17 @@ class _RoommateWidgetState extends State<RoommateWidget> {
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      logger.i("✅ Roommate 問卷已成功儲存！");
+      // 2. 更新 roommateCompleted = true
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .update({"roommateCompleted": true});
+
+      logger.i("✅ Roommate 問卷已成功儲存，並更新 roommateCompleted！");
+      return true;
     } catch (e) {
       logger.e("❌ 儲存 Roommate 問卷時發生錯誤：$e");
+      return false;
     }
   }
 }
