@@ -135,12 +135,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ? '否'
                                 : '未提供'),
                       ),
-                      infoTile(
-                        '新手媽咪?',
-                        userData['是否為新手媽咪'] == true
-                            ? '有'
-                            : (userData['是否為新手媽咪'] == false ? '否' : '未提供'),
-                      ),
                     ],
                   ),
                 ),
