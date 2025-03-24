@@ -196,19 +196,11 @@ class _DetaWidgetState extends State<DetaWidget> {
 
             // **刪除帳號 & 修改確認**
             Positioned(
-              top: screenHeight * 0.8,
+              top: screenHeight * 0.85,
               left: screenWidth * 0.60,
               child: Column(
                 children: [
-                  _buildButton('刪除帳號', Colors.grey.shade400, () {
-                    Navigator.pushNamed(
-                      context,
-                      '/DeleteWidget',
-                      arguments: {
-                      'userId': widget.userId,
-                      'isManUser': widget.isManUser,
-                  });
-                  }),
+                 
                   const SizedBox(height: 20),
                   _buildButton('修改確認', Colors.grey.shade400, () async {
                     await _updateUserData();

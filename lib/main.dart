@@ -37,7 +37,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/l10n.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter/services.dart';
-import 'package:doctor_2/profile.dart';
 
 //註解已完成
 
@@ -102,7 +101,7 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) => const ProfilePage(
+        '/': (context) => const HomeScreenWidget(
               userId: '1',
               isManUser: false,
             ), // 主畫面

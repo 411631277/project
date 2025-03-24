@@ -1,12 +1,12 @@
 import 'package:doctor_2/function/extensions.dart';
 import 'package:doctor_2/home/mate.dart';
+import 'package:doctor_2/profile.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'fa_home_screen.dart';
 import 'home_screen.dart';
 import 'language.dart';
 import 'notify.dart';
-import 'deta.dart';
 import 'phone.dart';
 import 'sign_out.dart';
 import 'privacy.dart';
@@ -124,7 +124,7 @@ class SettingWidgetState extends State<SettingWidget> {
                 ),
               ),
             ),
-            // 基本資料修改按鈕
+            // 個人基本資料按鈕
             Positioned(
               top: screenHeight * 0.28,
               left: screenWidth * 0.45,
@@ -133,7 +133,7 @@ class SettingWidgetState extends State<SettingWidget> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => DetaWidget(
+                      builder: (context) => ProfilePage(
                         userId: widget.userId,
                         isManUser: widget.isManUser,
                       ),

@@ -24,7 +24,7 @@ class AppLocalizations {
       'login': '登入',
       'language': '語言',
       'notification': '通知設定',
-      'data': '基本資料修改',
+      'data': '個人基本資料',
       'phone': '院內電話查詢',
       'share': '配偶分享碼',
       'privacy': '隱私權政策',

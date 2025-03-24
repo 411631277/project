@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'dart:math' as math; // 新增
 
 final Logger logger = Logger();
 
@@ -29,81 +30,165 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> fetchUserData() async {
-    try {
-      DocumentSnapshot snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .get();
+  try {
+    // 根據 isManUser 決定要讀取哪個集合
+    final String collectionName = widget.isManUser ? 'Man_users' : 'users';
 
-      if (snapshot.exists) {
-        setState(() {
-          userData = snapshot.data() as Map<String, dynamic>;
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      logger.e("❌ 無法載入資料: $e");
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection(collectionName)
+        .doc(widget.userId)
+        .get();
+
+    if (snapshot.exists) {
+      setState(() {
+        userData = snapshot.data() as Map<String, dynamic>;
+        isLoading = false;
+      });
+    } else {
+      logger.w("❗️ 該用戶資料不存在於 $collectionName 集合");
       setState(() {
         isLoading = false;
       });
     }
+  } catch (e) {
+    logger.e("❌ 無法載入資料: $e");
+    setState(() {
+      isLoading = false;
+    });
+  }
+}
+
+  // 確保這些方法已經定義，或依需求自行實作
+  Widget _buildButton(String label, Color color, VoidCallback onPressed) {
+  return ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: color,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(5), // 無圓角，長方形
+      ),
+      minimumSize: const Size(120, 40), // 可依需求調整尺寸
+    ),
+    onPressed: onPressed,
+    child: Text(label),
+  );
+}
+
+  Future<void> _updateUserData() async {
+    // 您的更新資料邏輯
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('個人資料'),
         backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ListView(
+      body: Stack(
+        children: [
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ListView(
+                    children: [
+                      infoTile('使用者身分', widget.isManUser ? '爸爸' : '媽媽'),
+                      infoTile('帳號', userData['帳號'] ?? '未提供'),
+                      infoTile('姓名', userData['名字'] ?? '未提供'),
+                      infoTile('Email', userData['電子信箱'] ?? '未提供'),
+                      infoTile('手機號碼', userData['手機號碼'] ?? '未提供'),
+                      infoTile('身高', userData['身高'] ?? '未提供'),
+                      infoTile('體重', userData['目前體重'] ?? '未提供'),
+                      infoTile(
+                        '慢性病',
+                        userData['是否有慢性病'] == true
+                            ? '有'
+                            : (userData['是否有慢性病'] == false ? '否' : '未提供'),
+                      ),
+                      infoTile('婚姻狀況', userData['婚姻狀況'] ?? '未提供'),
+                      infoTile(
+                        '有抽菸?',
+                        userData['answers']?['是否會吸菸?'] == true
+                            ? '有'
+                            : (userData['answers']?['是否會吸菸?'] == false
+                                ? '否'
+                                : '未提供'),
+                      ),
+                      infoTile(
+                        '會喝酒?',
+                        userData['answers']?['是否會喝酒?'] == true
+                            ? '有'
+                            : (userData['answers']?['是否會喝酒?'] == false
+                                ? '否'
+                                : '未提供'),
+                      ),
+                      infoTile(
+                        '會嚼食檳榔?',
+                        userData['answers']?['是否會嚼食檳榔'] == true
+                            ? '有'
+                            : (userData['answers']?['是否會嚼食檳榔'] == false
+                                ? '否'
+                                : '未提供'),
+                      ),
+                      infoTile(
+                        '新手媽咪?',
+                        userData['是否為新手媽咪'] == true
+                            ? '有'
+                            : (userData['是否為新手媽咪'] == false ? '否' : '未提供'),
+                      ),
+                    ],
+                  ),
+                ),
+          // 新增的 Positioned widget 1：返回按鈕
+          Positioned(
+            top: screenHeight * 0.65,
+            left: screenWidth * 0.08,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Transform.rotate(
+                angle: math.pi,
+                child: Image.asset(
+                  'assets/images/back.png',
+                  width: screenWidth * 0.15,
+                  height: screenHeight * 0.23,
+                ),
+              ),
+            ),
+          ),
+          // 刪除與修改按鈕
+          Positioned(
+              top: screenHeight * 0.7,
+              left: screenWidth * 0.60,
+              child: Column(
                 children: [
-                  infoTile('使用者身分', widget.isManUser ? '爸爸' : '媽媽'),
-                  infoTile('姓名', userData['名字'] ?? '未提供'),
-                  infoTile('Email', userData['電子信箱'] ?? '未提供'),
-                  infoTile('手機號碼', userData['手機號碼'] ?? '未提供'),
-                  infoTile('配對碼', userData['配對碼'] ?? '未提供'),
-                  infoTile('身高', userData['身高'] ?? '未提供'),
-                  infoTile('體重', userData['目前體重'] ?? '未提供'),
-                  infoTile(
-                    '慢性病',
-                    userData['是否有慢性病'] == true
-                        ? '有'
-                        : (userData['是否有慢性病'] == false ? '否' : '未提供'),
-                  ),
-                  infoTile('婚姻狀況', userData['婚姻狀況'] ?? '未提供'),
-                  infoTile(
-                    '有抽菸?',
-                    userData['answers']?['是否會吸菸?'] == true
-                        ? '有'
-                        : (userData['answers']?['是否會吸菸?'] == false
-                            ? '否'
-                            : '未提供'),
-                  ),
-                  infoTile(
-                    '會喝酒?',
-                    userData['answers']?['是否會喝酒?'] == true
-                        ? '有'
-                        : (userData['answers']?['是否會喝酒?'] == false
-                            ? '否'
-                            : '未提供'),
-                  ),
-                  infoTile(
-                    '會嚼食檳榔?',
-                    userData['answers']?['是否會嚼食檳榔'] == true
-                        ? '有'
-                        : (userData['answers']?['是否會嚼食檳榔'] == false
-                            ? '否'
-                            : '未提供'),
-                  ),
+                  _buildButton('刪除帳號', Colors.grey.shade400, () {
+                    Navigator.pushNamed(
+                      context,
+                      '/DeleteWidget',
+                      arguments: {
+                      'userId': widget.userId,
+                      'isManUser': widget.isManUser,
+                  });
+                  }),
+                  const SizedBox(height: 20),
+                  _buildButton('修改帳號', Colors.grey.shade400, () async {
+                    await _updateUserData();
+                    if (!context.mounted) return;
+                    Navigator.pushNamed(context, '/DetaWidget', arguments: {
+                      'userId': widget.userId,
+                      'isManUser': widget.isManUser,
+                    });
+                  }),
                 ],
               ),
             ),
+        ],
+      ),
     );
   }
 
@@ -113,17 +198,21 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Row(
         children: [
           SizedBox(
-              width: 100,
-              child: Text(
-                '$label：',
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              )),
+            width: 150,
+            child: Text(
+              '$label：',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ),
           Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 2),
               child: Text(
-            value,
-            style: const TextStyle(fontSize: 16),
-          )),
+                value,
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ),
         ],
       ),
     );
