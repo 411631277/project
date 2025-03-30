@@ -9,26 +9,21 @@ class TgosMapPage extends StatefulWidget {
 }
 
 class _TgosMapPageState extends State<TgosMapPage> {
-  late final WebViewController controller;
+  late final WebViewController _controller;
 
   @override
   void initState() {
     super.initState();
-    controller = WebViewController()
-      ..loadRequest(
-        Uri.parse('https://www.tgos.tw/tgos'), // 替換為你想顯示的網站
-      );
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted) // ✅ 啟用 JS
+      ..loadRequest(Uri.parse("https://map.tgos.tw/TGOSCloudMap"));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('TGOS 地圖平台'),
-      ),
-      body: WebViewWidget(
-        controller: controller,
-      ),
+      appBar: AppBar(title: Text("TGOS 地圖")),
+      body: WebViewWidget(controller: _controller),
     );
   }
 }
