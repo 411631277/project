@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:doctor_2/function/main.screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/services/firestore_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
 
@@ -441,12 +443,49 @@ class RegisterWidgetState extends State<RegisterWidget> {
         '配對碼': generatePairingCode(),
       });
       logger.i("✅ 使用者資料已存入 Firestore，ID：$userId");
+      await sendDataToMySQL(userId);
       return userId; //回傳 userId
     } catch (e) {
       logger.e("❌ Firestore 儲存錯誤: $e");
       return null;
     }
+    
   }
+
+Future<void> sendDataToMySQL(String userId) async {
+  final url = Uri.parse('http://163.13.201.85:3000/users');
+
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'user_id': int.parse(userId),
+      'user_name': nameController.text,
+      'user_email': emailController.text,
+      'user_gender': widget.role == "媽媽" ? "女" : "男",
+      'user_salutation': "", // 如果有稱謂
+      'user_birthdate': formatBirthForMySQL(birthController.text),
+      'user_age': "", // 可以用 birthday 算
+      'user_address': "",
+      'user_phone': phoneController.text,
+      'user_id_number': accountController.text,
+      'user_height': heightController.text,
+      'user_weight': weightController.text,
+      'user_blood_type': "", // 目前沒有抓，預設空
+      'emergency_contact_name': "",
+      'emergency_contact_phone': "",
+      'betel_nut_habit': answers["是否會嚼食檳榔"] == true,
+      'allergies': "", // 沒有相關欄位
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    logger.i("✅ 同步資料到 MySQL 成功");
+  } else {
+    logger.e("❌ 同步 MySQL 失敗: ${response.body}");
+  }
+}
+
 
   //輸入框設定
   InputDecoration _inputDecoration() => const InputDecoration(
@@ -515,6 +554,15 @@ class RegisterWidgetState extends State<RegisterWidget> {
       ],
     );
   }
+  
+ String formatBirthForMySQL(String text) {
+  try {
+    final parsed = DateFormat('yyyy年MM月dd日', 'zh_TW').parse(text);
+    return DateFormat('yyyy-MM-dd').format(parsed);
+  } catch (e) {
+    return ""; // 防呆處理，避免錯誤時整個崩潰
+  }
+}
 }
 
 //建立標籤
