@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:doctor_2/first_question/first_breastfeeding.dart';
 import 'package:doctor_2/first_question/notfirst.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 final Logger logger = Logger(); // 🔹 記錄 Firestore 變更
 
@@ -195,7 +197,12 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
                           "生產次數": deliveryCount,
                           "首次哺乳": breastfeedingAnswer,
                         });
-
+                        await sendFrequencyToMySQL(
+                          widget.userId,
+                          pregnancyCount!,
+                          deliveryCount!,
+                          breastfeedingAnswer!,
+                        );
                         logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
 
                         if (!context.mounted) return;
@@ -228,5 +235,27 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
         ),
       ),
     );
+  }
+
+  Future<void> sendFrequencyToMySQL(String userId, String pregnancy,
+      String delivery, String breastfeeding) async {
+    final url = Uri.parse('http://163.13.201.85:3000/user_question');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': int.parse(userId),
+        'pregnancy_count': pregnancy,
+        'delivery_count': delivery,
+        'first_time_breastfeeding': breastfeeding == 'yes' ? '是' : '否',
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      logger.i("✅ 懷孕、生產、首次哺乳資料同步 MySQL 成功");
+    } else {
+      logger.e("❌ 同步 MySQL 失敗: ${response.body}");
+    }
   }
 }

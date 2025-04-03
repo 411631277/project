@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:doctor_2/first_question/frequency.dart';
 import 'package:doctor_2/first_question/firsttime.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 final Logger logger = Logger();
 
@@ -209,7 +211,12 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
                           "妊娠合併症": complicationAnswer,
                           "親自哺餵母乳": breastfeedingAnswer,
                         });
-
+                        await sendNotYetDataToMySQL(
+                          widget.userId,
+                          selectedBabyCount!,
+                          complicationAnswer!,
+                          breastfeedingAnswer!,
+                        );
                         logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
 
                         if (!mounted) return;
@@ -245,5 +252,27 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
         ),
       ),
     );
+  }
+
+  Future<void> sendNotYetDataToMySQL(String userId, String babyCount,
+      String complication, String breastfeeding) async {
+    final url = Uri.parse('http://163.13.201.85:3000/user_question');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': int.parse(userId),
+        'pregnancy_babies_count': selectedBabyCount,
+        'pregnancy_complications': complicationAnswer == '是' ? '是' : '否',
+        'willing_to_breastfeed': breastfeedingAnswer == '是' ? '是' : '否',
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      logger.i("✅ notyet 資料同步 MySQL 成功");
+    } else {
+      logger.e("❌ 同步 MySQL 失敗: ${response.body}");
+    }
   }
 }

@@ -3,6 +3,8 @@ import 'package:doctor_2/first_question/nowfeeding.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 final Logger logger = Logger();
 
@@ -356,7 +358,14 @@ class _YesyetWidgetState extends State<YesyetWidget> {
                                 SetOptions(
                                     merge:
                                         true)); // 🔹 使用 `merge: true` 避免覆蓋原有資料
-
+                        await sendYesYetDataToMySQL(
+                          widget.userId,
+                          babyCount!,
+                          pregnancyCount!,
+                          deliveryCount!,
+                          complicationAnswer!,
+                          breastfeedingAnswer!,
+                        );
                         logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
 
                         if (!context.mounted) return;
@@ -398,5 +407,34 @@ class _YesyetWidgetState extends State<YesyetWidget> {
         ),
       ),
     );
+  }
+
+  Future<void> sendYesYetDataToMySQL(
+      String userId,
+      String babyCount,
+      String pregnancyCount,
+      String deliveryCount,
+      String complication,
+      String breastfeeding) async {
+    final url = Uri.parse('http://163.13.201.85:3000/user_question');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': int.parse(userId),
+        'pregnancy_babies_count': babyCount,
+        'pregnancy_count': pregnancyCount,
+        'delivery_count': deliveryCount,
+        'pregnancy_complications': complication,
+        'currently_breastfeeding': breastfeeding,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      logger.i("✅ yesyet 資料同步 MySQL 成功");
+    } else {
+      logger.e("❌ 同步 MySQL 失敗: ${response.body}");
+    }
   }
 }

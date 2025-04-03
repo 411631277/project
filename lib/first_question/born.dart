@@ -3,6 +3,8 @@ import 'package:doctor_2/first_question/notyet.dart';
 import 'package:doctor_2/first_question/yesyet.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 final Logger logger = Logger();
 
@@ -56,6 +58,7 @@ class BornWidget extends StatelessWidget {
                           .collection('users')
                           .doc(userId)
                           .update({"寶寶出生": false});
+                      await sendBabyBornToMySQL(userId, false);
                       if (!context.mounted) return;
                       logger.i(
                           "✅ Firestore 更新成功，userId: $userId -> babyBorn: 還沒");
@@ -92,7 +95,7 @@ class BornWidget extends StatelessWidget {
                           .collection('users')
                           .doc(userId)
                           .update({"寶寶出生": true});
-
+                      await sendBabyBornToMySQL(userId, true);
                       logger.i(
                           "✅ Firestore 更新成功，userId: $userId -> babyBorn: 出生了");
 
@@ -116,5 +119,24 @@ class BornWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> sendBabyBornToMySQL(String userId, bool babyBorn) async {
+    final url = Uri.parse('http://163.13.201.85:3000/user_question');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': int.parse(userId),
+        'baby_born': babyBorn ? '是' : '否',
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      logger.i("✅ 寶寶出生狀態同步到 MySQL 成功");
+    } else {
+      logger.e("❌ 同步寶寶出生到 MySQL 失敗: ${response.body}");
+    }
   }
 }

@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:doctor_2/first_question/finish.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 final Logger logger = Logger(); // 🔹 Firestore 更新記錄
 
@@ -103,7 +105,8 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
                             .update({
                           "預期哺餵時長": "$selectedDuration 個月",
                         });
-
+                        await sendFirstBreastfeedingToMySQL(
+                            widget.userId, "$selectedDuration 個月");
                         logger.i(
                             "✅ Firestore 更新成功，userId: ${widget.userId}, breastfeedingDuration: $selectedDuration");
 
@@ -128,5 +131,26 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
         ),
       ),
     );
+  }
+
+  Future<void> sendFirstBreastfeedingToMySQL(
+      String userId, String duration) async {
+    final url = Uri.parse('http://163.13.201.85:3000/user_question');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': int.parse(userId),
+        "expected_breastfeeding_months":
+            int.parse(duration.replaceAll('個月', '')),
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      logger.i("✅ 預期哺乳時長同步 MySQL 成功");
+    } else {
+      logger.e("❌ 預期哺乳時長同步 MySQL 失敗: ${response.body}");
+    }
   }
 }

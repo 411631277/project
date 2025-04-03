@@ -3,6 +3,8 @@ import 'package:doctor_2/first_question/notfirst.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 final Logger logger = Logger();
 
@@ -193,6 +195,8 @@ class _Nowfeeding extends State<Nowfeeding> {
                           "是否為純母乳": purebreastmilk,
                           "是否首次哺乳": firstime,
                         }, SetOptions(merge: true)); // 🔹 避免覆蓋原有資料
+                        await sendNowFeedingToMySQL(
+                            widget.userId, purebreastmilk!, firstime!);
 
                         logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
 
@@ -235,5 +239,26 @@ class _Nowfeeding extends State<Nowfeeding> {
         ),
       ),
     );
+  }
+
+  Future<void> sendNowFeedingToMySQL(
+      String userId, String puremilk, String firstfeed) async {
+    final url = Uri.parse('http://163.13.201.85:3000/user_question');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': int.parse(userId),
+        'exclusive_breastfeeding': puremilk,
+        'first_time_breastfeeding': firstfeed,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      logger.i("✅ 是否純母乳 & 是否首次哺乳 同步 MySQL 成功");
+    } else {
+      logger.e("❌ 同步 MySQL 失敗: ${response.body}");
+    }
   }
 }

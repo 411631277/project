@@ -438,7 +438,6 @@ class RegisterWidgetState extends State<RegisterWidget> {
         '是否為新手媽咪': isNewMom,
         '聯絡偏好': {'email': isEmailPreferred, 'phone': isPhonePreferred},
         'answers': answers,
-        '是否有慢性病': hasChronicDisease,
         '慢性病症狀': selectedChronicDiseases,
         '配對碼': generatePairingCode(),
       });
@@ -449,43 +448,65 @@ class RegisterWidgetState extends State<RegisterWidget> {
       logger.e("❌ Firestore 儲存錯誤: $e");
       return null;
     }
-    
   }
 
-Future<void> sendDataToMySQL(String userId) async {
-  final url = Uri.parse('http://163.13.201.85:3000/users');
+  Future<void> sendDataToMySQL(String userId) async {
+    final url = Uri.parse('http://163.13.201.85:3000/users');
 
-  final response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'user_id': int.parse(userId),
-      'user_name': nameController.text,
-      'user_email': emailController.text,
-      'user_gender': widget.role == "媽媽" ? "女" : "男",
-      'user_salutation': "", // 如果有稱謂
-      'user_birthdate': formatBirthForMySQL(birthController.text),
-      'user_age': "", // 可以用 birthday 算
-      'user_address': "",
-      'user_phone': phoneController.text,
-      'user_id_number': accountController.text,
-      'user_height': heightController.text,
-      'user_weight': weightController.text,
-      'user_blood_type': "", // 目前沒有抓，預設空
-      'emergency_contact_name': "",
-      'emergency_contact_phone': "",
-      'betel_nut_habit': answers["是否會嚼食檳榔"] == true,
-      'allergies': "", // 沒有相關欄位
-    }),
-  );
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': int.parse(userId),
+        'user_name': nameController.text,
+        'user_email': emailController.text,
+        'user_gender': widget.role == "媽媽" ? "女" : "男",
+        'user_salutation': isNewMom == true ? "是" : "否",
+        'user_birthdate': formatBirthForMySQL(birthController.text),
+        'user_phone': phoneController.text,
+        'user_id_number': accountController.text,
+        'user_height': double.tryParse(
+                heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+            0.0,
+        'current_weight': double.tryParse(
+                weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+            0.0,
+        'emergency_contact_name': "",
+        'emergency_contact_phone': "",
+        'betel_nut_habit': answers["是否會嚼食檳榔"] == true ? '有' : '無',
+        'smoking_habit': answers["是否會吸菸?"] == true ? '有' : '無',
+        'drinking_habit': answers["是否會喝酒?"] == true ? '有' : '無',
+        'pre_pregnancy_weight': double.tryParse(prePregnancyWeightController
+                .text
+                .replaceAll(RegExp(r'[^0-9.]'), '')) ??
+            0.0,
+        'marital_status': maritalStatus ?? '未婚',
+        'contact_preference': [
+          if (isEmailPreferred) 'e-mail',
+          if (isPhonePreferred) '電話',
+        ].join(','),
+        'chronic_illness': hasChronicDisease == true
+            ? [
+                ...chronicDiseaseOptions.entries
+                    .where((entry) => entry.value && entry.key != "其他")
+                    .map((entry) => entry.key),
+                if (chronicDiseaseOptions["其他"] == true) '其他', // ✅ 改這裡
+              ].join(',')
+            : '無',
+        'chronic_illness_details': otherDiseaseController.text.isNotEmpty
+            ? otherDiseaseController.text
+            : '',
+        'user_account': accountController.text,
+        'user_password': passwordController.text,
+      }),
+    );
 
-  if (response.statusCode == 200) {
-    logger.i("✅ 同步資料到 MySQL 成功");
-  } else {
-    logger.e("❌ 同步 MySQL 失敗: ${response.body}");
+    if (response.statusCode == 200) {
+      logger.i("✅ 同步資料到 MySQL 成功");
+    } else {
+      logger.e("❌ 同步 MySQL 失敗: ${response.body}");
+    }
   }
-}
-
 
   //輸入框設定
   InputDecoration _inputDecoration() => const InputDecoration(
@@ -554,15 +575,15 @@ Future<void> sendDataToMySQL(String userId) async {
       ],
     );
   }
-  
- String formatBirthForMySQL(String text) {
-  try {
-    final parsed = DateFormat('yyyy年MM月dd日', 'zh_TW').parse(text);
-    return DateFormat('yyyy-MM-dd').format(parsed);
-  } catch (e) {
-    return ""; // 防呆處理，避免錯誤時整個崩潰
+
+  String formatBirthForMySQL(String text) {
+    try {
+      final parsed = DateFormat('yyyy年MM月dd日', 'zh_TW').parse(text);
+      return DateFormat('yyyy-MM-dd').format(parsed);
+    } catch (e) {
+      return ""; // 防呆處理，避免錯誤時整個崩潰
+    }
   }
-}
 }
 
 //建立標籤
