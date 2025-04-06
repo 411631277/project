@@ -41,7 +41,8 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
         setState(() {
           painindex = userData['前次哺乳乳頭疼痛次數']?.toString();
           brokenskin = userData['是否有乳頭破皮']?.toString();
-          duration = userData['前胎哺乳持續時長']?.toString();
+         final original = userData['前胎哺乳持續時長']?.toString();
+         duration = original?.replaceAll(' 個月', '');
           isLoading = false;
         });
       } else {
@@ -271,8 +272,8 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
       body: jsonEncode({
         'user_id': int.parse(userId),
         'previous_nipple_pain_level': painIndex,
-        'nipple_cracking': brokenSkin,
-        'previous_breastfeeding_duration_months': "$duration 個月",
+        'nipple_cracking': brokenSkin == '是' ? '是'  : '否',
+        'previous_breastfeeding_duration_months': int.parse(duration),
       }),
     );
 

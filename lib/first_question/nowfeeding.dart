@@ -250,11 +250,11 @@ class _Nowfeeding extends State<Nowfeeding> {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'user_id': int.parse(userId),
-        'exclusive_breastfeeding': puremilk,
-        'first_time_breastfeeding': firstfeed,
+        'exclusive_breastfeeding': puremilk.toLowerCase() == 'yes' ? '是' : '否',
+       'first_time_breastfeeding': firstfeed.toLowerCase() == 'yes' ? '是' : '否',
       }),
-    );
-
+      );
+      
     if (response.statusCode == 200) {
       logger.i("✅ 是否純母乳 & 是否首次哺乳 同步 MySQL 成功");
     } else {

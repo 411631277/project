@@ -136,7 +136,7 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
           .set({
         "是否為第一次生產": answer,
       }, SetOptions(merge: true)); // 🔹 避免覆蓋舊資料
-      await sendFirstTimeToMySQL(widget.userId, answer);
+      await sendFirstTimeDeliveryToMySQL(widget.userId, answer);
       logger.i("✅ Firestore 更新成功，userId: ${widget.userId} -> 是否第一次生產: $answer");
 
       if (!context.mounted) return;
@@ -163,17 +163,17 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
     }
   }
 
-  Future<void> sendFirstTimeToMySQL(String userId, String answer) async {
-    final url = Uri.parse('http://163.13.201.85:3000/user_question');
+ Future<void> sendFirstTimeDeliveryToMySQL(String userId, String answer) async {
+  final url = Uri.parse('http://163.13.201.85:3000/user_question');
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': int.parse(userId),
-        'first_time_delivery': answer,
-      }),
-    );
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'user_id': int.parse(userId),
+       'first_time_delivery': answer == '是' ? '是' : '否', 
+    }),
+  );
 
     if (response.statusCode == 200) {
       logger.i("✅ 是否第一次生產同步 MySQL 成功");

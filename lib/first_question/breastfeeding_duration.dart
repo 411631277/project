@@ -115,7 +115,7 @@ class _BreastfeedingDurationWidgetState
                                 .collection('users')
                                 .doc(widget.userId)
                                 .update({
-                              "前胎哺乳時長": "$selectedDuration 個月",
+                              "前胎哺乳持續時長": "$selectedDuration 個月",
                             });
                             await sendBreastfeedingToMySQL(
                                 widget.userId, "$selectedDuration 個月");
@@ -162,7 +162,7 @@ class _BreastfeedingDurationWidgetState
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'user_id': int.parse(userId),
-        'previous_breastfeeding_duration_months': "$selectedDuration 個月",
+        'previous_breastfeeding_duration_months':  int.parse(selectedDuration.replaceAll('個月', '')),
       }),
     );
 

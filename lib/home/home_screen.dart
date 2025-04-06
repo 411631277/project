@@ -11,7 +11,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
 import 'dart:async';
 import 'dart:math' as math;
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -216,9 +217,9 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
         '步數': _stepCount,
         'lastDeviceSteps': _lastDeviceSteps ?? 0,
       }, SetOptions(merge: true));
-
       logger.i(
           "✅ 已更新 ${widget.userId} => $_currentDay, 步數: $_stepCount, 基準: $_lastDeviceSteps");
+          await sendStepDataToMySQL();
     } catch (e) {
       logger.e("❌ 步數更新失敗: $e");
     }
@@ -740,4 +741,31 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
       ),
     );
   }
+  Future<void> sendStepDataToMySQL() async {
+  final url = Uri.parse('http://163.13.201.85:3000/steps');
+
+  final now = DateTime.now();
+  final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+  logger.i('user_id: ${widget.userId}, date: $formattedDate, steps: $_stepCount, goal: $_targetSteps');
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': int.parse(widget.userId),
+        'step_date': formattedDate,
+        'steps': _stepCount,
+        'goal': _targetSteps,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      logger.i("✅ 步數資料已同步至 MySQL");
+    } else {
+      logger.e("❌ 同步步數資料失敗: ${response.body}");
+    }
+  } catch (e) {
+    logger.e("❌ 發送步數資料時出錯: $e");
+  }
+}
 }
