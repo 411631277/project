@@ -94,7 +94,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
       if (userDoc.exists && userDoc.data() != null) {
         Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
-        int firebaseTarget = data['targetSteps'] ?? 8000; // 預設 8000
+        int firebaseTarget = data['目標步數'] ?? 5000; // 預設 5000
         setState(() {
           _targetSteps = firebaseTarget;
         });

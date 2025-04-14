@@ -1,35 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-  <meta charset="utf-8" />
-  <script src="https://api.tgos.tw/TGOS_MAP_API/Maps/lite/TGOSLiteMap.js"></script>
+  <meta charset="utf-8">
+  <title>TGOS MAP API 測試地圖</title>
   <style>
-    html, body, #map {
+    html, body, #mapDiv {
+      width: 100%;
       height: 100%;
       margin: 0;
       padding: 0;
     }
   </style>
+  <!-- ✅ 正確 TGOS API 載入 -->
+  <script src="https://api.tgos.tw/TGOS_MAP_API_3/tgos.js"></script>
 </head>
 <body>
-  <div id="map"></div>
+  <div id="mapDiv">載入中...</div>
 
   <script>
-    console.log("🟢 HTML 載入成功");
-    alert("🟢 TGOS Lite 載入中");
-  
-    let map;
     function initMap() {
-      console.log("🟢 開始初始化地圖");
-      const mapDiv = document.getElementById('map');
-      map = new TGOS.TGOnlineMap(mapDiv, {
-        zoom: 13,
-        center: new TGOS.TGPoint(121.5654, 25.0330),
-        mapTypeId: TGOS.TGMapType.ROADMAP
-      });
+      console.log("✅ initMap 被呼叫了！");
+      try {
+        let map = new TGMap("mapDiv", {
+          APIKey: "f1KvhIruYT4tXvKUb+Ls6B+4FnN8q/SFbUJMv+64U6CYj+Y7lLYrDZI+wSf+HBtLI3S+ifrDIgMjg97vrcUUh5R5LyMJx92m+sbc+vi4U5F7XJnjlp5/GfPylmZxFajd",
+          ShowMarker: true,
+          Zoom: 12,
+          Center: { x: 121.5654, y: 25.0330 },
+          MapType: "ROADMAP"
+        });
+        console.log("✅ 地圖建立成功！");
+      } catch (err) {
+        console.error("❌ 地圖建立失敗：", err);
+        alert("地圖建立失敗，請打開 F12 看 console.log");
+      }
     }
-  
-    window.onload = initMap;
+
+    window.onload = function () {
+      console.log("🌐 嘗試 TGOS.TGInit...");
+      if (typeof TGOS !== 'undefined' && TGOS.TGInit) {
+        TGOS.TGInit(initMap);
+      } else {
+        console.error("❌ TGOS.TGInit 無法使用");
+        alert("TGOS API 未載入成功，請檢查網路或 API 網址");
+      }
+    };
   </script>
 </body>
 </html>

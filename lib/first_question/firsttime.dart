@@ -33,8 +33,8 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
           children: <Widget>[
             // **問題標題**
             Positioned(
-              top: screenHeight * 0.25,
-              left: screenWidth * 0.3,
+              top: screenHeight * 0.35,
+              left: screenWidth * 0.28,
               child: Text(
                 '是否為第一次生產',
                 textAlign: TextAlign.center,
@@ -48,8 +48,8 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
 
             // **選擇按鈕**
             Positioned(
-              top: screenHeight * 0.33,
-              left: screenWidth * 0.2,
+              top: screenHeight * 0.45,
+              left: screenWidth * 0.20,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -171,7 +171,7 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
       'user_id': int.parse(userId),
-       'first_time_delivery': answer == '是' ? '是' : '否', 
+       'first_time_delivery': firstTimeAnswer == '是' ? '是' : '否', 
     }),
   );
 

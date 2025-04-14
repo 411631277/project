@@ -414,8 +414,8 @@ class _YesyetWidgetState extends State<YesyetWidget> {
       String babyCount,
       String pregnancyCount,
       String deliveryCount,
-      String complication,
-      String breastfeeding) async {
+      String complicationAnswer,
+      String breastfeedingAnswer ) async {
     final url = Uri.parse('http://163.13.201.85:3000/user_question');
 
     final response = await http.post(
@@ -426,8 +426,8 @@ class _YesyetWidgetState extends State<YesyetWidget> {
         'pregnancy_babies_count': babyCount,
         'pregnancy_count': pregnancyCount,
         'delivery_count': deliveryCount,
-        'pregnancy_complications': complication  == '是' ? '是' : '否',
-        'currently_breastfeeding': breastfeeding == '是' ? '是' : '否',
+        'pregnancy_complications': complicationAnswer  == '是' ? '是' : '否',
+        'currently_breastfeeding': breastfeedingAnswer == '是' ? '是' : '否',
       }),
     );
 

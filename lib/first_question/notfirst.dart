@@ -18,7 +18,7 @@ class NotfirstWidget extends StatefulWidget {
 class _NotfirstWidgetState extends State<NotfirstWidget> {
   String? painindex;
   String? brokenskin;
-  String? duration;
+  String? selectedDuration;
   bool isLoading = true; // 🔹 Firestore 資料加載中狀態
 
   @override
@@ -42,7 +42,7 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
           painindex = userData['前次哺乳乳頭疼痛次數']?.toString();
           brokenskin = userData['是否有乳頭破皮']?.toString();
          final original = userData['前胎哺乳持續時長']?.toString();
-         duration = original?.replaceAll(' 個月', '');
+         selectedDuration = original?.replaceAll(' 個月', '');
           isLoading = false;
         });
       } else {
@@ -69,7 +69,7 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
 
     // 檢查是否所有問題都填答
     final isAllAnswered =
-        painindex != null && brokenskin != null && duration != null;
+        painindex != null && brokenskin != null && selectedDuration != null;
 
     return Scaffold(
       body: Container(
@@ -190,7 +190,7 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
               child: SizedBox(
                 width: screenWidth * 0.5,
                 child: DropdownButtonFormField<String>(
-                  value: duration,
+                  value: selectedDuration,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
@@ -209,7 +209,7 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
                       .toList(),
                   onChanged: (value) {
                     setState(() {
-                      duration = value;
+                      selectedDuration = value;
                     });
                   },
                 ),
@@ -232,11 +232,11 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
                             .set({
                           "前次哺乳乳頭疼痛次數": painindex,
                           "是否有乳頭破皮": brokenskin,
-                          "前胎哺乳持續時長": "$duration 個月",
+                          "前胎哺乳持續時長": "$selectedDuration 個月",
                         }, SetOptions(merge: true)); // 🔹 保留先前數據
 
                         await sendNotFirstDataToMySQL(
-                            widget.userId, painindex!, brokenskin!, duration!);
+                            widget.userId, painindex!, brokenskin!, selectedDuration!);
 
                         logger.i("✅ Firestore 更新成功，userId: ${widget.userId}");
 
@@ -263,7 +263,7 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
   }
 
   Future<void> sendNotFirstDataToMySQL(String userId, String painIndex,
-      String brokenSkin, String duration) async {
+      String brokenSkin, String selectedDuration) async {
     final url = Uri.parse('http://163.13.201.85:3000/user_question');
 
     final response = await http.post(
@@ -273,7 +273,7 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
         'user_id': int.parse(userId),
         'previous_nipple_pain_level': painIndex,
         'nipple_cracking': brokenSkin == '是' ? '是'  : '否',
-        'previous_breastfeeding_duration_months': int.parse(duration),
+        'previous_breastfeeding_selectedDuration_months': int.parse(selectedDuration),
       }),
     );
 
