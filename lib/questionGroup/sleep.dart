@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
@@ -339,10 +342,31 @@ class _SleepWidgetState extends State<SleepWidget> {
       }, SetOptions(merge: true));
 
       logger.i("✅ SleepWidget 資料已成功儲存並覆蓋舊檔案！");
+      await sendSleepAnswersToMySQL(widget.userId, formattedAnswers);
+
       return true;
     } catch (e) {
       logger.e("❌ 儲存 SleepWidget 資料時發生錯誤：$e");
       return false;
     }
   }
+  Future<void> sendSleepAnswersToMySQL(String userId, Map<String, String?> formattedAnswers) async {
+  final url = Uri.parse('http://163.13.201.85:3000/sleep_answers');
+
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'user_id': int.parse(userId),
+      'answers': formattedAnswers,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    logger.i("✅ 睡眠問卷答案已同步到 MySQL");
+  } else {
+    logger.e("❌ 同步睡眠問卷失敗: ${response.body}");
+  }
+}
+
 }

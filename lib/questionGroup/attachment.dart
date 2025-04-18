@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
 
@@ -252,11 +255,48 @@ class _AttachmentWidget extends State<AttachmentWidget> {
         .update({"attachmentCompleted": true});
 
     logger.i("✅ 問卷已成功儲存，並更新 attachmentCompleted！");
-
+    await sendAttachmentScoreToMySQL(widget.userId, answers);
     return true;
   } catch (e) {
     logger.e("❌ 儲存問卷時發生錯誤：$e");
     return false;
+  }
+}
+
+Future<void> sendAttachmentScoreToMySQL(String userId, Map<int, String?> answers) async {
+  int score = 0;
+  const scoreMap = {
+    "非常認同": 4,
+    "認同": 3,
+    "不認同": 2,
+    "很不認同": 1,
+  };
+
+  for (var entry in answers.entries) {
+    final value = entry.value;
+    if (value != null && scoreMap.containsKey(value)) {
+      score += scoreMap[value]!;
+    }
+  }
+
+  final completionRate = ((score / (questions.length * 4)) * 100).toStringAsFixed(2);
+
+  final url = Uri.parse('http://163.13.201.85:3000/attachment_score');
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'user_id': int.parse(userId),
+      'total_score': score,
+      'max_score': questions.length * 4,
+      'completion_rate': completionRate,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    logger.i("✅ 親子依附分數已同步到 MySQL！");
+  } else {
+    logger.e("❌ 同步失敗：${response.body}");
   }
 }
 }

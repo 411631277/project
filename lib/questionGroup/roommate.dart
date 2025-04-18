@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'dart:math' as math;
 import 'package:logger/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -224,10 +227,32 @@ class _RoommateWidgetState extends State<RoommateWidget> {
           .update({"roommateCompleted": true});
 
       logger.i("✅ Roommate 問卷已成功儲存，並更新 roommateCompleted！");
+      await sendRoommateAnswersToMySQL(widget.userId);
+
       return true;
     } catch (e) {
       logger.e("❌ 儲存 Roommate 問卷時發生錯誤：$e");
       return false;
     }
   }
+  Future<void> sendRoommateAnswersToMySQL(String userId) async {
+  final url = Uri.parse('http://163.13.201.85:3000/roommate_answers');
+
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'user_id': int.parse(userId),
+      'rooming_24h': isRoomingIn24Hours == true ? '是' : '否',
+      'postpartum_center': isLivingInPostpartumCenter == true ? '是' : '否',
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    logger.i("✅ 親子同室問卷已同步到 MySQL！");
+  } else {
+    logger.e("❌ 同步 MySQL 失敗: ${response.body}");
+  }
+}
+
 }

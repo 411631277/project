@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
 
@@ -215,8 +218,30 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
           .update({"melancholyCompleted": true});
 
       logger.i("✅ 憂鬱量表問卷已成功儲存，並更新 melancholyCompleted！");
+      await sendMelancholyAnswersToMySQL(widget.userId, answers);
+
     } catch (e) {
       logger.e("❌ 儲存憂鬱量表問卷時發生錯誤：$e");
     }
   }
+  Future<void> sendMelancholyAnswersToMySQL(String userId, Map<int, String?> answers) async {
+  final formattedAnswers = answers.map((key, value) => MapEntry("Q${key + 1}", value ?? '未填答'));
+
+  final url = Uri.parse('http://163.13.201.85:3000/melancholy_answers'); // ⬅️ 根據你的後端路由調整
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'user_id': int.parse(userId),
+      'answers': formattedAnswers,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    logger.i("✅ 憂鬱問卷答案已同步到 MySQL");
+  } else {
+    logger.e("❌ 憂鬱問卷同步失敗: ${response.body}");
+  }
+}
+
 }

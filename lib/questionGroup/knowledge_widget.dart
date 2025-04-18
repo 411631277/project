@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
 
@@ -230,11 +233,60 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
           .update({"knowledgeCompleted": true});
 
       logger.i("✅ 問卷已成功儲存，並更新 knowledgeCompleted！");
-
+   await sendKnowledgeScoreToMySQL(widget.userId, answers);
       return true;
     } catch (e) {
       logger.e("❌ 儲存問卷時發生錯誤：$e");
       return false;
     }
   }
+  Future<void> sendKnowledgeScoreToMySQL(String userId, Map<int, String?> answers) async {
+  int score = 0;
+  const correctAnswers = {
+    0,  // 初乳增加免疫力 ✅
+    2,  // 心情影響乳汁 ✅
+    6,  // 含住乳暈 ✅
+    7,  // 手掌支托遠離乳暈 ✅
+    9,  // 平乳頭也能餵 ✅
+    10, // 初期沒乳汁也能餵 ✅
+    11, // 擠乳塗抹乳頭 ✅
+    14, // 吸吮越多分泌越多 ✅
+    15, // 脹奶可讓嬰兒吸 ✅
+    17, // 吸吮弱可協助擠乳 ✅
+    18, // 配方奶影響分泌 ✅
+    19, // 配方奶會影響適應 ✅
+    20, // 嗜睡可搓嬰兒 ✅
+    21, // 沒親餵也要擠奶 ✅
+    23, // 已吃過奶水要丟掉 ✅
+    24, // 每 3 小時擠奶 ✅
+  };
+
+  for (var entry in answers.entries) {
+    if (correctAnswers.contains(entry.key) && entry.value == "正確") {
+      score += 1;
+    }
+  }
+
+  final total = correctAnswers.length;
+  final completionRate = ((score / total) * 100).toStringAsFixed(2);
+
+  final url = Uri.parse('http://163.13.201.85:3000/knowledge_score');
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'user_id': int.parse(userId),
+      'total_score': score,
+      'max_score': total,
+      'completion_rate': completionRate,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    logger.i("✅ 知識分數已同步至 MySQL！");
+  } else {
+    logger.e("❌ 知識同步失敗：${response.body}");
+  }
+}
+
 }

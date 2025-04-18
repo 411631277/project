@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'dart:math' as math;
 import 'package:logger/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -307,11 +310,49 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
           .update({"painScaleCompleted": true});
 
       logger.i("✅ 疼痛分數問卷已成功儲存，並更新 painScaleCompleted！");
+      await sendPainScaleToMySQL(widget.userId);
+
       return true;
+      
     } catch (e) {
       logger.e("❌ 儲存疼痛分數問卷時發生錯誤：$e");
       return false;
     }
   }
+  Future<void> sendPainScaleToMySQL(String userId) async {
+  final url = Uri.parse('http://163.13.201.85:3000/pain_scale');
+
+  final birthType = isNaturalBirth
+      ? "自然產"
+      : isCSection
+          ? "剖腹產"
+          : null;
+
+  final painControl = isCSection
+      ? (usedSelfPainControl
+          ? "是"
+          : notUsedSelfPainControl
+              ? "否"
+              : null)
+      : null;
+
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'user_id': int.parse(userId),
+      'birth_type': birthType,
+      'pain_level': painLevel.toInt(),  // painLevel 是 double，轉 int 儲存
+      'used_self_pain_control': painControl,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    logger.i("✅ 疼痛分數已同步到 MySQL！");
+  } else {
+    logger.e("❌ 疼痛分數同步 MySQL 失敗: ${response.body}");
+  }
+}
+
 }
 

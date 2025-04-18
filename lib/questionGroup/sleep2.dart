@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
 
@@ -216,11 +219,38 @@ class _Sleep2Widget extends State<Sleep2Widget> {
           .update({"sleepCompleted": true});
 
       logger.i("✅ Sleep2Widget 資料已成功儲存並更新 sleepCompleted！");
+      await sendSleep2AnswersToMySQL(widget.userId, answers);
+
       return true;
     } catch (e) {
       logger.e("❌ 儲存 Sleep2Widget 資料時發生錯誤：$e");
       return false;
     }
   }
+  Future<void> sendSleep2AnswersToMySQL(String userId, Map<int, String?> answers) async {
+  final formattedAnswers = answers.map((key, value) => MapEntry("Q${key + 1}", value ?? '未填答'));
+
+  final url = Uri.parse('http://163.13.201.85:3000/sleep2_answers');
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': int.parse(userId),
+        'answers': formattedAnswers,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      logger.i("✅ Sleep2 問卷答案已同步到 MySQL");
+    } else {
+      logger.e("❌ 同步 Sleep2 MySQL 失敗: ${response.body}");
+    }
+  } catch (e) {
+    logger.e("❌ 發送 Sleep2 資料到 MySQL 時錯誤: $e");
+  }
+}
+
 }
 
