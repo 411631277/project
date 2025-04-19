@@ -235,24 +235,29 @@ class _RoommateWidgetState extends State<RoommateWidget> {
       return false;
     }
   }
-  Future<void> sendRoommateAnswersToMySQL(String userId) async {
-  final url = Uri.parse('http://163.13.201.85:3000/roommate_answers');
+ Future<void> sendRoommateAnswersToMySQL(String userId) async {
+  final url = Uri.parse('http://163.13.201.85:3000/roommate');
+
+  final now = DateTime.now();
+  final formattedDate =
+      "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
       'user_id': int.parse(userId),
-      'rooming_24h': isRoomingIn24Hours == true ? '是' : '否',
-      'postpartum_center': isLivingInPostpartumCenter == true ? '是' : '否',
+      'roommate_question_content': "親子同室問卷",
+      'roommate_test_date': formattedDate,
+      'roommate_answer_1': isRoomingIn24Hours == true ? '是' : '否',
+      'roommate_answer_2': isLivingInPostpartumCenter == true ? '是' : '否',
     }),
   );
 
-  if (response.statusCode == 200) {
+  if (response.statusCode >= 200 && response.statusCode < 300) {
     logger.i("✅ 親子同室問卷已同步到 MySQL！");
   } else {
     logger.e("❌ 同步 MySQL 失敗: ${response.body}");
   }
 }
-
 }

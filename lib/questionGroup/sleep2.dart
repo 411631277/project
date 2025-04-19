@@ -227,30 +227,46 @@ class _Sleep2Widget extends State<Sleep2Widget> {
       return false;
     }
   }
-  Future<void> sendSleep2AnswersToMySQL(String userId, Map<int, String?> answers) async {
-  final formattedAnswers = answers.map((key, value) => MapEntry("Q${key + 1}", value ?? '未填答'));
+ Future<void> sendSleep2AnswersToMySQL(String userId, Map<int, String?> answers) async {
+  final url = Uri.parse('http://163.13.201.85:3000/sleep2');
 
-  final url = Uri.parse('http://163.13.201.85:3000/sleep2_answers');
+  // 先宣告 payload（給整個 function 都能使用）
+  Map<String, dynamic> payload = {};
 
   try {
+    final now = DateTime.now();
+    final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+    payload = {
+      'user_id': int.parse(userId),
+      'sleep_question_content': "睡眠品質量表",
+      'sleep_test_date': formattedDate,
+    };
+
+    for (int i = 0; i < 19; i++) {
+      final answer = answers[i] ?? 'none';
+      payload['sleep_answer_${i + 1}'] = answer;
+    }
+
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': int.parse(userId),
-        'answers': formattedAnswers,
-      }),
+      body: jsonEncode(payload),
     );
 
     if (response.statusCode == 200) {
-      logger.i("✅ Sleep2 問卷答案已同步到 MySQL");
+      final result = jsonDecode(response.body);
+      logger.i("✅ Sleep2 資料同步成功：${result['message']} (insertId: ${result['insertId']})");
     } else {
-      logger.e("❌ 同步 Sleep2 MySQL 失敗: ${response.body}");
+      throw Exception("❌ Sleep2 資料同步失敗：${response.body}");
     }
+
   } catch (e) {
-    logger.e("❌ 發送 Sleep2 資料到 MySQL 時錯誤: $e");
+    logger.e("❌ 發送 Sleep2 資料到 MySQL 時錯誤：$e");
+    logger.i("🟨 payload：$payload"); // ✅ 這裡就可以用了
   }
 }
+
 
 }
 

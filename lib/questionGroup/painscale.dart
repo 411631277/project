@@ -320,7 +320,10 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
     }
   }
   Future<void> sendPainScaleToMySQL(String userId) async {
-  final url = Uri.parse('http://163.13.201.85:3000/pain_scale');
+  final url = Uri.parse('http://163.13.201.85:3000/painscale');
+
+  final now = DateTime.now();
+  final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
   final birthType = isNaturalBirth
       ? "自然產"
@@ -341,18 +344,21 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
       'user_id': int.parse(userId),
-      'birth_type': birthType,
-      'pain_level': painLevel.toInt(),  // painLevel 是 double，轉 int 儲存
-      'used_self_pain_control': painControl,
+      'painscale_question_content': "會陰疼痛量表",
+      'painscale_test_date': formattedDate,
+      'childbirth_method': birthType,
+      'pain_level': painLevel.toInt(),
+      'used_self_controlled_pain_relief': painControl,
     }),
   );
 
-  if (response.statusCode == 200) {
+ if (response.statusCode >= 200 && response.statusCode < 300) {
     logger.i("✅ 疼痛分數已同步到 MySQL！");
   } else {
     logger.e("❌ 疼痛分數同步 MySQL 失敗: ${response.body}");
   }
 }
+
 
 }
 

@@ -342,7 +342,7 @@ class _SleepWidgetState extends State<SleepWidget> {
       }, SetOptions(merge: true));
 
       logger.i("✅ SleepWidget 資料已成功儲存並覆蓋舊檔案！");
-      await sendSleepAnswersToMySQL(widget.userId, formattedAnswers);
+      await sendSleepAnswersToMySQL(widget.userId, formattedAnswers.cast<int, String?>());
 
       return true;
     } catch (e) {
@@ -350,23 +350,74 @@ class _SleepWidgetState extends State<SleepWidget> {
       return false;
     }
   }
-  Future<void> sendSleepAnswersToMySQL(String userId, Map<String, String?> formattedAnswers) async {
-  final url = Uri.parse('http://163.13.201.85:3000/sleep_answers');
+ Future<void> sendSleepAnswersToMySQL(String userId, Map<int, String?> answers) async {
+  final url = Uri.parse('http://163.13.201.85:3000/sleep');
+  final now = DateTime.now();
+  final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-  final response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'user_id': int.parse(userId),
-      'answers': formattedAnswers,
-    }),
-  );
+  final Map<String, dynamic> payload = {
+    'user_id': int.parse(userId),
+    'sleep_question_content': "睡眠品質量表",
+    'sleep_test_date': formattedDate,
+  };
 
-  if (response.statusCode == 200) {
-    logger.i("✅ 睡眠問卷答案已同步到 MySQL");
-  } else {
-    logger.e("❌ 同步睡眠問卷失敗: ${response.body}");
+  // 填空題（只包含資料表中有的欄位）
+  payload['sleep_answer_1_a'] = int.tryParse(hourControllers[0]?.text.trim() ?? '') ?? 0;
+  payload['sleep_answer_1_b'] = int.tryParse(minuteControllers[0]?.text.trim() ?? '') ?? 0;
+  payload['sleep_answer_2']   = int.tryParse(minuteControllers[1]?.text.trim() ?? '') ?? 0;
+  payload['sleep_answer_3_a'] = int.tryParse(hourControllers[2]?.text.trim() ?? '') ?? 0;
+  payload['sleep_answer_3_b'] = int.tryParse(minuteControllers[2]?.text.trim() ?? '') ?? 0;
+  payload['sleep_answer_4']   = int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0;
+  payload['sleep_answer_5']   = int.tryParse(hourControllers[4]?.text.trim() ?? '') ?? 0;
+
+  // 選擇題 ENUM 對照來源（6~10 對應 questions[0~4]）
+  final questions = [
+    {"options": ["很好", "好", "不好", "很不好"]},
+    {"options": ["很好", "好", "不好", "很不好"]},
+    {"options": ["未發生", "約一兩次", "三次或以上"]},
+    {"options": ["未發生", "約一兩次", "三次或以上"]},
+    {"options": ["沒有", "有一點", "的確有", "很嚴重"]},
+  ];
+
+  for (int i = 6; i <= 10; i++) {
+    final selectedText = answers[i];
+    final options = (questions[i - 6]['options'] ?? []);
+    final index = options.indexOf(selectedText ?? '');
+
+    if (index < 0) {
+      logger.w("⚠️ sleep_answer_$i 的選項未正確匹配：$selectedText");
+    }
+
+    payload['sleep_answer_$i'] = (index >= 0) ? index.toString() : 'none';
+  }
+
+  // 額外檢查是否有 none
+  if (payload.containsValue('none')) {
+    logger.e("❗有欄位未填寫或選擇錯誤，請檢查以下 payload 👇");
+    logger.e(payload);
+    return;
+  }
+
+  logger.i("📦 最終送出 payload：$payload");
+
+  // 發送資料
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(payload),
+    );
+
+    if (response.statusCode == 200) {
+      final result = jsonDecode(response.body);
+      logger.i("✅ 睡眠問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
+    } else {
+      throw Exception("❌ 睡眠問卷同步失敗：${response.body}");
+    }
+  } catch (e) {
+    logger.e("❌ 發送 Sleep 資料到 MySQL 時發生錯誤：$e");
   }
 }
+
 
 }
