@@ -270,11 +270,11 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
   body: jsonEncode(payload),
 );
 
-if (response.statusCode == 200) {
+if (response.statusCode >= 200 && response.statusCode < 300) {
   final result = jsonDecode(response.body);
-  logger.i("✅ MySQL 儲存成功: ${result['message']}");
+  logger.i("✅ 生產支持問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
 } else {
-  logger.e("❌ 同步失敗: ${response.body}");
+  throw Exception("❌ 生產支持問卷同步失敗：${response.body}");
 }
-}
+ }
 }

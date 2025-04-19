@@ -255,7 +255,7 @@ class _AttachmentWidget extends State<AttachmentWidget> {
         .update({"attachmentCompleted": true});
 
     logger.i("✅ 問卷已成功儲存，並更新 attachmentCompleted！");
-    await sendAttachmentScoreToMySQL(widget.userId, answers);
+    await sendAttachmentAnswersToMySQL(widget.userId, answers);
     return true;
   } catch (e) {
     logger.e("❌ 儲存問卷時發生錯誤：$e");
@@ -263,40 +263,39 @@ class _AttachmentWidget extends State<AttachmentWidget> {
   }
 }
 
-Future<void> sendAttachmentScoreToMySQL(String userId, Map<int, String?> answers) async {
-  int score = 0;
-  const scoreMap = {
-    "非常認同": 4,
-    "認同": 3,
-    "不認同": 2,
-    "很不認同": 1,
+Future<void> sendAttachmentAnswersToMySQL(String userId, Map<int, String?> answers) async {
+  final url = Uri.parse('http://163.13.201.85:3000/attachment');
+
+  // 取得今天日期（格式：2025-04-19）
+  final now = DateTime.now();
+  final formattedDate =
+      "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+  final payload = {
+    'user_id': int.parse(userId),
+    'attachment_question_content': '親子依附量表',
+    'attachment_test_date': formattedDate,
   };
 
-  for (var entry in answers.entries) {
-    final value = entry.value;
-    if (value != null && scoreMap.containsKey(value)) {
-      score += scoreMap[value]!;
-    }
+  // 前 19 題作答寫入（欄位名稱與 DB 對應）
+  for (int i = 0; i < 25; i++) {
+    final answer = answers[i] ?? '未填';
+    payload['attachment_answer_${i + 1}'] = answer;
   }
 
-  final completionRate = ((score / (questions.length * 4)) * 100).toStringAsFixed(2);
-
-  final url = Uri.parse('http://163.13.201.85:3000/attachment_score');
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'user_id': int.parse(userId),
-      'total_score': score,
-      'max_score': questions.length * 4,
-      'completion_rate': completionRate,
-    }),
+    body: jsonEncode(payload),
   );
 
   if (response.statusCode == 200) {
-    logger.i("✅ 親子依附分數已同步到 MySQL！");
+    final result = jsonDecode(response.body);
+    logger.i("✅ Attachment 資料同步成功：${result['message']} (insertId: ${result['insertId']})");
   } else {
-    logger.e("❌ 同步失敗：${response.body}");
+    logger.e("❌ Attachment 資料同步失敗：${response.body}");
+    throw Exception("同步失敗：${response.body}");
   }
 }
+
 }

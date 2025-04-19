@@ -231,7 +231,7 @@ class _ProdutionWidget extends State<ProdutionWidget> {
           .update({"produtionCompleted": true});
 
       logger.i("✅ 生產支持知覺量表問卷已成功儲存，並更新 produtionCompleted！");
-      await sendProductionAnswersToMySQL(widget.userId, answers);
+     await sendProductionAnswersToMySQL(widget.userId, answers);
 
       return true;
     } catch (e) {
@@ -239,24 +239,41 @@ class _ProdutionWidget extends State<ProdutionWidget> {
       return false;
     }
   }
-  Future<void> sendProductionAnswersToMySQL(String userId, Map<int, String?> answers) async {
-  final formattedAnswers = answers.map((key, value) => MapEntry("Q${key + 1}", value ?? '未填答'));
+ Future<void> sendProductionAnswersToMySQL(String userId, Map<int, String?> answers) async {
+  final url = Uri.parse('http://163.13.201.85:3000/assessment'); // ✅ 你的 MySQL API 路徑
 
-  final url = Uri.parse('http://163.13.201.85:3000/production_answers');
+  // 當日日期格式
+  final now = DateTime.now();
+  final formattedDate =
+      "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+  // 組裝傳送資料
+  final Map<String, dynamic> payload = {
+    'user_id': int.parse(userId),
+    'assessment_question_content': '生產支持知覺量表',
+    'assessment_test_date': formattedDate,
+  };
+
+  // 把 answers 依序加入 payload
+  for (int i = 0; i < 19; i++) {
+    final answer = answers[i] ?? '未填答';
+    payload['assessment_answer_${i + 1}'] = answer;
+  }
+
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'user_id': int.parse(userId),
-      'answers': formattedAnswers,
-    }),
+    body: jsonEncode(payload),
   );
 
-  if (response.statusCode == 200) {
-    logger.i("✅ 生產支持量表作答已同步到 MySQL");
-  } else {
-    logger.e("❌ 生產支持量表同步失敗: ${response.body}");
-  }
+ if (response.statusCode >= 200 && response.statusCode < 300) {
+  final result = jsonDecode(response.body);
+  logger.i("✅ 生產支持問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
+} else {
+  throw Exception("❌ 生產支持問卷同步失敗：${response.body}");
 }
+
+}
+
 
 }
