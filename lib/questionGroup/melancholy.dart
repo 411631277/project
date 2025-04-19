@@ -224,24 +224,39 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
       logger.e("❌ 儲存憂鬱量表問卷時發生錯誤：$e");
     }
   }
-  Future<void> sendMelancholyAnswersToMySQL(String userId, Map<int, String?> answers) async {
-  final formattedAnswers = answers.map((key, value) => MapEntry("Q${key + 1}", value ?? '未填答'));
+ Future<void> sendMelancholyAnswersToMySQL(String userId, Map<int, String?> answers) async {
+  final url = Uri.parse('http://163.13.201.85:3000/dour');
 
-  final url = Uri.parse('http://163.13.201.85:3000/melancholy_answers'); // ⬅️ 根據你的後端路由調整
+  // 取得今天日期（格式：2025-04-19）
+  final now = DateTime.now();
+  final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+  final Map<String, dynamic> payload = {
+    'user_id': int.parse(userId),
+    "dour_question_content": "產後憂鬱量表",
+    'dour_test_date': formattedDate,
+  };
+
+  // 把答案轉成 ENUM 對應的 '0'~'3'
+  for (int i = 0; i < 10; i++) {
+    final selectedText = answers[i];
+    final optionIndex = questionOptions[i]?.indexOf(selectedText ?? '') ?? -1;
+     payload['dour_answer_${i + 1}'] = (optionIndex >= 0) ? optionIndex.toString() : 'none';
+
+  }
+
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'user_id': int.parse(userId),
-      'answers': formattedAnswers,
-    }),
+    body: jsonEncode(payload),
   );
 
-  if (response.statusCode == 200) {
-    logger.i("✅ 憂鬱問卷答案已同步到 MySQL");
-  } else {
-    logger.e("❌ 憂鬱問卷同步失敗: ${response.body}");
-  }
+ if (response.statusCode >= 200 && response.statusCode < 300) {
+  final result = jsonDecode(response.body);
+  logger.i("✅ 憂鬱問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
+} else {
+  throw Exception("❌ 憂鬱問卷同步失敗：${response.body}");
 }
 
+}
 }
