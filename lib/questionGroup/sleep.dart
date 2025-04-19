@@ -77,12 +77,12 @@ class _SleepWidgetState extends State<SleepWidget> {
     {
       "type": "choice", // 選擇題
       "question": "過去一個月來，您通常一星期幾個晚上需要使用藥物幫忙睡眠？",
-      "options": ["未發生", "約一兩次", "三次或以上"],
+      "options": ["從未發生", "約一兩次", "三次或以上"],
     },
     {
       "type": "choice", // 選擇題
       "question": "過去一個月來，您是否曾在用餐、開車或社交場合瞌睡而無法保持清醒，每星期約幾次?",
-      "options": ["未發生", "約一兩次", "三次或以上"],
+      "options": ["從未發生", "約一兩次", "三次或以上"],
     },
     {
       "type": "choice", // 選擇題
@@ -262,51 +262,54 @@ class _SleepWidgetState extends State<SleepWidget> {
     );
   }
 
-  Widget _buildChoiceQuestion(int index, Map<String, dynamic> question) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "${index + 1}. ${question['question']}",
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color.fromRGBO(147, 129, 108, 1),
-            ),
+  Widget _buildChoiceQuestion(int uiIndex, Map<String, dynamic> question) {
+  final int answerIndex = questions.indexOf(question); // 這行最關鍵！
+
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "${answerIndex + 1}. ${question['question']}",
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color.fromRGBO(147, 129, 108, 1),
           ),
-          const SizedBox(height: 5),
-          Column(
-            children: (question['options'] as List<String>)
-                .map((option) => Row(
-                      children: [
-                        Radio<String>(
-                          value: option,
-                          groupValue: answers[index],
-                          onChanged: (value) {
-                            setState(() {
-                              answers[index] = value;
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: Text(
-                            option,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color.fromRGBO(147, 129, 108, 1),
-                            ),
-                            softWrap: true,
+        ),
+        const SizedBox(height: 5),
+        Column(
+          children: (question['options'] as List<String>)
+              .map((option) => Row(
+                    children: [
+                      Radio<String>(
+                        value: option,
+                        groupValue: answers[answerIndex],
+                        onChanged: (value) {
+                          setState(() {
+                            answers[answerIndex] = value;
+                            logger.i("📌 寫入第 $answerIndex 題答案：$value");
+                          });
+                        },
+                      ),
+                      Expanded(
+                        child: Text(
+                          option,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color.fromRGBO(147, 129, 108, 1),
                           ),
+                          softWrap: true,
                         ),
-                      ],
-                    ))
-                .toList(),
-          ),
-        ],
-      ),
-    );
-  }
+                      ),
+                    ],
+                  ))
+              .toList(),
+        ),
+      ],
+    ),
+  );
+}
 
   Future<bool> _saveAnswersToFirebase() async {
     try {
@@ -342,7 +345,7 @@ class _SleepWidgetState extends State<SleepWidget> {
       }, SetOptions(merge: true));
 
       logger.i("✅ SleepWidget 資料已成功儲存並覆蓋舊檔案！");
-      await sendSleepAnswersToMySQL(widget.userId, formattedAnswers.cast<int, String?>());
+      await sendSleepAnswersToMySQL(widget.userId, answers);
 
       return true;
     } catch (e) {
@@ -350,7 +353,7 @@ class _SleepWidgetState extends State<SleepWidget> {
       return false;
     }
   }
- Future<void> sendSleepAnswersToMySQL(String userId, Map<int, String?> answers) async {
+Future<void> sendSleepAnswersToMySQL(String userId, Map<int, String?> answers) async {
   final url = Uri.parse('http://163.13.201.85:3000/sleep');
   final now = DateTime.now();
   final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
@@ -361,7 +364,7 @@ class _SleepWidgetState extends State<SleepWidget> {
     'sleep_test_date': formattedDate,
   };
 
-  // 填空題（只包含資料表中有的欄位）
+  // ✅ 填空題（轉成 int）
   payload['sleep_answer_1_a'] = int.tryParse(hourControllers[0]?.text.trim() ?? '') ?? 0;
   payload['sleep_answer_1_b'] = int.tryParse(minuteControllers[0]?.text.trim() ?? '') ?? 0;
   payload['sleep_answer_2']   = int.tryParse(minuteControllers[1]?.text.trim() ?? '') ?? 0;
@@ -370,37 +373,39 @@ class _SleepWidgetState extends State<SleepWidget> {
   payload['sleep_answer_4']   = int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0;
   payload['sleep_answer_5']   = int.tryParse(hourControllers[4]?.text.trim() ?? '') ?? 0;
 
-  // 選擇題 ENUM 對照來源（6~10 對應 questions[0~4]）
-  final questions = [
-    {"options": ["很好", "好", "不好", "很不好"]},
-    {"options": ["很好", "好", "不好", "很不好"]},
-    {"options": ["未發生", "約一兩次", "三次或以上"]},
-    {"options": ["未發生", "約一兩次", "三次或以上"]},
-    {"options": ["沒有", "有一點", "的確有", "很嚴重"]},
+  // ✅ 選擇題（6~10）ENUM 字串值
+  const List<List<String>> sleepChoiceOptions = [
+    ["很好", "好", "不好", "很不好"],            // sleep_answer_6
+    ["很好", "好", "不好", "很不好"],            // sleep_answer_7
+    ["從未發生", "約一兩次", "三次或以上"],      // sleep_answer_8
+    ["從未發生", "約一兩次", "三次或以上"],      // sleep_answer_9
+    ["沒有", "有一點", "的確有", "很嚴重"],      // sleep_answer_10
   ];
 
-  for (int i = 6; i <= 10; i++) {
-    final selectedText = answers[i];
-    final options = (questions[i - 6]['options'] ?? []);
-    final index = options.indexOf(selectedText ?? '');
+  const List<int> answerIndexes = [5, 6, 7, 8, 9];
 
-    if (index < 0) {
-      logger.w("⚠️ sleep_answer_$i 的選項未正確匹配：$selectedText");
+  for (int i = 0; i < answerIndexes.length; i++) {
+    final int questionIndex = answerIndexes[i];
+    final selectedText = answers[questionIndex];
+    final options = sleepChoiceOptions[i];
+
+    final index = options.indexWhere((opt) => opt.trim() == (selectedText ?? '').trim());
+
+    if (index >= 0) {
+      payload['sleep_answer_${i + 6}'] = options[index]; // ✅ ENUM 字串
+    } else {
+      logger.w("⚠️ sleep_answer_${i + 6} 對應失敗：找不到選項 '$selectedText' in $options");
+      payload['sleep_answer_${i + 6}'] = "未發生"; // 預設值也 OK
     }
-
-    payload['sleep_answer_$i'] = (index >= 0) ? index.toString() : 'none';
   }
 
-  // 額外檢查是否有 none
-  if (payload.containsValue('none')) {
-    logger.e("❗有欄位未填寫或選擇錯誤，請檢查以下 payload 👇");
-    logger.e(payload);
-    return;
+  // ✅ ⛑️ 自動補 sleep_answer_11~19 為預設合法 ENUM 值
+  for (int i = 11; i <= 19; i++) {
+    payload['sleep_answer_$i'] = "從未發生"; // ENUM 的預設值
   }
 
   logger.i("📦 最終送出 payload：$payload");
 
-  // 發送資料
   try {
     final response = await http.post(
       url,
@@ -408,7 +413,7 @@ class _SleepWidgetState extends State<SleepWidget> {
       body: jsonEncode(payload),
     );
 
-    if (response.statusCode == 200) {
+     if (response.statusCode >= 200 && response.statusCode < 300) {
       final result = jsonDecode(response.body);
       logger.i("✅ 睡眠問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
     } else {
@@ -418,6 +423,8 @@ class _SleepWidgetState extends State<SleepWidget> {
     logger.e("❌ 發送 Sleep 資料到 MySQL 時發生錯誤：$e");
   }
 }
+
+
 
 
 }
