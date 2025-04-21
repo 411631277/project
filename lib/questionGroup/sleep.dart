@@ -1,17 +1,15 @@
-//睡眠評估1
+// sleep_combined.dart
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:math' as math;
-
-//註解已完成
 
 final Logger logger = Logger();
 
 class SleepWidget extends StatefulWidget {
-  final String userId; // 接收 userId
+  final String userId;
   const SleepWidget({super.key, required this.userId});
 
   @override
@@ -19,114 +17,78 @@ class SleepWidget extends StatefulWidget {
 }
 
 class _SleepWidgetState extends State<SleepWidget> {
-  // 填空題的控制器
+  // 第一部分：填空題 controllers & 答案
   final Map<int, TextEditingController> hourControllers = {
-    for (int i = 0; i < 5; i++) i: TextEditingController(),
+    for (var i = 0; i < 5; i++) i: TextEditingController()
   };
   final Map<int, TextEditingController> minuteControllers = {
-    for (int i = 0; i < 5; i++) i: TextEditingController(),
+    for (var i = 0; i < 5; i++) i: TextEditingController()
   };
-
-  // 問題與選項的資料結構
-  final List<Map<String, dynamic>> questions = [
-    {
-      "type": "fill", // 填空題
-      "question": "過去一個月來，您通常何時上床？",
-      "index": 0,
-      "hasHour": true,
-      "hasMinute": true,
-    },
-    {
-      "type": "fill", // 填空題
-      "question": "過去一個月來，您通常多久才能入睡？",
-      "index": 1,
-      "hasHour": false,
-      "hasMinute": true,
-    },
-    {
-      "type": "fill", // 填空題
-      "question": "過去一個月來，您早上通常何時起床？",
-      "index": 2,
-      "hasHour": true,
-      "hasMinute": true,
-    },
-    {
-      "type": "fill", // 填空題
-      "question": "過去一個月來，您通常實際睡眠可以入睡幾小時？",
-      "index": 3,
-      "hasHour": true,
-      "hasMinute": false,
-    },
-    {
-      "type": "fill", // 填空題
-      "question": "過去一個月來，您平均而看您一天睡幾小時？",
-      "index": 4,
-      "hasHour": true,
-      "hasMinute": false,
-    },
-    {
-      "type": "choice", // 選擇題
-      "question": "您覺得睡眠品質好嗎?",
-      "options": ["很好", "好", "不好", "很不好"],
-    },
-    {
-      "type": "choice", // 選擇題
-      "question": "過去一個月來，整體而言，您覺得自己的睡眠品質如何？",
-      "options": ["很好", "好", "不好", "很不好"],
-    },
-    {
-      "type": "choice", // 選擇題
-      "question": "過去一個月來，您通常一星期幾個晚上需要使用藥物幫忙睡眠？",
-      "options": ["從未發生", "約一兩次", "三次或以上"],
-    },
-    {
-      "type": "choice", // 選擇題
-      "question": "過去一個月來，您是否曾在用餐、開車或社交場合瞌睡而無法保持清醒，每星期約幾次?",
-      "options": ["從未發生", "約一兩次", "三次或以上"],
-    },
-    {
-      "type": "choice", // 選擇題
-      "question": "過去一個月來，您會感到無心完成該做的事",
-      "options": ["沒有", "有一點", "的確有", "很嚴重"],
-    },
+  final List<Map<String, dynamic>> _q1 = [
+    {"type":"fill","question":"過去一個月來，您通常何時上床？","index":0,"hasHour":true,"hasMinute":true},
+    {"type":"fill","question":"過去一個月來，您通常多久才能入睡？","index":1,"hasHour":false,"hasMinute":true},
+    {"type":"fill","question":"過去一個月來，您早上通常何時起床？","index":2,"hasHour":true,"hasMinute":true},
+    {"type":"fill","question":"過去一個月來，您通常實際睡眠可以入睡幾小時？","index":3,"hasHour":true,"hasMinute":false},
+    {"type":"fill","question":"過去一個月來，您平均一天睡幾小時？","index":4,"hasHour":true,"hasMinute":false},
+    {"type":"choice","question":"您覺得睡眠品質好嗎?","options":["很好","好","不好","很不好"]},
+    {"type":"choice","question":"過去一個月來，整體而言，您覺得自己的睡眠品質如何？","options":["很好","好","不好","很不好"]},
+    {"type":"choice","question":"過去一個月來，您通常一星期幾個晚上需要使用藥物幫忙睡眠？","options":["從未發生","約一兩次","三次或以上"]},
+    {"type":"choice","question":"過去一個月來，您是否曾在用餐、開車或社交場合瞌睡而無法保持清醒，每星期約幾次?","options":["從未發生","約一兩次","三次或以上"]},
+    {"type":"choice","question":"過去一個月來，您會感到無心完成該做的事","options":["沒有","有一點","的確有","很嚴重"]},
   ];
+  final Map<int, String?> _a1 = {};
 
-  final Map<int, String?> answers = {};
+  // 第二部分：表格題
+  final List<String> _q2 = [
+    "無法在 30 分鐘內入睡",
+    "半夜或凌晨便清醒",
+    "必須起來上廁所",
+    "覺得呼吸不順暢",
+    "大聲打鼾或咳嗽",
+    "會覺得冷",
+    "覺得躁熱",
+    "睡覺時常會做惡夢",
+    "身上有疼痛",
+  ];
+  final Map<int, String?> _a2 = {};
 
-  // 檢查是否所有題目都填寫完成
-  bool _isAllQuestionsAnswered() {
-    // 檢查填空題是否填寫完成
-    for (int i = 0; i < 5; i++) {
-      if (questions[i]['hasHour'] && hourControllers[i]!.text.trim().isEmpty) {
-        return false;
-      }
-      if (questions[i]['hasMinute'] &&
-          minuteControllers[i]!.text.trim().isEmpty) {
-        return false;
-      }
+  bool get _isAllAnswered {
+    // 填空題
+    for (var i = 0; i < 5; i++) {
+      if (_q1[i]['hasHour'] && hourControllers[i]!.text.trim().isEmpty) return false;
+      if (_q1[i]['hasMinute'] && minuteControllers[i]!.text.trim().isEmpty) return false;
     }
-
-    // 檢查選擇題是否填寫完成
-    for (int i = 5; i < questions.length; i++) {
-      if (answers[i] == null || answers[i]!.isEmpty) {
-        return false;
-      }
+    // 第一部分選擇題
+    for (var i = 5; i < _q1.length; i++) {
+      if ((_a1[i] ?? '').isEmpty) return false;
     }
-
-    // 如果所有檢查都通過，返回 true
+    // 第二部分表格題
+    if (_a2.length != _q2.length) return false;
     return true;
   }
 
   @override
+  void dispose() {
+    // 改用傳統 for 迴圈，不要 forEach
+    for (final c in hourControllers.values) {
+      c.dispose();
+    }
+    for (final c in minuteControllers.values) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final w = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Container(
-        padding: const EdgeInsets.all(20),
         color: const Color.fromRGBO(233, 227, 213, 1),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            // ==== 第一部分 ==== //
             const Text(
               "睡眠評估問卷",
               style: TextStyle(
@@ -135,296 +97,280 @@ class _SleepWidgetState extends State<SleepWidget> {
                 color: Color.fromRGBO(147, 129, 108, 1),
               ),
             ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: questions.length,
-                itemBuilder: (context, index) {
-                  final question = questions[index];
-                  if (question["type"] == "fill") {
-                    // 填空題處理
-                    return _buildFillQuestion(question);
-                  } else if (question["type"] == "choice") {
-                    // 選擇題處理
-                    return _buildChoiceQuestion(index, question);
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.pop(context); //回去上一頁
-                },
-                child: Transform.rotate(
-                  angle: math.pi,
-                  child: Image.asset(
-                    'assets/images/back.png',
-                    width: screenWidth * 0.15,
-                  ),
-                ),
-              ),
+            const SizedBox(height: 12),
+            ...List.generate(_q1.length, (i) {
+              final q = _q1[i];
+              if (q['type'] == 'fill') {
+                return _buildFillQuestion(q);
+              } else {
+                return _buildChoiceQuestion(i, q);
+              }
+            }),
 
-              // 顯示下一步按鈕僅在所有問題都填寫完整時
-              if (_isAllQuestionsAnswered())
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 15),
-                    backgroundColor: Colors.brown.shade400,
-                  ),
-                  onPressed: () async {
-                    await _saveAnswersToFirebase();
-                    if (!context.mounted) return;
-                    Navigator.pushNamed(
-                      context,
-                      '/Sleep2Widget',
-                      arguments: widget.userId,
-                    );
-                  },
-                  child: const Text(
-                    "下一步",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
-            ]),
-          ],
-        ),
-      ),
-    );
-  }
+            const Divider(height: 32, thickness: 1, color: Colors.brown),
 
-  Widget _buildFillQuestion(Map<String, dynamic> question) {
-    final int index = question["index"];
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            flex: 4,
-            child: Text(
-              "${index + 1}. ${question['question']}",
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color.fromRGBO(147, 129, 108, 1),
-              ),
-            ),
-          ),
-          if (question["hasHour"]) ...[
-            Expanded(
-              flex: 1,
-              child: TextField(
-                controller: hourControllers[index],
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  hintStyle: TextStyle(fontSize: 12),
-                ),
-                style: const TextStyle(fontSize: 14),
-                onChanged: (_) => setState(() {}), // 輸入時更新
-              ),
-            ),
+            // ==== 第二部分 ==== //
             const Text(
-              "時",
+              "以下問題選擇一個適當的答案打勾，請全部作答",
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
                 color: Color.fromRGBO(147, 129, 108, 1),
               ),
             ),
-          ],
-          if (question["hasMinute"]) ...[
-            Expanded(
-              flex: 1,
-              child: TextField(
-                controller: minuteControllers[index],
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  hintStyle: TextStyle(fontSize: 12),
+            const SizedBox(height: 8),
+            Table(
+              columnWidths: const {
+                0: FlexColumnWidth(2),
+                1: FlexColumnWidth(1),
+                2: FlexColumnWidth(1),
+                3: FlexColumnWidth(1),
+              },
+              border: const TableBorder.symmetric(
+                inside: BorderSide(color: Colors.black12),
+              ),
+              children: [
+                TableRow(
+                  decoration: const BoxDecoration(
+                    color: Color.fromRGBO(233, 227, 213, 1),
+                  ),
+                  children: [
+                    _buildHeaderCell("題目"),
+                    _buildHeaderCell("從未發生"),
+                    _buildHeaderCell("約一兩次"),
+                    _buildHeaderCell("三次或以上"),
+                  ],
                 ),
-                style: const TextStyle(fontSize: 14),
-                onChanged: (_) => setState(() {}),
-              ),
-            ),
-            const Text(
-              "分",
-              style: TextStyle(
-                fontSize: 14,
-                color: Color.fromRGBO(147, 129, 108, 1),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChoiceQuestion(int uiIndex, Map<String, dynamic> question) {
-  final int answerIndex = questions.indexOf(question); // 這行最關鍵！
-
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "${answerIndex + 1}. ${question['question']}",
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color.fromRGBO(147, 129, 108, 1),
-          ),
-        ),
-        const SizedBox(height: 5),
-        Column(
-          children: (question['options'] as List<String>)
-              .map((option) => Row(
+                ...List.generate(_q2.length, (i) {
+                  return TableRow(
+                    decoration: BoxDecoration(
+                      color: _a2[i] != null
+                          ? const Color.fromARGB(255, 241, 215, 237)
+                          : const Color.fromRGBO(233, 227, 213, 1),
+                    ),
                     children: [
-                      Radio<String>(
-                        value: option,
-                        groupValue: answers[answerIndex],
-                        onChanged: (value) {
-                          setState(() {
-                            answers[answerIndex] = value;
-                            logger.i("📌 寫入第 $answerIndex 題答案：$value");
-                          });
-                        },
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("${i + 1}. ${_q2[i]}",
+                            style: const TextStyle(fontSize: 14)),
                       ),
-                      Expanded(
-                        child: Text(
-                          option,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color.fromRGBO(147, 129, 108, 1),
-                          ),
-                          softWrap: true,
-                        ),
-                      ),
+                      _buildRadioCell(i, "從未發生"),
+                      _buildRadioCell(i, "約一兩次"),
+                      _buildRadioCell(i, "三次或以上"),
                     ],
-                  ))
-              .toList(),
-        ),
-      ],
-    ),
-  );
-}
+                  );
+                }),
+              ],
+            ),
 
-  Future<bool> _saveAnswersToFirebase() async {
-    try {
-      final Map<String, String?> formattedAnswers = answers.map(
-        (key, value) => MapEntry(key.toString(), value),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Transform.rotate(
+                    angle: math.pi,
+                    child: Image.asset('assets/images/back.png', width: w * 0.15),
+                  ),
+                ),
+                if (_isAllAnswered)
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      backgroundColor: Colors.brown.shade400,
+                    ),
+                    onPressed: _handleSubmit,
+                    child: const Text("提交完成", style: TextStyle(fontSize: 18, color: Colors.white)),
+                  ),
+              ],
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFillQuestion(Map<String, dynamic> q) {
+    final idx = q['index'] as int;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(children: [
+        Expanded(
+          flex: 4,
+          child: Text(
+            "${idx + 1}. ${q['question']}",
+            style: const TextStyle(fontSize: 16, color: Color.fromRGBO(147, 129, 108, 1)),
+          ),
+        ),
+        if (q['hasHour']) ...[
+          Expanded(
+            flex: 1,
+            child: TextField(
+              controller: hourControllers[idx],
+              textAlign: TextAlign.center,
+              decoration: const InputDecoration(border: UnderlineInputBorder()),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          const Text("時", style: TextStyle(fontSize: 14, color: Color.fromRGBO(147, 129, 108, 1))),
+        ],
+        if (q['hasMinute']) ...[
+          Expanded(
+            flex: 1,
+            child: TextField(
+              controller: minuteControllers[idx],
+              textAlign: TextAlign.center,
+              decoration: const InputDecoration(border: UnderlineInputBorder()),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          const Text("分", style: TextStyle(fontSize: 14, color: Color.fromRGBO(147, 129, 108, 1))),
+        ],
+      ]),
+    );
+  }
+
+  Widget _buildChoiceQuestion(int uiIndex, Map<String, dynamic> q) {
+    final answerIndex = _q1.indexOf(q);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text("${answerIndex + 1}. ${q['question']}",
+            style: const TextStyle(fontSize: 14, color: Color.fromRGBO(147, 129, 108, 1))),
+        const SizedBox(height: 4),
+        ...List.generate((q['options'] as List<String>).length, (i) {
+          final opt = q['options'][i];
+          return Row(children: [
+            Radio<String>(
+              value: opt,
+              groupValue: _a1[answerIndex],
+              onChanged: (v) => setState(() => _a1[answerIndex] = v),
+            ),
+            Expanded(child: Text(opt, style: const TextStyle(fontSize: 12, color: Color.fromRGBO(147, 129, 108, 1)))),
+          ]);
+        }),
+      ]),
+    );
+  }
+
+  Widget _buildHeaderCell(String label) => SizedBox(
+        height: 40,
+        child: Center(child: Text(label, style: const TextStyle(fontSize: 12))),
       );
 
-      for (int i = 0; i < 5; i++) {
-        String hour = hourControllers[i]!.text.trim();
-        String minute = minuteControllers[i]!.text.trim();
+  Widget _buildRadioCell(int idx, String val) => Center(
+        child: Radio<String>(
+          value: val,
+          groupValue: _a2[idx],
+          onChanged: (v) => setState(() => _a2[idx] = v),
+        ),
+      );
 
-        if (hour.isNotEmpty || minute.isNotEmpty) {
-          formattedAnswers["填空題 ${i + 1}"] =
-              "${hour.isNotEmpty ? "$hour時" : ""} ${minute.isNotEmpty ? "$minute分" : ""}"
-                  .trim();
-        }
+  Future<void> _handleSubmit() async {
+    final doc = FirebaseFirestore.instance
+        .collection("users")
+        .doc(widget.userId)
+        .collection("questions")
+        .doc("SleepWidget");
+
+    // 第一部分格式化
+    final Map<String, String?> formatted1 = {};
+    for (var i = 0; i < 5; i++) {
+      final h = hourControllers[i]!.text.trim();
+      final m = minuteControllers[i]!.text.trim();
+      final part1 = h.isNotEmpty ? "$h時" : "";
+      final part2 = m.isNotEmpty ? "$m分" : "";
+      formatted1["填空${i + 1}"] = [part1, part2].where((s) => s.isNotEmpty).join(" ");
+    }
+    for (var i = 5; i < _q1.length; i++) {
+      formatted1["選擇${i + 1}"] = _a1[i]!;
+    }
+
+    // 第二部分格式化
+    final Map<String, String?> formatted2 = {};
+    for (var i = 0; i < _q2.length; i++) {
+      formatted2["${i + 1}"] = _a2[i]!;
+    }
+
+    // Firestore 合併寫入
+    await doc.set({
+      "answers": {
+        "SleepWidget": {"data": formatted1, "timestamp": Timestamp.now()},
+        "Sleep2Widget": {"data": formatted2, "timestamp": Timestamp.now()},
       }
+    }, SetOptions(merge: true));
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(widget.userId)
+        .update({"sleepCompleted": true});
 
-      final DocumentReference docRef = FirebaseFirestore.instance
-          .collection("users")
-          .doc(widget.userId)
-          .collection("questions")
-          .doc("SleepWidget");
+    // 同步到 MySQL
+    await _sendAllToMySQL();
 
-      // 覆蓋舊資料，指定 key
-      await docRef.set({
-        "answers": {
-          "SleepWidget": {
-            "data": formattedAnswers,
-            "timestamp": Timestamp.now(),
-          }
-        }
-      }, SetOptions(merge: true));
 
-      logger.i("✅ SleepWidget 資料已成功儲存並覆蓋舊檔案！");
-      await sendSleepAnswersToMySQL(widget.userId, answers);
-
-      return true;
-    } catch (e) {
-      logger.e("❌ 儲存 SleepWidget 資料時發生錯誤：$e");
-      return false;
+    if (context.mounted) {
+    if (!mounted) return;
+      Navigator.pushNamed(context, '/FinishWidget', arguments: widget.userId);
     }
   }
-Future<void> sendSleepAnswersToMySQL(String userId, Map<int, String?> answers) async {
+
+
+  Future<void> _sendAllToMySQL() async {
   final url = Uri.parse('http://163.13.201.85:3000/sleep');
   final now = DateTime.now();
-  final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+  final date = "${now.year}-${now.month.toString().padLeft(2,'0')}-${now.day.toString().padLeft(2,'0')}";
 
+  // 1) 先組固定欄位 & Q1 填空題（1–5）
   final Map<String, dynamic> payload = {
-    'user_id': int.parse(userId),
+    'user_id': int.parse(widget.userId),
     'sleep_question_content': "睡眠品質量表",
-    'sleep_test_date': formattedDate,
+    'sleep_test_date': date,
+    'sleep_answer_1_a': int.tryParse(hourControllers[0]!.text.trim()) ?? 0,
+    'sleep_answer_1_b': int.tryParse(minuteControllers[0]!.text.trim()) ?? 0,
+    'sleep_answer_2':   int.tryParse(minuteControllers[1]!.text.trim()) ?? 0,
+    'sleep_answer_3_a': int.tryParse(hourControllers[2]!.text.trim()) ?? 0,
+    'sleep_answer_3_b': int.tryParse(minuteControllers[2]!.text.trim()) ?? 0,
+    'sleep_answer_4':   int.tryParse(hourControllers[3]!.text.trim()) ?? 0,
+    'sleep_answer_5':   int.tryParse(hourControllers[4]!.text.trim()) ?? 0,
   };
 
-  // ✅ 填空題（轉成 int）
-  payload['sleep_answer_1_a'] = int.tryParse(hourControllers[0]?.text.trim() ?? '') ?? 0;
-  payload['sleep_answer_1_b'] = int.tryParse(minuteControllers[0]?.text.trim() ?? '') ?? 0;
-  payload['sleep_answer_2']   = int.tryParse(minuteControllers[1]?.text.trim() ?? '') ?? 0;
-  payload['sleep_answer_3_a'] = int.tryParse(hourControllers[2]?.text.trim() ?? '') ?? 0;
-  payload['sleep_answer_3_b'] = int.tryParse(minuteControllers[2]?.text.trim() ?? '') ?? 0;
-  payload['sleep_answer_4']   = int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0;
-  payload['sleep_answer_5']   = int.tryParse(hourControllers[4]?.text.trim() ?? '') ?? 0;
-
-  // ✅ 選擇題（6~10）ENUM 字串值
-  const List<List<String>> sleepChoiceOptions = [
-    ["很好", "好", "不好", "很不好"],            // sleep_answer_6
-    ["很好", "好", "不好", "很不好"],            // sleep_answer_7
-    ["從未發生", "約一兩次", "三次或以上"],      // sleep_answer_8
-    ["從未發生", "約一兩次", "三次或以上"],      // sleep_answer_9
-    ["沒有", "有一點", "的確有", "很嚴重"],      // sleep_answer_10
-  ];
-
-  const List<int> answerIndexes = [5, 6, 7, 8, 9];
-
-  for (int i = 0; i < answerIndexes.length; i++) {
-    final int questionIndex = answerIndexes[i];
-    final selectedText = answers[questionIndex];
-    final options = sleepChoiceOptions[i];
-
-    final index = options.indexWhere((opt) => opt.trim() == (selectedText ?? '').trim());
-
-    if (index >= 0) {
-      payload['sleep_answer_${i + 6}'] = options[index]; // ✅ ENUM 字串
-    } else {
-      logger.w("⚠️ sleep_answer_${i + 6} 對應失敗：找不到選項 '$selectedText' in $options");
-      payload['sleep_answer_${i + 6}'] = "未發生"; // 預設值也 OK
-    }
+  // 2) Q1 的選擇題（6–10）
+  for (var i = 0; i < 5; i++) {
+    // _a1[5] 對應第 6 題，以此類推
+    payload['sleep_answer_${6 + i}'] = _a1[5 + i]!;
   }
 
-  // ✅ ⛑️ 自動補 sleep_answer_11~19 為預設合法 ENUM 值
-  for (int i = 11; i <= 19; i++) {
-    payload['sleep_answer_$i'] = "從未發生"; // ENUM 的預設值
+  // 3) Q2 的表格題（11–19）
+  for (var i = 0; i < _q2.length; i++) {
+    // 如果沒選，預設 'none'
+    payload['sleep_answer_${11 + i}'] = _a2[i] ?? 'none';
   }
 
-  logger.i("📦 最終送出 payload：$payload");
+  // 4) payload 檢查：列出哪些欄位是 'none'
+  final noneKeys = payload.entries
+      .where((e) => e.value == 'none')
+      .map((e) => e.key)
+      .toList();
+  if (noneKeys.isNotEmpty) {
+    logger.w("⚠️ payload 中有 'none' 值: $noneKeys");
+  }
+  // 5) 顯示最終 payload
+  logger.i("📦 最終送出 payload: $payload");
 
+  // 6) 發 HTTP
   try {
-    final response = await http.post(
+    final resp = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type':'application/json'},
       body: jsonEncode(payload),
     );
-
-     if (response.statusCode >= 200 && response.statusCode < 300) {
-      final result = jsonDecode(response.body);
-      logger.i("✅ 睡眠問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
-    } else {
-      throw Exception("❌ 睡眠問卷同步失敗：${response.body}");
+    if (resp.statusCode < 200 || resp.statusCode >= 300) {
+      logger.e("MySQL 同步失敗: ${resp.body}");
     }
   } catch (e) {
-    logger.e("❌ 發送 Sleep 資料到 MySQL 時發生錯誤：$e");
+    logger.e("MySQL 同步例外: $e");
   }
 }
-
-
-
 
 }
