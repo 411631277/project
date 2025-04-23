@@ -501,7 +501,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
       }),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
       logger.i("✅ 同步資料到 MySQL 成功");
     } else {
       logger.e("❌ 同步 MySQL 失敗: ${response.body}");

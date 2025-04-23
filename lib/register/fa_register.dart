@@ -461,27 +461,27 @@ Future<void> sendDataToMySQL(String userId) async {
     url,
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
+      'man_user_name': nameController.text,
       'user_id': int.parse(userId),
-      'user_name': nameController.text,
-      'user_email': emailController.text,
+      'man_user_email': emailController.text,
       'user_gender': "男",
-      'user_salutation': isNewMom == true ? "是" : "否",
-      'user_birthdate': birthController.text,
-      'user_phone': phoneController.text,
-      'user_id_number': accountController.text,
-      'user_height': double.tryParse(heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
-      'current_weight': double.tryParse(weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
-      'emergency_contact_name': "",
-      'emergency_contact_phone': "",
-      'betel_nut_habit': answers["是否會嚼食檳榔"] == true ? '有' : '無',
-      'smoking_habit': answers["是否會吸菸?"] == true ? '有' : '無',
-      'drinking_habit': answers["是否會喝酒?"] == true ? '有' : '無',
-      'marital_status': maritalStatus ?? '未婚',
-      'contact_preference': [
+      'man_user_salutation': isNewMom == true ? "是" : "否",
+      'man_user_birthdate': formatBirthForMySQL(birthController.text),
+      'man_user_phone': phoneController.text,
+      'man_user_id_number': accountController.text,
+      'man_user_height': double.tryParse(heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
+      'man_current_weight': double.tryParse(weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
+      'man_emergency_contact_name': "",
+      'man_emergency_contact_phone': "",
+      'man_betel_nut_habit': answers["是否會嚼食檳榔"] == true ? '有' : '無',
+      'man_smoking_habit': answers["是否會吸菸?"] == true ? '有' : '無',
+      'man_drinking_habit': answers["是否會喝酒?"] == true ? '有' : '無',
+      'man_marital_status': maritalStatus ?? '未婚',
+      'man_contact_preference': [
         if (isEmailPreferred) 'e-mail',
         if (isPhonePreferred) '電話',
       ].join(','),
-      'chronic_illness': hasChronicDisease == true
+      'man_chronic_illness': hasChronicDisease == true
           ? [
               ...chronicDiseaseOptions.entries
                   .where((entry) => entry.value && entry.key != "其他")
@@ -489,15 +489,15 @@ Future<void> sendDataToMySQL(String userId) async {
               if (chronicDiseaseOptions["其他"] == true) '其他',
             ].join(',')
           : '無',
-      'chronic_illness_details': otherDiseaseController.text.isNotEmpty
+      'man_chronic_illness_details': otherDiseaseController.text.isNotEmpty
           ? otherDiseaseController.text
           : '',
-      'user_account': accountController.text,
-      'user_password': passwordController.text,
+      'man_user_account': accountController.text,
+      'man_user_password': passwordController.text,
     }),
   );
 
-  if (response.statusCode == 200) {
+  if (response.statusCode >= 200 && response.statusCode < 300) {
     logger.i("✅ 爸爸資料同步至 MySQL 成功");
   } else {
     logger.e("❌ 爸爸同步 MySQL 失敗: ${response.body}");
@@ -705,6 +705,15 @@ Widget _buildheightPickerField(
     ],
   );
 }
+
+String formatBirthForMySQL(String text) {
+    try {
+      final parsed = DateFormat('yyyy年MM月dd日', 'zh_TW').parse(text);
+      return DateFormat('yyyy-MM-dd').format(parsed);
+    } catch (e) {
+      return ""; // 防呆處理，避免錯誤時整個崩潰
+    }
+  }
 
 //身高功能設定
 void _showheightPicker(BuildContext context, TextEditingController controller) {
