@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:doctor_2/function/main.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/services/firestore_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
 
@@ -13,8 +16,7 @@ final Logger logger = Logger();
 
 
 class FaRegisterWidget extends StatefulWidget {
-  final String pairingCode;
-  const FaRegisterWidget( {super.key, required String role, required this.pairingCode} );
+  const FaRegisterWidget({super.key, required String role});
 
   @override
   FaRegisterWidgetState createState() => FaRegisterWidgetState();
@@ -441,21 +443,9 @@ class FaRegisterWidget extends StatefulWidget {
         'answers': answers,
         '是否有慢性病': hasChronicDisease,
         '慢性病症狀': selectedChronicDiseases,
-        '配對碼': widget.pairingCode,
+        
       });
-      // **標記媽媽的配對碼為已使用**
-      await FirebaseFirestore.instance
-          .collection('users')
-          .where('配對碼', isEqualTo: widget.pairingCode)
-          .limit(1)
-          .get()
-          .then((querySnapshot) {
-        if (querySnapshot.docs.isNotEmpty) {
-          querySnapshot.docs.first.reference.update({
-            '配對碼已使用': true, // 🟢 更新 Firestore
-          });
-        }
-      });
+      await sendDataToMySQL(userId);
       logger.i("✅ 使用者資料已存入 Firestore，ID：$userId");
       return userId; //回傳 userId
     } catch (e) {
@@ -463,6 +453,56 @@ class FaRegisterWidget extends StatefulWidget {
       return null;
     }
   }
+
+Future<void> sendDataToMySQL(String userId) async {
+  final url = Uri.parse('http://163.13.201.85:3000/man_users');
+
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'user_id': int.parse(userId),
+      'user_name': nameController.text,
+      'user_email': emailController.text,
+      'user_gender': "男",
+      'user_salutation': isNewMom == true ? "是" : "否",
+      'user_birthdate': birthController.text,
+      'user_phone': phoneController.text,
+      'user_id_number': accountController.text,
+      'user_height': double.tryParse(heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
+      'current_weight': double.tryParse(weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
+      'emergency_contact_name': "",
+      'emergency_contact_phone': "",
+      'betel_nut_habit': answers["是否會嚼食檳榔"] == true ? '有' : '無',
+      'smoking_habit': answers["是否會吸菸?"] == true ? '有' : '無',
+      'drinking_habit': answers["是否會喝酒?"] == true ? '有' : '無',
+      'marital_status': maritalStatus ?? '未婚',
+      'contact_preference': [
+        if (isEmailPreferred) 'e-mail',
+        if (isPhonePreferred) '電話',
+      ].join(','),
+      'chronic_illness': hasChronicDisease == true
+          ? [
+              ...chronicDiseaseOptions.entries
+                  .where((entry) => entry.value && entry.key != "其他")
+                  .map((entry) => entry.key),
+              if (chronicDiseaseOptions["其他"] == true) '其他',
+            ].join(',')
+          : '無',
+      'chronic_illness_details': otherDiseaseController.text.isNotEmpty
+          ? otherDiseaseController.text
+          : '',
+      'user_account': accountController.text,
+      'user_password': passwordController.text,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    logger.i("✅ 爸爸資料同步至 MySQL 成功");
+  } else {
+    logger.e("❌ 爸爸同步 MySQL 失敗: ${response.body}");
+  }
+}
 
   //輸入框設定
   InputDecoration _inputDecoration() => const InputDecoration(

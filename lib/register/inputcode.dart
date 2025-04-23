@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+/*import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_2/register/fa_register.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -204,4 +204,4 @@ class _InputcodeWidgetState extends State<InputcodeWidget> {
       logger.e("❌ Firestore 查詢錯誤: $e");
     }
   }
-}
+} */

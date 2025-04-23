@@ -1,4 +1,4 @@
-import 'package:doctor_2/register/inputcode.dart';
+import 'package:doctor_2/register/fa_register.dart';
 import 'package:doctor_2/register/register.dart';
 import 'package:flutter/material.dart';
 
@@ -57,7 +57,7 @@ class IamWidget extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const InputcodeWidget(
+                        builder: (context) => const FaRegisterWidget(
                           role: '爸爸',
                         ),
                       ),
