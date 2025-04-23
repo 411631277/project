@@ -217,12 +217,15 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
         '步數': _stepCount,
         'lastDeviceSteps': _lastDeviceSteps ?? 0,
       }, SetOptions(merge: true));
+      
       logger.i(
           "✅ 已更新 ${widget.userId} => $_currentDay, 步數: $_stepCount, 基準: $_lastDeviceSteps");
-          await sendStepDataToMySQL();
+          
     } catch (e) {
       logger.e("❌ 步數更新失敗: $e");
     }
+    await sendStepDataToMySQL();
+    logger.i("✅ 嘗試同步步數資料至 MySQL");
   }
 
   /// **🔹 請求計步權限**
@@ -742,10 +745,11 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     );
   }
   Future<void> sendStepDataToMySQL() async {
+    
   final url = Uri.parse('http://163.13.201.85:3000/steps');
-
   final now = DateTime.now();
   final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+  logger.i("📤 準備傳送 MySQL payload：userId=${widget.userId}, steps=$_stepCount, goal=$_targetSteps, date=$formattedDate");
   logger.i('user_id: ${widget.userId}, date: $formattedDate, steps: $_stepCount, goal: $_targetSteps');
   try {
     final response = await http.post(
@@ -759,7 +763,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
       }),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode >= 200 && response.statusCode < 300){
       logger.i("✅ 步數資料已同步至 MySQL");
     } else {
       logger.e("❌ 同步步數資料失敗: ${response.body}");

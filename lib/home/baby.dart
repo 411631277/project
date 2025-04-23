@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 final Logger logger = Logger();
 
@@ -578,11 +581,11 @@ void _saveBabyData(
         ? babyName
         : DateTime.now().millisecondsSinceEpoch.toString();
 
-    await FirebaseFirestore.instance
-        .collection(isManUser ? 'Man_users' : 'users') // 🔹 進入 users collection
-        .doc(userId) // 🔹 指定使用者 ID
-        .collection('baby') // 🔹 **在該使用者底下建立 baby 子 collection**
-        .doc(babyId) // ✅ **使用 babyName 作為 docId**
+     await FirebaseFirestore.instance
+        .collection(isManUser ? 'Man_users' : 'users')
+        .doc(userId)
+        .collection('baby')
+        .doc(babyId)
         .set({
       '姓名': babyName,
       '生日': babyBirthController.text,
@@ -591,12 +594,94 @@ void _saveBabyData(
       '出生身高': babyHeightController.text,
       '寶寶出生特殊狀況': hasSpecialCondition
           ? specialConditionController.text
-          : null, // 只有勾選時才存入
+          : null,
       '填寫時間': FieldValue.serverTimestamp(),
     });
+    logger.i("✅ 寶寶資訊已儲存到 Firestore users/$userId/baby/$babyId");
 
-    logger.i("✅ 寶寶資訊成功儲存於 users/$userId/baby/$babyId");
+    // 2. 再呼叫後端 API，同步到 MySQL
+    await sendBabyDataToMySQL(
+      userId: userId,
+      isManUser: isManUser,
+      babyName: babyName,
+      babyBirth: babyBirthController.text,
+      babyGender: babyGenderController.text,
+      babyWeight: babyWeightController.text,
+      babyHeight: babyHeightController.text,
+      hasSpecialCondition: hasSpecialCondition,
+    );
   } catch (e) {
-    logger.e("❌ 儲存寶寶資訊時發生錯誤: $e");
+    logger.e("❌ _saveBabyData 發生錯誤: $e");
   }
 }
+
+String formatBirthForMySQL(String text) {
+    try {
+      final parsed = DateFormat('yyyy年MM月dd日', 'zh_TW').parse(text);
+      return DateFormat('yyyy-MM-dd').format(parsed);
+    } catch (e) {
+      return ""; // 防呆處理，避免錯誤時整個崩潰
+    }
+  }
+
+
+ Future<void> sendBabyDataToMySQL({
+  required String userId,
+  required bool isManUser,
+  required String babyName,
+  required String babyBirth,
+  required String babyGender,
+  required String babyWeight,
+  required String babyHeight,
+  required bool hasSpecialCondition,
+}) async {
+  final uri = Uri.parse('http://163.13.201.85:3000/baby');
+
+  // 1) 先放所有「必填」欄位
+  final payload = <String, dynamic>{
+    'baby_name':      babyName,                       // 一定要有
+    'baby_birthdate': formatBirthForMySQL(babyBirth),
+    'baby_gender':    babyGender,
+    'baby_weight':    double.tryParse(
+                         babyWeight.replaceAll(RegExp(r'[^0-9.]'), '')),
+    'baby_height':    double.tryParse(
+                         babyHeight.replaceAll(RegExp(r'[^0-9.]'), '')),
+    'baby_solution':  hasSpecialCondition ? '有' : '無',
+  };
+
+  // 2) 再「擇一」加入 user_id 或 man_user_id
+  final idInt = int.tryParse(userId);
+  if (idInt == null) {
+    logger.e("❌ userId 無法轉成 int：$userId");
+    return;
+  }
+  if (isManUser) {
+    payload['man_user_id'] = idInt;
+  } else {
+    payload['user_id'] = idInt;
+  }
+
+  // 3) （可選）再檢查一次，確保所有必填 key 都在
+  assert(payload.containsKey('baby_name')
+         && payload.containsKey(isManUser ? 'man_user_id' : 'user_id'));
+
+  logger.i("📦 傳送至後端 MySQL 的 payload：$payload");
+
+  try {
+    final resp = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(payload),
+    );
+
+    if (resp.statusCode >= 200 && resp.statusCode < 300) {
+      logger.i("✅ 後端同步成功：${resp.body}");
+    } else {
+      logger.e("❌ 後端同步失敗 (狀態 ${resp.statusCode})：${resp.body}");
+    }
+  } catch (e) {
+    logger.e("🔥 sendBabyDataToMySQL 發生錯誤：$e");
+  }
+}
+
+
