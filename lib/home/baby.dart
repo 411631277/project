@@ -609,6 +609,7 @@ void _saveBabyData(
       babyWeight: babyWeightController.text,
       babyHeight: babyHeightController.text,
       hasSpecialCondition: hasSpecialCondition,
+      babySolutionDetails: specialConditionController.text,
     );
   } catch (e) {
     logger.e("❌ _saveBabyData 發生錯誤: $e");
@@ -634,6 +635,7 @@ String formatBirthForMySQL(String text) {
   required String babyWeight,
   required String babyHeight,
   required bool hasSpecialCondition,
+ String? babySolutionDetails,
 }) async {
   final uri = Uri.parse('http://163.13.201.85:3000/baby');
 
@@ -648,6 +650,10 @@ String formatBirthForMySQL(String text) {
                          babyHeight.replaceAll(RegExp(r'[^0-9.]'), '')),
     'baby_solution':  hasSpecialCondition ? '有' : '無',
   };
+
+ if (hasSpecialCondition && babySolutionDetails != null && babySolutionDetails.isNotEmpty) {
+    payload['baby_solution_details'] = babySolutionDetails;
+  }
 
   // 2) 再「擇一」加入 user_id 或 man_user_id
   final idInt = int.tryParse(userId);

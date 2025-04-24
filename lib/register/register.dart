@@ -407,6 +407,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
 
   //儲存使用者資料
   Future<String?> _saveUserData() async {
+    
     try {
       AggregateQuerySnapshot countSnapshot =
           await FirebaseFirestore.instance.collection('users').count().get();
