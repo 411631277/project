@@ -312,7 +312,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
       if (babySnapshot.docs.isNotEmpty) {
         setState(() {
-          babyName = babySnapshot.docs.first.id;
+          babyName = "小寶";
         });
       } else {
         setState(() {
@@ -437,6 +437,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+     final base = math.min(screenWidth, screenHeight);
 
     // 根據當前步數與目標步數，決定顯示文字
     String statusText = (_stepCount >= _targetSteps) ? "今日步數已達標" : "今日步數未達標";
@@ -471,7 +472,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
             // **顯示當前步數 & 目標步數 (可點擊)**
             Positioned(
-              top: screenHeight * 0.45,
+              top: screenHeight * 0.5,
               left: screenWidth * 0.08,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,7 +483,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                       Text(
                         "當前步數：$_stepCount",
                         style: TextStyle(
-                          fontSize: screenWidth * 0.05,
+                          fontSize: base * 0.05,
                           color: const Color.fromRGBO(165, 146, 125, 1),
                         ),
                       ),
@@ -492,7 +493,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                         child: Text(
                           "目標步數：$_targetSteps",
                           style: TextStyle(
-                            fontSize: screenWidth * 0.05,
+                            fontSize: base * 0.05,
                             color: const Color.fromRGBO(165, 146, 125, 1),
                           ),
                         ),
@@ -506,7 +507,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                   Text(
                     statusText,
                     style: TextStyle(
-                      fontSize: screenWidth * 0.045,
+                      fontSize: base * 0.05,
                       color: (_stepCount >= _targetSteps)
                           ? Colors.green
                           : Colors.red,
@@ -589,7 +590,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                 style: TextStyle(
                   color: const Color.fromRGBO(165, 146, 125, 1),
                   fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.05,
+                  fontSize: base * 0.05,
                 ),
               ),
             ),
@@ -601,13 +602,13 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               child: SizedBox(
                 width: screenWidth * 0.84,
                 child: Text(
-                  '今天心情還好嗎?一切都會越來越好喔!\n\n'
+                  '今天心情還好嗎?一切都會越來越好喔!\n'
                   '別擔心，你已經做得很好了！每一天都是新的學習與成長，請相信自己，也別忘了好好照顧自己 ',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: const Color.fromRGBO(165, 146, 125, 1),
                     fontFamily: 'Inter',
-                    fontSize: screenWidth * 0.05,
+                    fontSize: base * 0.05,
                   ),
                 ),
               ),
@@ -615,7 +616,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
             // Baby 圖片
             Positioned(
-              top: screenHeight * 0.65,
+              top: screenHeight * 0.75,
               left: screenWidth * 0.08,
               child: GestureDetector(
                 onTap: () {
@@ -642,7 +643,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
             // 小寶文字
             Positioned(
-              top: screenHeight * 0.67,
+              top: screenHeight * 0.77,
               left: screenWidth * 0.25,
               child: Text(
                 babyName,
@@ -650,14 +651,14 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                 style: TextStyle(
                   color: const Color.fromRGBO(165, 146, 125, 1),
                   fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.05,
+                  fontSize: base * 0.05,
                 ),
               ),
             ),
 
             // Robot 圖片
             Positioned(
-              top: screenHeight * 0.77,
+              top: screenHeight * 0.82,
               left: screenWidth * 0.8,
               child: GestureDetector(
                 onTap: () {
@@ -686,7 +687,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
             // 需要協助嗎 區塊
             Positioned(
-              top: screenHeight * 0.75,
+              top: screenHeight * 0.81,
               left: screenWidth * 0.43,
               child: Transform.rotate(
                 angle: -5.56 * (math.pi / 180),
@@ -703,21 +704,21 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
             Positioned(
-              top: screenHeight * 0.76,
-              left: screenWidth * 0.52,
+              top: screenHeight * 0.825,
+              left: screenWidth * 0.54,
               child: Text(
                 '需要協助嗎?',
                 style: TextStyle(
                   color: const Color.fromRGBO(255, 255, 255, 1),
                   fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.045,
+                  fontSize: base * 0.05,
                 ),
               ),
             ),
             //tgos
             Positioned(
-              top: screenHeight * 0.77,
-              left: screenWidth * 0.1,
+              top: screenHeight * 0.83,
+              left: screenWidth * 0.08,
               child: GestureDetector(
                 onTap: () {
                   Navigator.push(
