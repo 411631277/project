@@ -1,11 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:logger/logger.dart';
-import 'dart:math' as math;
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 
 final Logger logger = Logger();
 
@@ -16,7 +15,7 @@ final TextEditingController babyWeightController = TextEditingController();
 final TextEditingController babyHeightController = TextEditingController();
 
 class BabyWidget extends StatefulWidget {
-  final String userId; // 🔹 從登入或註冊時傳入的 userId
+  final String userId;
   final bool isManUser;
   const BabyWidget({super.key, required this.userId, required this.isManUser});
 
@@ -25,133 +24,70 @@ class BabyWidget extends StatefulWidget {
 }
 
 class _BabyWidgetState extends State<BabyWidget> {
-  bool hasSpecialCondition = false; // 是否有特殊狀況
-  TextEditingController specialConditionController =
-      TextEditingController(); // 輸入框控制器
+  bool hasSpecialCondition = false;
+  TextEditingController specialConditionController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
-      body: Container(
-        width: screenWidth,
-        height: screenHeight,
-        decoration: const BoxDecoration(
-          color: Color.fromRGBO(233, 227, 213, 1),
-        ),
-        child: Stack(
-          children: <Widget>[
-            // **寶寶圖示**
-            Positioned(
-              top: screenHeight * 0.02,
-              left: screenWidth * 0.06,
-              child: Image.asset(
-                'assets/images/Baby.png',
-                width: screenWidth * 0.15,
-              ),
-            ),
-
-            // **姓名**
-            _buildInputRow(
-                screenWidth, screenHeight * 0.15, '姓名', babyNameController),
-            // **生日**
-            Positioned(
-              top: screenHeight * 0.23,
-              left: screenWidth * 0.1, // 控制標籤與輸入框的水平位置
-              child: SizedBox(
-                width: screenWidth * 0.8, // 與其他輸入框寬度保持一致
-                child: _buildDatePickerField('生日', babyBirthController),
-              ),
-            ),
-            // **性別**
-            Positioned(
-              top: screenHeight * 0.31,
-              left: screenWidth * 0.1,
-              child: SizedBox(
-                width: screenWidth * 0.8, // 調整寬度，確保佈局一致
-                child: _buildGenderSelector(), // 使用性別選擇器方法
-              ),
-            ),
-            // **出生體重**
-            Positioned(
-              top: screenHeight * 0.39,
-              left: screenWidth * 0.1,
-              child: SizedBox(
-                width: screenWidth * 0.8,
-                child: _buildWeightPickerField('出生體重', babyWeightController),
-              ),
-            ),
-            // **出生身高**
-            Positioned(
-              top: screenHeight * 0.47,
-              left: screenWidth * 0.1,
-              child: SizedBox(
-                width: screenWidth * 0.8,
-                child: _buildHeightPickerField('出生身高', babyHeightController),
-              ),
-            ),
-
-            Positioned(
-              top: screenHeight * 0.60, // 調整文字的垂直位置
-              left: screenWidth * 0.25,
-              child: const Text(
-                '寶寶出生是否有特殊狀況',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Color.fromRGBO(147, 129, 108, 1),
-                  fontWeight: FontWeight.bold,
+  body: SafeArea(
+    child: Container(
+      color: const Color.fromRGBO(233, 227, 213, 1),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.asset('assets/images/Baby.png', width: 60),
+              const SizedBox(height: 20),
+              _buildInputRow('姓名', babyNameController),
+              const SizedBox(height: 15),
+              _buildDatePickerField('生日', babyBirthController),
+              const SizedBox(height: 15),
+              _buildGenderSelector(),
+              const SizedBox(height: 15),
+              _buildWeightPickerField('出生體重', babyWeightController),
+              const SizedBox(height: 15),
+              _buildHeightPickerField('出生身高', babyHeightController),
+              const SizedBox(height: 25),
+              Center(
+                child: const Text(
+                  '寶寶出生是否有特殊狀況',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(147, 129, 108, 1)),
                 ),
               ),
-            ),
-            Positioned(
-              top: screenHeight * 0.65,
-              left: screenWidth * 0.22,
-              child: Row(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // **無**
                   Checkbox(
                     value: !hasSpecialCondition,
-                    onChanged: (bool? value) {
+                    onChanged: (val) {
                       setState(() {
-                        hasSpecialCondition = false; // 取消勾選"有"
-                        specialConditionController.clear(); // 清空輸入框
+                        hasSpecialCondition = false;
+                        specialConditionController.clear();
                       });
                     },
                   ),
-                  const Text(
-                    '無',
-                    style: TextStyle(
-                        fontSize: 18, color: Color.fromRGBO(147, 129, 108, 1)),
-                  ),
-                  SizedBox(width: screenWidth * 0.2),
-
-                  // **有**
+                  const Text('無'),
+                  const SizedBox(width: 30),
                   Checkbox(
                     value: hasSpecialCondition,
-                    onChanged: (bool? value) {
+                    onChanged: (val) {
                       setState(() {
                         hasSpecialCondition = true;
                       });
                     },
                   ),
-                  const Text(
-                    '有',
-                    style: TextStyle(
-                        fontSize: 18, color: Color.fromRGBO(147, 129, 108, 1)),
-                  ),
+                  const Text('有'),
                 ],
               ),
-            ),
-
-            // **如果選擇"有"，則顯示輸入框**
-            if (hasSpecialCondition)
-              Positioned(
-                top: screenHeight * 0.70,
-                left: screenWidth * 0.15,
-                child: SizedBox(
-                  width: screenWidth * 0.7,
+              if (hasSpecialCondition)
+                Padding(
+                  padding: const EdgeInsets.only(left: 60, right: 40),
                   child: TextField(
                     controller: specialConditionController,
                     decoration: const InputDecoration(
@@ -162,55 +98,204 @@ class _BabyWidgetState extends State<BabyWidget> {
                     ),
                   ),
                 ),
-              ),
+              const SizedBox(height: 100), // 留空位避免底部按鈕蓋住
+            ],
+          ),
+        ),
+      ),
+    ),
+  ),
+  bottomNavigationBar: Container(
+  color: const Color.fromRGBO(233, 227, 213, 1), // ✅ 設定背景色
+  padding: const EdgeInsets.symmetric(horizontal: 27, vertical: 16),
+  child: Row(
+    children: [
+      GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Transform.rotate(
+          angle: 3.1416,
+          child: Image.asset(
+            'assets/images/back.png',
+            width: 60,
+          ),
+        ),
+      ),
+      const Spacer(),
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.brown.shade400,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+        ),
+        onPressed: () {
+          _saveBabyData(
+            widget.userId,
+            widget.isManUser,
+            babyNameController.text,
+            babyBirthController,
+            babyGenderController,
+            babyWeightController,
+            babyHeightController,
+            hasSpecialCondition,
+            specialConditionController,
+          );
+          Navigator.pushNamed(context, '/BabyAccWidget', arguments: {
+            'userId': widget.userId,
+            'isManUser': widget.isManUser,
+          });
+        },
+        child: const Text('填寫完成', style: TextStyle(fontSize: 18, color: Colors.white,)),
+      ),
+    ],
+  ),
+),
 
-            // **填寫完成按鈕**
-            Positioned(
-              top: screenHeight * 0.80,
-              left: screenWidth * 0.3,
-              child: _buildButton(context, '填寫完成', Colors.brown.shade400, () {
-                _saveBabyData(
-                    widget.userId, // ✅ 傳入 userId
-                    widget.isManUser,
-                    babyNameController.text,
-                    babyBirthController,
-                    babyGenderController,
-                    babyWeightController,
-                    babyHeightController,
-                    hasSpecialCondition,
-                    specialConditionController);
 
-                // ✅ **確保這裡傳遞的是 widget.userId**
-                Navigator.pushNamed(context, '/BabyAccWidget', arguments: {
-                  'userId': widget.userId,
-                  'isManUser': widget.isManUser,
-                } // ✅ **改為 widget.userId**
-                    );
-              }),
-            ),
+    );
+  }
 
-            // **返回按鈕**
-            Positioned(
-              top: screenHeight * 0.75,
-              left: screenWidth * 0.1,
+  Widget _buildInputRow(String label, TextEditingController controller) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(label, style: const TextStyle(fontSize: 18, color: Color.fromRGBO(147, 129, 108, 1))),
+        ),
+        const SizedBox(width: 10),
+       Expanded(
+  child: Align(
+    alignment: Alignment.centerRight,
+    child: SizedBox(
+      width: 160, // 跟身高體重一致
+      child: TextField(
+        controller: controller,
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        ),
+      ),
+    ),
+  ),
+)]);   
+  }
+
+  Widget _buildGenderSelector() {
+    return Row(
+      children: [
+        const SizedBox(
+          width: 80,
+          child: Text('性別', style: TextStyle(fontSize: 18, color: Color.fromRGBO(147, 129, 108, 1))),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+  child: Align(
+    alignment: Alignment.centerRight,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Radio<String>(
+          value: '男生',
+          groupValue: babyGenderController.text,
+          onChanged: (value) {
+            setState(() {
+              babyGenderController.text = value ?? '';
+            });
+          },
+        ),
+        const Text('男生'),
+        const SizedBox(width: 20),
+        Radio<String>(
+          value: '女生',
+          groupValue: babyGenderController.text,
+          onChanged: (value) {
+            setState(() {
+              babyGenderController.text = value ?? '';
+            });
+          },
+        ),
+        const Text('女生'),
+      ],
+    ),
+  ),
+),
+      ]
+    );
+  }
+
+  Widget _buildWeightPickerField(String label, TextEditingController controller) {
+    return _buildPickerRow(label, controller, 0.0, 7.0, 0.1, 'kg');
+  }
+
+  Widget _buildHeightPickerField(String label, TextEditingController controller) {
+    return _buildPickerRow(label, controller, 20, 90, 1, 'cm');
+  }
+
+  Widget _buildPickerRow(String label, TextEditingController controller, double start, double end, double step, String unit) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(label, style: const TextStyle(fontSize: 18, color: Color.fromRGBO(147, 129, 108, 1))),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: SizedBox(
+              width: 160,
               child: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Transform.rotate(
-                  angle: math.pi,
-                  child: Container(
-                    width: screenWidth * 0.15,
-                    height: screenHeight * 0.15,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/images/back.png'),
-                        fit: BoxFit.fitWidth,
-                      ),
+                onTap: () => _showPicker(context, controller, start, end, step, unit),
+                child: AbsorbPointer(
+                  child: TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(),
                     ),
                   ),
                 ),
               ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showPicker(BuildContext context, TextEditingController controller, double start, double end, double step, String unit) {
+    final values = <String>[];
+    for (double val = start; val <= end; val += step) {
+      values.add(val.toStringAsFixed(step < 1 ? 1 : 0));
+    }
+    int initialIndex = controller.text.isNotEmpty
+        ? values.indexWhere((v) => controller.text.contains(v))
+        : 0;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SizedBox(
+        height: 250,
+        child: Column(
+          children: [
+            SizedBox(
+              height: 200,
+              child: CupertinoPicker(
+                itemExtent: 40,
+                scrollController: FixedExtentScrollController(initialItem: initialIndex),
+                onSelectedItemChanged: (index) {
+                  controller.text = '${values[index]} $unit';
+                },
+                children: values.map((e) => Center(child: Text('$e $unit'))).toList(),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("確定"),
             ),
           ],
         ),
@@ -218,352 +303,47 @@ class _BabyWidgetState extends State<BabyWidget> {
     );
   }
 
-  Widget _buildInputRow(double screenWidth, double top, String label,
-      TextEditingController controller) {
-    return Positioned(
-      top: top,
-      left: screenWidth * 0.10, // Label 起始位置
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: screenWidth * 0.36, // Label 寬度（固定比例）
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 18,
-                color: Color.fromRGBO(147, 129, 108, 1),
-                fontFamily: 'Inter',
-              ),
-            ),
-          ),
-          SizedBox(
-            width: screenWidth * 0.44 + 0.5, // TextField 寬度（固定比例）
-            height: 32, // TextField 高度
-            child: TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-              ),
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // **按鈕 Widget**
-  Widget _buildButton(
-      BuildContext context, String text, Color color, VoidCallback onPressed) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.4,
-      height: 40,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        onPressed: onPressed,
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontFamily: 'Inter',
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGenderSelector() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120, // 標籤寬度，確保與其他標籤一致
-          child: const Text(
-            '性別',
-            style: TextStyle(
-              fontSize: 18,
-              color: Color.fromRGBO(147, 129, 108, 1),
-            ),
-          ),
-        ),
-        Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              // 男生選項
-              Row(
-                children: [
-                  Radio<String>(
-                    value: '男生',
-                    groupValue: babyGenderController.text,
-                    onChanged: (value) {
-                      setState(() {
-                        babyGenderController.text = value ?? '';
-                      });
-                    },
-                  ),
-                  const Text(
-                    '男生',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color.fromRGBO(147, 129, 108, 1),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 20), // 男生和女生之間的間距
-
-              // 女生選項
-              Row(
-                children: [
-                  Radio<String>(
-                    value: '女生',
-                    groupValue: babyGenderController.text,
-                    onChanged: (value) {
-                      setState(() {
-                        babyGenderController.text = value ?? '';
-                      });
-                    },
-                  ),
-                  const Text(
-                    '女生',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color.fromRGBO(147, 129, 108, 1),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-// 體重選擇器功能
-  Widget _buildWeightPickerField(
-      String label, TextEditingController controller) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 140, // Label 寬度
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 18,
-              color: Color.fromRGBO(147, 129, 108, 1),
-            ),
-          ),
-        ),
-        Expanded(
-          child: GestureDetector(
-            onTap: () => _showWeightPicker(context, controller),
-            child: AbsorbPointer(
-              child: TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-// 身高選擇器功能
-  Widget _buildHeightPickerField(
-      String label, TextEditingController controller) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 140, // Label 寬度
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 18,
-              color: Color.fromRGBO(147, 129, 108, 1),
-            ),
-          ),
-        ),
-        Expanded(
-          child: GestureDetector(
-            onTap: () => _showHeightPicker(context, controller),
-            child: AbsorbPointer(
-              child: TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-// 身高選擇功能
-  void _showHeightPicker(
-      BuildContext context, TextEditingController controller) {
-    int selectedHeight = controller.text.isNotEmpty
-        ? int.parse(controller.text.replaceAll(' cm', ''))
-        : 50; // 預設值改為 115cm
-
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext builder) {
-        return SizedBox(
-          height: 250,
-          child: Column(
-            children: [
-              SizedBox(
-                height: 200,
-                child: CupertinoPicker(
-                  scrollController: FixedExtentScrollController(
-                    initialItem: selectedHeight - 20, // 偏移值改為從 80 開始
-                  ),
-                  itemExtent: 40,
-                  onSelectedItemChanged: (int index) {
-                    selectedHeight = index + 20; // 偏移值改為 +80
-                  },
-                  children: List<Widget>.generate(71, (int index) {
-                    return Center(
-                        child: Text('${index + 20} cm')); // 生成 80~150 的選項
-                  }),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  controller.text = '$selectedHeight cm'; // 更新控制器的值
-                  Navigator.pop(context); // 關閉彈出視窗
-                },
-                child: const Text("確定"),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-// 體重選擇功能
-  void _showWeightPicker(
-      BuildContext context, TextEditingController controller) {
-    double selectedWeight = controller.text.isNotEmpty
-        ? double.parse(controller.text.replaceAll(' kg', ''))
-        : 3.0; // 預設值改為 3.0 kg
-
-    final List<String> weightOptions = List.generate(71, (index) {
-      return (index / 10).toStringAsFixed(1); // 生成 0.0 ~ 7.0 (0.1 間隔)
-    });
-
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext builder) {
-        return SizedBox(
-          height: 250,
-          child: Column(
-            children: [
-              SizedBox(
-                height: 200,
-                child: CupertinoPicker(
-                  scrollController: FixedExtentScrollController(
-                    initialItem: (selectedWeight * 10).round(), // 對應至0.1間隔
-                  ),
-                  itemExtent: 40,
-                  onSelectedItemChanged: (int index) {
-                    selectedWeight = index / 10; // 轉為小數點後一位
-                  },
-                  children: weightOptions
-                      .map((weight) => Center(child: Text('$weight kg')))
-                      .toList(),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  controller.text = '${selectedWeight.toStringAsFixed(1)} kg';
-                  Navigator.pop(context);
-                },
-                child: const Text("確定"),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // 日期選擇器
   Widget _buildDatePickerField(String label, TextEditingController controller) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 140, // 標籤寬度
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 18,
-              color: Color.fromRGBO(147, 129, 108, 1),
-            ),
-          ),
+          width: 80,
+          child: Text(label, style: const TextStyle(fontSize: 18, color: Color.fromRGBO(147, 129, 108, 1))),
         ),
-        Expanded(
-          child: SizedBox(
-            height: 40, // 與其他輸入框高度一致
-            child: TextField(
-              controller: controller,
-              readOnly: true, // 禁止手動輸入
-              decoration: const InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-              ),
+        const SizedBox(width: 10),
+      Expanded(
+  child: Align(
+    alignment: Alignment.centerRight,
+    child: SizedBox(
+      width: 160, // 同樣改成 160
+      child: TextField(
+        controller: controller,
+        readOnly: true,
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(),
+        ),
               onTap: () async {
-                DateTime? pickedDate = await showDatePicker(
-                  context: context, // 確保傳入正確 context
+                final picked = await showDatePicker(
+                  context: context,
                   initialDate: DateTime.now(),
                   firstDate: DateTime(2000),
                   lastDate: DateTime.now(),
                   locale: const Locale("zh", "TW"),
                 );
-                if (pickedDate != null) {
-                  String formattedDate =
-                      "${pickedDate.year}年${pickedDate.month}月${pickedDate.day}日";
-                  setState(() {
-                    controller.text = formattedDate; // 更新日期
-                  });
+                if (picked != null) {
+                  controller.text = '${picked.year}年${picked.month}月${picked.day}日';
                 }
               },
             ),
           ),
         ),
-      ],
+     ) ],
     );
   }
 }
+
 
 void _saveBabyData(
     String userId,

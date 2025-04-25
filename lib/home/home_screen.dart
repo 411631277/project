@@ -602,7 +602,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               child: SizedBox(
                 width: screenWidth * 0.84,
                 child: Text(
-                  '今天心情還好嗎?一切都會越來越好喔!\n'
+                  '今天心情還好嗎?一切都會越來越好喔!\n\n'
                   '別擔心，你已經做得很好了！每一天都是新的學習與成長，請相信自己，也別忘了好好照顧自己 ',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -705,13 +705,13 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
             ),
             Positioned(
               top: screenHeight * 0.825,
-              left: screenWidth * 0.54,
+              left: screenWidth * 0.5,
               child: Text(
                 '需要協助嗎?',
                 style: TextStyle(
                   color: const Color.fromRGBO(255, 255, 255, 1),
                   fontFamily: 'Inter',
-                  fontSize: base * 0.05,
+                  fontSize: base * 0.045,
                 ),
               ),
             ),
