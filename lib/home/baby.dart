@@ -29,13 +29,15 @@ class _BabyWidgetState extends State<BabyWidget> {
 
   @override
   Widget build(BuildContext context) {
+ final screenWidth = MediaQuery.of(context).size.width;
+ final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
   body: SafeArea(
     child: Container(
       color: const Color.fromRGBO(233, 227, 213, 1),
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: screenHeight * 0.03),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -85,20 +87,29 @@ class _BabyWidgetState extends State<BabyWidget> {
                   const Text('有'),
                 ],
               ),
-              if (hasSpecialCondition)
-                Padding(
-                  padding: const EdgeInsets.only(left: 60, right: 40),
-                  child: TextField(
-                    controller: specialConditionController,
-                    decoration: const InputDecoration(
-                      labelText: "請輸入特殊狀況",
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 100), // 留空位避免底部按鈕蓋住
+
+              Visibility(
+  visible: hasSpecialCondition,
+  maintainState: true,
+  maintainAnimation: true,
+  child: Padding(
+    padding: const EdgeInsets.only(left: 60, right: 40, bottom: 20),
+    child: TextField(
+      controller: specialConditionController,
+      decoration: const InputDecoration(
+        labelText: "請輸入特殊狀況",
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(),
+      ),
+    ),
+  ),
+),
+
+  const SizedBox(height: 40), // ✅ 加這個避免空白太大
+
+const SizedBox(height: 100), // 可保留讓按鈕不會被擋住
+
             ],
           ),
         ),
