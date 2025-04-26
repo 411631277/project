@@ -18,6 +18,7 @@ import 'package:doctor_2/home/fa_home_screen.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/home/revise.dart';
 import 'package:doctor_2/parentchildGroup/adaptscore.dart';
+import 'package:doctor_2/parentchildGroup/close.dart';
 import 'package:doctor_2/parentchildGroup/closescore.dart';
 import 'package:doctor_2/questionGroup/attachment.dart';
 import 'package:doctor_2/questionGroup/knowledge_widget.dart';
@@ -103,7 +104,7 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) =>  Closescore(userId: '8', totalScore: 35,), // 主畫面
+        '/': (context) =>  CloseWidget(userId: '8', ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),

@@ -195,42 +195,49 @@ class _CloseWidgetState extends State<CloseWidget> {
   }
 
   /// 將作答結果儲存到 Firestore，並更新 melancholyCompleted = true
-  Future<bool> _savecloseAndScore(int totalScore) async {
+ Future<bool> _savecloseAndScore(int totalScore) async {
   try {
     final String documentName = "AttachmentWidget";
 
- final Map<String, String> formattedclose = close.map(
+    final Map<String, String> formattedclose = close.map(
       (k, v) => MapEntry(k.toString(), v!),
     );
 
-    // 1. 儲存問卷答案到 users/{userId}/questions/{documentName}
     final docRef = FirebaseFirestore.instance
-      .collection("users")
-      .doc(widget.userId)
-      .collection("questions")
-      .doc(documentName);
+        .collection("users")
+        .doc(widget.userId)
+        .collection("questions")
+        .doc(documentName);
 
-    await docRef.set({
-      "close": formattedclose,
-      "timestamp": Timestamp.now(),
-      "totalScore": totalScore,
+    // 先取得舊資料
+    final docSnapshot = await docRef.get();
+    Map<String, dynamic> existingData = {};
 
-    });
+    if (docSnapshot.exists) {
+      existingData = docSnapshot.data() ?? {};
+    }
 
-    // 2. 在同一個 function 中，更新 attachmentCompleted = true
+    // 把新的 close 加進去，不覆蓋其他資料
+    existingData['close'] = formattedclose;
+    existingData['closeTotalScore'] = totalScore;
+    existingData['timestamp'] = Timestamp.now();
+
+    await docRef.set(existingData);
+
+    // 更新 attachmentCompleted
     await FirebaseFirestore.instance
         .collection("users")
         .doc(widget.userId)
         .update({"attachmentCompleted": true});
 
-    logger.i("✅ 問卷已成功儲存，並更新 attachmentCompleted！");
-   
+    logger.i("✅ close問卷已成功合併並儲存！");
     return true;
   } catch (e) {
-    logger.e("❌ 儲存問卷時發生錯誤：$e");
+    logger.e("❌ 儲存close問卷時發生錯誤：$e");
     return false;
   }
 }
+
 /// 1〜6 分對應陣列索引 +1，計算所有題目的總分
 int _calculateTotalScore() {
   return close.entries.map((entry) {
