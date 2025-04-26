@@ -17,6 +17,8 @@ import 'package:doctor_2/home/deta.dart';
 import 'package:doctor_2/home/fa_home_screen.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/home/revise.dart';
+import 'package:doctor_2/parentchildGroup/adaptscore.dart';
+import 'package:doctor_2/parentchildGroup/closescore.dart';
 import 'package:doctor_2/questionGroup/attachment.dart';
 import 'package:doctor_2/questionGroup/knowledge_widget.dart';
 import 'package:doctor_2/questionGroup/melancholy.dart';
@@ -101,7 +103,7 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) =>  const HomeScreenWidget(userId: '8', isManUser: false,), // 主畫面
+        '/': (context) =>  Closescore(userId: '8', totalScore: 35,), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
@@ -315,7 +317,24 @@ class _MyAppState extends State<MyApp> {
             ),
           );
         }
-
+         if (settings.name == '/Closescore') {
+          final args = settings.arguments as Map<String, dynamic>; 
+             return MaterialPageRoute(
+    builder: (context) => Closescore(
+      userId: args['userId'] as String,
+      totalScore: args['totalScore'] as int,
+    ),
+  );
+}
+if (settings.name == '/Adaptscore') {
+          final args = settings.arguments as Map<String, dynamic>; 
+             return MaterialPageRoute(
+    builder: (context) => Adaptscore(
+      userId: args['userId'] as String,
+      totalScore: args['totalScore'] as int,
+    ),
+  );
+}
         return null;
       },
     );
