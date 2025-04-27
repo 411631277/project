@@ -1,30 +1,28 @@
-//1.親近
+//4.回應信心
 //import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import 'dart:math' as math;
 
 final Logger logger = Logger();
 
-class CloseWidget extends StatefulWidget {
+class RespondWidget extends StatefulWidget {
   final String userId;
-  const CloseWidget({super.key, required this.userId});
+  const RespondWidget({super.key, required this.userId});
 
   @override
-  State<CloseWidget> createState() => _CloseWidgetState();
+  State<RespondWidget> createState() => _RespondWidgetState();
 }
 
-class _CloseWidgetState extends State<CloseWidget> {
+class _RespondWidgetState extends State<RespondWidget> {
   final List<String> questions = [
-    "看到孩子，我就會覺得心情好",
-    "我喜歡陪伴著孩子",
-    "和孩子在一起是一種享受",
-    "我喜歡抱著孩子的感覺",
-    "孩子加入我的生活，讓我感到幸福",
-    "陪在孩子身邊，讓我感到滿足",
-    "我喜歡欣賞孩子的表情或動作",
+    "我能察覺孩子「想睡覺」的訊號",
+    "我會由孩子的表情或動作，來猜測他的需求",
+    "我知道孩子的需求和情緒",
+    "我能有效地安撫孩子",
+    "我會依照孩子的反應，來調整照顧他的方式",
+    "我對照顧孩子的方式有信心",
   ];
 
   /// 每題對應的選項
@@ -35,16 +33,15 @@ class _CloseWidgetState extends State<CloseWidget> {
     3: ["非常不同意", "不同意", "有點不同意", "有點同意", "同意", "非常同意"],
     4: ["非常不同意", "不同意", "有點不同意", "有點同意", "同意", "非常同意"],
     5: ["非常不同意", "不同意", "有點不同意", "有點同意", "同意", "非常同意"],
-    6: ["非常不同意", "不同意", "有點不同意", "有點同意", "同意", "非常同意"],
-
+  
   };
 
   /// 紀錄每題選擇的答案
-  final Map<int, String?> close = {};
+  final Map<int, String?> respond = {};
 
   /// 檢查是否所有題目都已作答
   bool _isAllQuestionsAnswered() {
-    return close.length == questions.length && !close.containsValue(null);
+    return respond.length == questions.length && !respond.containsValue(null);
   }
 
   @override
@@ -64,7 +61,7 @@ class _CloseWidgetState extends State<CloseWidget> {
           children: [
             SizedBox(height: screenHeight * 0.02),
             Text(
-              '1.親近',
+              '4.回應信心',
               style: TextStyle(
                 fontSize: fontSize * 1.2,
                 fontWeight: FontWeight.bold,
@@ -82,27 +79,11 @@ class _CloseWidgetState extends State<CloseWidget> {
                 },
               ),
             ),
-            SizedBox(height: screenHeight * 0.02),
-
-            /// 按鈕區
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                /// 返回按鈕
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Transform.rotate(
-                    angle: math.pi,
-                    child: Image.asset(
-                      'assets/images/back.png',
-                      width: screenWidth * 0.12,
-                    ),
-                  ),
-                ),
-
-                /// 只有全部題目都回答後才顯示「下一步」按鈕
+            
+                 /// 只有全部題目都回答後才顯示「下一步」按鈕
                if (_isAllQuestionsAnswered())
-  ElevatedButton(
+               Center(
+    child: ElevatedButton(
     style: ElevatedButton.styleFrom(
       padding: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.08,
@@ -118,13 +99,13 @@ class _CloseWidgetState extends State<CloseWidget> {
      'totalScore': totalScore,
      };
       // 2. 儲存到 Firestore
-      await _savecloseAndScore(totalScore);
+      await _saverespondAndScore(totalScore);
 
       // 3. 導頁
       if (!context.mounted) return;
       Navigator.pushNamed(
         context,
-        '/Closescore',
+        '/Respondscore',
         arguments: args,
       );
     },
@@ -136,12 +117,14 @@ class _CloseWidgetState extends State<CloseWidget> {
       ),
     ),
   ),
-              ],
+               ),
+  SizedBox(height: screenHeight * 0.02),
+               ],
             ),
-            SizedBox(height: screenHeight * 0.02),
-          ],
+         
+        
         ),
-      ),
+      
     );
   }
 
@@ -169,10 +152,10 @@ class _CloseWidgetState extends State<CloseWidget> {
               children: [
                 Radio<String>(
                   value: option,
-                  groupValue: close[questionIndex],
+                  groupValue: respond[questionIndex],
                   onChanged: (value) {
                     setState(() {
-                      close[questionIndex] = value!;
+                      respond[questionIndex] = value!;
                     });
                   },
                 ),
@@ -195,11 +178,11 @@ class _CloseWidgetState extends State<CloseWidget> {
   }
 
   /// 將作答結果儲存到 Firestore，並更新 melancholyCompleted = true
- Future<bool> _savecloseAndScore(int totalScore) async {
+ Future<bool> _saverespondAndScore(int totalScore) async {
   try {
     final String documentName = "AttachmentWidget";
 
-    final Map<String, String> formattedclose = close.map(
+    final Map<String, String> formattedrespond = respond.map(
       (k, v) => MapEntry(k.toString(), v!),
     );
 
@@ -217,9 +200,9 @@ class _CloseWidgetState extends State<CloseWidget> {
       existingData = docSnapshot.data() ?? {};
     }
 
-    // 把新的 close 加進去，不覆蓋其他資料
-    existingData['close'] = formattedclose;
-    existingData['closeTotalScore'] = totalScore;
+    // 把新的 respond 加進去，不會覆蓋掉舊的 close
+    existingData['respond'] = formattedrespond;
+    existingData['RespondTotalScore'] = totalScore;
     existingData['timestamp'] = Timestamp.now();
 
     await docRef.set(existingData);
@@ -230,17 +213,17 @@ class _CloseWidgetState extends State<CloseWidget> {
         .doc(widget.userId)
         .update({"attachmentCompleted": true});
 
-    logger.i("✅ close問卷已成功合併並儲存！");
+    logger.i("✅ 問卷已成功合併並儲存！");
     return true;
   } catch (e) {
-    logger.e("❌ 儲存close問卷時發生錯誤：$e");
+    logger.e("❌ 儲存問卷時發生錯誤：$e");
     return false;
   }
 }
 
 /// 1〜6 分對應陣列索引 +1，計算所有題目的總分
 int _calculateTotalScore() {
-  return close.entries.map((entry) {
+  return respond.entries.map((entry) {
     // 找到該題答案在 options 陣列的索引，再＋1 成為分數
     final score = questionOptions[entry.key]!
                     .indexOf(entry.value!) + 1;

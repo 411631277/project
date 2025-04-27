@@ -1,29 +1,28 @@
-//2..親職適應
+//3.承諾
 //import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import 'dart:math' as math;
 
 final Logger logger = Logger();
 
-class AdaptWidget extends StatefulWidget {
+class PromiseWidget extends StatefulWidget {
   final String userId;
-  const AdaptWidget({super.key, required this.userId});
+  const PromiseWidget({super.key, required this.userId});
 
   @override
-  State<AdaptWidget> createState() => _AdaptWidgetState();
+  State<PromiseWidget> createState() => _PromiseWidgetState();
 }
 
-class _AdaptWidgetState extends State<AdaptWidget> {
+class _PromiseWidgetState extends State<PromiseWidget> {
   final List<String> questions = [
-   "我在照顧孩子的時候，會感到不耐煩",
-    "時時要滿足孩子的需求，讓我感到沮喪",
-    "如果孩子干擾到我的休息，我會感到討厭",
-    "我覺得自己像是個照顧孩子的機器",
-    "照顧孩子讓我感到筋疲力盡",
-    "我會對孩子生氣",
+    "我要保留自己的最佳精力給孩子",
+    "我看重孩子的需求甚過自己的",
+    "如果孩子受苦，我願意替他承受",
+    "即使我有其他重要事情，我還是以照顧孩子爲第一優先",
+    "我願意因爲孩子而減少自己的自由",
+    "對我而言，孩子是世界上最重要的",
   ];
 
   /// 每題對應的選項
@@ -38,11 +37,11 @@ class _AdaptWidgetState extends State<AdaptWidget> {
   };
 
   /// 紀錄每題選擇的答案
-  final Map<int, String?> adapt = {};
+  final Map<int, String?> promise = {};
 
   /// 檢查是否所有題目都已作答
   bool _isAllQuestionsAnswered() {
-    return adapt.length == questions.length && !adapt.containsValue(null);
+    return promise.length == questions.length && !promise.containsValue(null);
   }
 
   @override
@@ -62,7 +61,7 @@ class _AdaptWidgetState extends State<AdaptWidget> {
           children: [
             SizedBox(height: screenHeight * 0.02),
             Text(
-              '2.親職適應',
+              '3.承諾',
               style: TextStyle(
                 fontSize: fontSize * 1.2,
                 fontWeight: FontWeight.bold,
@@ -80,27 +79,11 @@ class _AdaptWidgetState extends State<AdaptWidget> {
                 },
               ),
             ),
-            SizedBox(height: screenHeight * 0.02),
-
-            /// 按鈕區
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                /// 返回按鈕
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Transform.rotate(
-                    angle: math.pi,
-                    child: Image.asset(
-                      'assets/images/back.png',
-                      width: screenWidth * 0.12,
-                    ),
-                  ),
-                ),
-
+          
                 /// 只有全部題目都回答後才顯示「下一步」按鈕
                if (_isAllQuestionsAnswered())
-  ElevatedButton(
+               Center(
+    child: ElevatedButton(
     style: ElevatedButton.styleFrom(
       padding: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.08,
@@ -116,13 +99,13 @@ class _AdaptWidgetState extends State<AdaptWidget> {
      'totalScore': totalScore,
      };
       // 2. 儲存到 Firestore
-      await _saveadaptAndScore(totalScore);
+      await _savePromiseAndScore(totalScore);
 
       // 3. 導頁
       if (!context.mounted) return;
       Navigator.pushNamed(
         context,
-        '/Adaptscore',
+        '/Promisescore',
         arguments: args,
       );
     },
@@ -134,12 +117,15 @@ class _AdaptWidgetState extends State<AdaptWidget> {
       ),
     ),
   ),
-              ],
+               ),
+              SizedBox(height: screenHeight * 0.02),
+               ],
+              
             ),
-            SizedBox(height: screenHeight * 0.02),
-          ],
+           
+          
         ),
-      ),
+      
     );
   }
 
@@ -167,10 +153,10 @@ class _AdaptWidgetState extends State<AdaptWidget> {
               children: [
                 Radio<String>(
                   value: option,
-                  groupValue: adapt[questionIndex],
+                  groupValue: promise[questionIndex],
                   onChanged: (value) {
                     setState(() {
-                      adapt[questionIndex] = value!;
+                      promise[questionIndex] = value!;
                     });
                   },
                 ),
@@ -193,11 +179,11 @@ class _AdaptWidgetState extends State<AdaptWidget> {
   }
 
   /// 將作答結果儲存到 Firestore，並更新 melancholyCompleted = true
- Future<bool> _saveadaptAndScore(int totalScore) async {
+ Future<bool> _savePromiseAndScore(int totalScore) async {
   try {
     final String documentName = "AttachmentWidget";
 
-    final Map<String, String> formattedadapt = adapt.map(
+    final Map<String, String> formattedPromise = promise.map(
       (k, v) => MapEntry(k.toString(), v!),
     );
 
@@ -215,9 +201,9 @@ class _AdaptWidgetState extends State<AdaptWidget> {
       existingData = docSnapshot.data() ?? {};
     }
 
-    // 把新的 adapt 加進去，不會覆蓋掉舊的 close
-    existingData['adapt'] = formattedadapt;
-    existingData['totalScore'] = totalScore;
+    // 把新的 Promise 加進去，不會覆蓋掉舊的 close
+    existingData['Promise'] = formattedPromise;
+    existingData['PromiseTotalScore'] = totalScore;
     existingData['timestamp'] = Timestamp.now();
 
     await docRef.set(existingData);
@@ -238,7 +224,7 @@ class _AdaptWidgetState extends State<AdaptWidget> {
 
 /// 1〜6 分對應陣列索引 +1，計算所有題目的總分
 int _calculateTotalScore() {
-  return adapt.entries.map((entry) {
+  return promise.entries.map((entry) {
     // 找到該題答案在 options 陣列的索引，再＋1 成為分數
     final score = questionOptions[entry.key]!
                     .indexOf(entry.value!) + 1;

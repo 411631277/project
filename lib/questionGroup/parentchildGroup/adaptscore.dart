@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:doctor_2/first_question/finish.dart';
+import 'package:doctor_2/questionGroup/parentchildGroup/promise.dart';
 import 'package:flutter/material.dart';
 
 class Adaptscore extends StatelessWidget {
@@ -80,7 +80,7 @@ class Adaptscore extends StatelessWidget {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => FinishWidget(
+      builder: (context) => PromiseWidget(
         userId: userId, // 這邊傳遞 id
       ),
     ),

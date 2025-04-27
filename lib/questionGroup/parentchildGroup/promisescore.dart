@@ -1,12 +1,12 @@
 import 'dart:math' as math;
-import 'package:doctor_2/parentchildGroup/adapt.dart';
+import 'package:doctor_2/questionGroup/parentchildGroup/respond.dart';
 import 'package:flutter/material.dart';
 
-class Closescore extends StatelessWidget {
+class Promisescore extends StatelessWidget {
   final String userId;
   final int totalScore;
 
-  const Closescore({
+  const Promisescore({
     super.key,
     required this.userId,
     required this.totalScore,
@@ -20,9 +20,9 @@ class Closescore extends StatelessWidget {
     final base = math.min(screenW, screenH);
 
     // 根據分數挑文字
-    final message = totalScore < 34
-      ? '媽媽最近和孩子相處有遇到什麼問題嗎？\n\n如果有需求可以使用app的AI問答功能，或是撥打以下電話諮詢喔！'
-      : '和寶寶的關係不錯呢，繼續保持溫暖的互動吧！';
+    final message = totalScore < 24
+      ? '最近照顧寶寶有遇到什麼挫折嗎？\n\n還是說照顧寶寶帶給您什麼樣的負擔呢？媽媽可以利用APP的AI問答或是或是撥打以下電話諮詢喔！'
+      : '看來您花了很多心思在照顧寶寶呢～';
 
     return Scaffold(
       backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
@@ -64,7 +64,7 @@ class Closescore extends StatelessWidget {
 
               SizedBox(
                 width: screenW * 0.7,
-                height: screenH * 0.1,
+                height: screenH * 0.08,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFB0A28D),
@@ -80,7 +80,7 @@ class Closescore extends StatelessWidget {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => AdaptWidget(
+      builder: (context) => RespondWidget(
         userId: userId, // 這邊傳遞 id
       ),
     ),
@@ -101,8 +101,8 @@ child: Text(
               ),
 
           
-  
-          ),);
+         ),
+         );
         
   }
 }

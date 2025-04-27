@@ -1,4 +1,4 @@
-//親子依附量表
+/*親子依附量表
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -35,7 +35,7 @@ class _AttachmentWidget extends State<AttachmentWidget> {
     "我要保留自己的最佳精力給孩子",
     "我看重孩子的需求甚過自己的",
     "如果孩子受苦，我願意替他承受",
-    "即使我有其他重要事情，我還是以照顧孩子爲第一",
+    "即使我有其他重要事情，我還是以照顧孩子爲第一優先",
     "我願意因爲孩子而減少自己的自由",
     "對我而言，孩子是世界上最重要的",
     "我能察覺孩子「想睡覺」的訊號",
@@ -299,3 +299,4 @@ Future<void> sendAttachmentAnswersToMySQL(String userId, Map<int, String?> answe
 }
 
 }
+*/

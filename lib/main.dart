@@ -17,10 +17,12 @@ import 'package:doctor_2/home/deta.dart';
 import 'package:doctor_2/home/fa_home_screen.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/home/revise.dart';
-import 'package:doctor_2/parentchildGroup/adaptscore.dart';
-import 'package:doctor_2/parentchildGroup/close.dart';
-import 'package:doctor_2/parentchildGroup/closescore.dart';
-import 'package:doctor_2/questionGroup/attachment.dart';
+import 'package:doctor_2/questionGroup/parentchildGroup/adaptscore.dart';
+import 'package:doctor_2/questionGroup/parentchildGroup/closescore.dart';
+import 'package:doctor_2/questionGroup/parentchildGroup/parentchild1.dart';
+import 'package:doctor_2/questionGroup/parentchildGroup/promisescore.dart';
+import 'package:doctor_2/questionGroup/parentchildGroup/respondscore.dart';
+//import 'package:doctor_2/questionGroup/parentchildGroup/attachment.dart';
 import 'package:doctor_2/questionGroup/knowledge_widget.dart';
 import 'package:doctor_2/questionGroup/melancholy.dart';
 import 'package:doctor_2/questionGroup/painscale.dart';
@@ -104,7 +106,7 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) =>  CloseWidget(userId: '8', ), // 主畫面
+        '/': (context) =>  HomeScreenWidget(userId: '8', isManUser: false, ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
@@ -161,6 +163,12 @@ class _MyAppState extends State<MyApp> {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => Notyet1Widget(userId: userId),
+          );
+        }
+         if (settings.name == '/MaternalConnectionPage') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => MaternalConnectionPage(userId: userId),
           );
         }
         if (settings.name == '/BornWidget') {
@@ -270,12 +278,12 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => ProdutionWidget(userId: userId),
           );
         }
-        if (settings.name == '/AttachmentWidget') {
+        /*if (settings.name == '/AttachmentWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => AttachmentWidget(userId: userId),
           );
-        }
+        }*/
         if (settings.name == '/SleepWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
@@ -331,6 +339,24 @@ if (settings.name == '/Adaptscore') {
           final args = settings.arguments as Map<String, dynamic>; 
              return MaterialPageRoute(
     builder: (context) => Adaptscore(
+      userId: args['userId'] as String,
+      totalScore: args['totalScore'] as int,
+    ),
+  );
+}
+if (settings.name == '/Promisescore') {
+          final args = settings.arguments as Map<String, dynamic>; 
+             return MaterialPageRoute(
+    builder: (context) => Promisescore(
+      userId: args['userId'] as String,
+      totalScore: args['totalScore'] as int,
+    ),
+  );
+}
+if (settings.name == '/Respondscore') {
+          final args = settings.arguments as Map<String, dynamic>; 
+             return MaterialPageRoute(
+    builder: (context) => Respondscore(
       userId: args['userId'] as String,
       totalScore: args['totalScore'] as int,
     ),

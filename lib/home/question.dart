@@ -41,7 +41,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
           // 假設 Firestore 中使用這些欄位紀錄是否完成
           surveyStatus['knowledgeCompleted'] = data['knowledgeCompleted'] ?? false;
           surveyStatus['melancholyCompleted'] = data['melancholyCompleted'] ?? false;
-          surveyStatus['produtionCompleted'] = data['produtionCompleted'] ?? false;
+          //surveyStatus['produtionCompleted'] = data['produtionCompleted'] ?? false;
           surveyStatus['attachmentCompleted'] = data['attachmentCompleted'] ?? false;
           surveyStatus['painScaleCompleted'] = data['painScaleCompleted'] ?? false;
           surveyStatus['sleepCompleted'] = data['sleepCompleted'] ?? false;
@@ -128,7 +128,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                     '/MelancholyWidget',
                     'melancholyCompleted',
                   ),
-                  _buildSurveyButton(
+                  /*_buildSurveyButton(
                     context,
                     screenWidth,
                     screenHeight,
@@ -136,21 +136,21 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                     '生產支持知覺量表',
                     '/ProdutionWidget',
                     'produtionCompleted',
-                  ),
+                  ),*/
                   _buildSurveyButton(
                     context,
                     screenWidth,
                     screenHeight,
-                    0.48,
+                    0.38,
                     '親子依附量表',
-                    '/AttachmentWidget',
+                    '/MaternalConnectionPage',
                     'attachmentCompleted',
                   ),
                   _buildSurveyButton(
                     context,
                     screenWidth,
                     screenHeight,
-                    0.58,
+                    0.48,
                     '會陰疼痛分數計算',
                     '/PainScaleWidget',
                     'painScaleCompleted',
@@ -159,7 +159,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                     context,
                     screenWidth,
                     screenHeight,
-                    0.68,
+                    0.58,
                     '睡眠評估問卷',
                     '/SleepWidget',
                     'sleepCompleted',
@@ -168,7 +168,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                     context,
                     screenWidth,
                     screenHeight,
-                    0.78,
+                    0.68,
                     '親子同室情況',
                     '/RoommateWidget',
                     'roommateCompleted',
