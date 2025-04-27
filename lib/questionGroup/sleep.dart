@@ -82,6 +82,8 @@ class _SleepWidgetState extends State<SleepWidget> {
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
+final h = MediaQuery.of(context).size.height;
+final base = math.min(w, h); 
     return Scaffold(
       body: Container(
         color: const Color.fromRGBO(233, 227, 213, 1),
@@ -89,33 +91,33 @@ class _SleepWidgetState extends State<SleepWidget> {
         child: SingleChildScrollView(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             // ==== 第一部分 ==== //
-            const Text(
+            Text(
               "睡眠評估問卷",
               style: TextStyle(
-                fontSize: 18,
+              fontSize: base * 0.05,
                 fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(147, 129, 108, 1),
+                color: const Color.fromRGBO(147, 129, 108, 1),
               ),
             ),
             const SizedBox(height: 12),
             ...List.generate(_q1.length, (i) {
               final q = _q1[i];
               if (q['type'] == 'fill') {
-                return _buildFillQuestion(q);
+                return _buildFillQuestion(q ,base);
               } else {
-                return _buildChoiceQuestion(i, q);
+                return _buildChoiceQuestion(i, q , base);
               }
             }),
 
             const Divider(height: 32, thickness: 1, color: Colors.brown),
 
             // ==== 第二部分 ==== //
-            const Text(
+            Text(
               "以下問題選擇一個適當的答案打勾，請全部作答",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: base * 0.05,
                 fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(147, 129, 108, 1),
+                color: const Color.fromRGBO(147, 129, 108, 1),
               ),
             ),
             const SizedBox(height: 8),
@@ -135,10 +137,10 @@ class _SleepWidgetState extends State<SleepWidget> {
                     color: Color.fromRGBO(233, 227, 213, 1),
                   ),
                   children: [
-                    _buildHeaderCell("題目"),
-                    _buildHeaderCell("從未發生"),
-                    _buildHeaderCell("約一兩次"),
-                    _buildHeaderCell("三次或以上"),
+                    _buildHeaderCell("題目",base),
+                    _buildHeaderCell("從未發生",base),
+                    _buildHeaderCell("約一兩次",base),
+                    _buildHeaderCell("三次或以上",base),
                   ],
                 ),
                 ...List.generate(_q2.length, (i) {
@@ -152,7 +154,7 @@ class _SleepWidgetState extends State<SleepWidget> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text("${i + 1}. ${_q2[i]}",
-                            style: const TextStyle(fontSize: 14)),
+                            style: TextStyle(fontSize: base * 0.04)),
                       ),
                       _buildRadioCell(i, "從未發生"),
                       _buildRadioCell(i, "約一兩次"),
@@ -181,7 +183,7 @@ class _SleepWidgetState extends State<SleepWidget> {
                       backgroundColor: Colors.brown.shade400,
                     ),
                     onPressed: _handleSubmit,
-                    child: const Text("提交完成", style: TextStyle(fontSize: 18, color: Colors.white)),
+                    child: Text("提交完成", style: TextStyle(fontSize: base * 0.045, color: Colors.white)),
                   ),
               ],
             ),
@@ -191,7 +193,7 @@ class _SleepWidgetState extends State<SleepWidget> {
     );
   }
 
-  Widget _buildFillQuestion(Map<String, dynamic> q) {
+  Widget _buildFillQuestion(Map<String, dynamic> q , double base) {
     final idx = q['index'] as int;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -200,7 +202,7 @@ class _SleepWidgetState extends State<SleepWidget> {
           flex: 4,
           child: Text(
             "${idx + 1}. ${q['question']}",
-            style: const TextStyle(fontSize: 16, color: Color.fromRGBO(147, 129, 108, 1)),
+            style:  TextStyle(fontSize: base*0.045, color: Color.fromRGBO(147, 129, 108, 1)),
           ),
         ),
         if (q['hasHour']) ...[
@@ -213,7 +215,7 @@ class _SleepWidgetState extends State<SleepWidget> {
               onChanged: (_) => setState(() {}),
             ),
           ),
-          const Text("時", style: TextStyle(fontSize: 14, color: Color.fromRGBO(147, 129, 108, 1))),
+           Text("時", style: TextStyle(fontSize: base*0.045, color: Color.fromRGBO(147, 129, 108, 1))),
         ],
         if (q['hasMinute']) ...[
           Expanded(
@@ -225,19 +227,19 @@ class _SleepWidgetState extends State<SleepWidget> {
               onChanged: (_) => setState(() {}),
             ),
           ),
-          const Text("分", style: TextStyle(fontSize: 14, color: Color.fromRGBO(147, 129, 108, 1))),
+           Text("分", style: TextStyle(fontSize: base*0.045, color: Color.fromRGBO(147, 129, 108, 1))),
         ],
       ]),
     );
   }
 
-  Widget _buildChoiceQuestion(int uiIndex, Map<String, dynamic> q) {
+  Widget _buildChoiceQuestion(int uiIndex, Map<String, dynamic> q , double base) {
     final answerIndex = _q1.indexOf(q);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text("${answerIndex + 1}. ${q['question']}",
-            style: const TextStyle(fontSize: 14, color: Color.fromRGBO(147, 129, 108, 1))),
+            style:  TextStyle(fontSize: base*0.035, color: Color.fromRGBO(147, 129, 108, 1))),
         const SizedBox(height: 4),
         ...List.generate((q['options'] as List<String>).length, (i) {
           final opt = q['options'][i];
@@ -247,17 +249,25 @@ class _SleepWidgetState extends State<SleepWidget> {
               groupValue: _a1[answerIndex],
               onChanged: (v) => setState(() => _a1[answerIndex] = v),
             ),
-            Expanded(child: Text(opt, style: const TextStyle(fontSize: 12, color: Color.fromRGBO(147, 129, 108, 1)))),
+            Expanded(child: Text(opt, style:  TextStyle(fontSize: base*0.035, color: Color.fromRGBO(147, 129, 108, 1)))),
           ]);
         }),
       ]),
     );
   }
 
-  Widget _buildHeaderCell(String label) => SizedBox(
-        height: 40,
-        child: Center(child: Text(label, style: const TextStyle(fontSize: 12))),
-      );
+ Widget _buildHeaderCell(String label, double base) => SizedBox(
+  height: 40,
+  child: Center(
+    child: Text(
+      label,
+      style: TextStyle(
+        fontSize: base * 0.035, // ✅ 字體跟著螢幕大小調整
+      ),
+    ),
+  ),
+);
+
 
   Widget _buildRadioCell(int idx, String val) => Center(
         child: Radio<String>(

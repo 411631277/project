@@ -18,6 +18,7 @@ import 'package:doctor_2/home/fa_home_screen.dart';
 import 'package:doctor_2/home/home_screen.dart';
 import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/revise.dart';
+import 'package:doctor_2/questionGroup/knowledgeGroup/knowledge_score.dart';
 import 'package:doctor_2/questionGroup/melancholyGroup/dour_introduce1.dart';
 import 'package:doctor_2/questionGroup/melancholyGroup/melancholyscore.dart';
 import 'package:doctor_2/questionGroup/parentchildGroup/adaptscore.dart';
@@ -26,13 +27,12 @@ import 'package:doctor_2/questionGroup/parentchildGroup/parentchild1.dart';
 import 'package:doctor_2/questionGroup/parentchildGroup/promisescore.dart';
 import 'package:doctor_2/questionGroup/parentchildGroup/respondscore.dart';
 //import 'package:doctor_2/questionGroup/parentchildGroup/attachment.dart';
-import 'package:doctor_2/questionGroup/knowledge_widget.dart';
+import 'package:doctor_2/questionGroup/knowledgeGroup/knowledge_widget.dart';
 import 'package:doctor_2/questionGroup/melancholyGroup/melancholy.dart';
 import 'package:doctor_2/questionGroup/painscale.dart';
 import 'package:doctor_2/questionGroup/production.dart';
 import 'package:doctor_2/questionGroup/roommate.dart';
 import 'package:doctor_2/questionGroup/sleep.dart';
-import 'package:doctor_2/questionGroup/sleep2.dart';
 import 'package:doctor_2/register/fa_success.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
@@ -109,7 +109,7 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) =>  DourIntroduce1Page(userId: '8',  ), // 主畫面
+        '/': (context) =>  MainScreenWidget(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
@@ -174,6 +174,12 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => MaternalConnectionPage(userId: userId),
           );
         }
+          if (settings.name == '/DourIntroduce1Page') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => DourIntroduce1Page(userId: userId),
+          );
+        }
         if (settings.name == '/BornWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
@@ -222,6 +228,7 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => BreastfeedingDurationWidget(userId: userId),
           );
         }
+        
         if (settings.name == '/StopWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
@@ -299,12 +306,6 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => SleepWidget(userId: userId),
           );
         }
-        if (settings.name == '/Sleep2Widget') {
-          final userId = settings.arguments as String;
-          return MaterialPageRoute(
-            builder: (context) => Sleep2Widget(userId: userId),
-          );
-        }
         if (settings.name == '/PainScaleWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
@@ -380,6 +381,16 @@ if (settings.name == '/Melancholyscore') {
     ),
   );
 }
+if (settings.name == '/KnowledgeScore') {
+          final args = settings.arguments as Map<String, dynamic>; 
+             return MaterialPageRoute(
+    builder: (context) => KnowledgeScore(
+      userId: args['userId'] as String,
+      totalScore: args['totalScore'] as int,
+    ),
+  );
+}
+
 
         return null;
       },

@@ -36,7 +36,7 @@ class SettingWidgetState extends State<SettingWidget> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
+     final base = math.min(screenWidth, screenHeight); // ✅
     return Scaffold(
       body: Container(
         width: screenWidth,
@@ -65,7 +65,7 @@ class SettingWidgetState extends State<SettingWidget> {
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
                     fontFamily: 'Inter',
-                    fontSize: screenWidth * 0.08,
+                    fontSize: (base * 0.06).clamp(16.0, 24.0),
                     fontWeight: FontWeight.normal,
                   ),
                 ),
@@ -104,7 +104,7 @@ class SettingWidgetState extends State<SettingWidget> {
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
                     fontFamily: 'Inter',
-                    fontSize: screenWidth * 0.08,
+                   fontSize: (base * 0.06).clamp(16.0, 24.0),
                     fontWeight: FontWeight.normal,
                   ),
                 ),
@@ -146,7 +146,7 @@ class SettingWidgetState extends State<SettingWidget> {
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
                     fontFamily: 'Inter',
-                    fontSize: screenWidth * 0.075,
+                    fontSize: (base * 0.06).clamp(16.0, 24.0),
                     fontWeight: FontWeight.normal,
                   ),
                 ),
@@ -185,7 +185,7 @@ class SettingWidgetState extends State<SettingWidget> {
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
                     fontFamily: 'Inter',
-                    fontSize: screenWidth * 0.075,
+                   fontSize: (base * 0.06).clamp(16.0, 24.0),
                     fontWeight: FontWeight.normal,
                   ),
                 ),
@@ -224,7 +224,7 @@ class SettingWidgetState extends State<SettingWidget> {
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
                     fontFamily: 'Inter',
-                    fontSize: screenWidth * 0.075,
+                   fontSize: (base * 0.06).clamp(16.0, 24.0),
                     fontWeight: FontWeight.normal,
                   ),
                 ),
@@ -263,7 +263,7 @@ class SettingWidgetState extends State<SettingWidget> {
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
                     fontFamily: 'Inter',
-                    fontSize: screenWidth * 0.075,
+                    fontSize: (base * 0.06).clamp(16.0, 24.0),
                     fontWeight: FontWeight.normal,
                   ),
                 ),
@@ -306,7 +306,7 @@ class SettingWidgetState extends State<SettingWidget> {
                   style: TextStyle(
                     color: const Color.fromRGBO(147, 129, 108, 1),
                     fontFamily: 'Inter',
-                    fontSize: screenWidth * 0.075,
+                    fontSize: (base * 0.06).clamp(16.0, 24.0),
                     fontWeight: FontWeight.normal,
                   ),
                 ),

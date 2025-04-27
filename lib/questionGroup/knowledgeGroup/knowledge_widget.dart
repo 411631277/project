@@ -1,8 +1,8 @@
 //母乳哺餵知識量表
-import 'dart:convert';
+//import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
+//import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
 
@@ -157,22 +157,26 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
                       backgroundColor: Colors.brown.shade400,
                     ),
                     onPressed: () async {
-                      final success = await _saveAnswersToFirebase();
-                      if (!context.mounted) return;
+  final int totalScore = _calculateTotalScore();
+  final success = await _saveAnswersToFirebase(totalScore);
+  if (!context.mounted) return;
 
-                      if (success) {
-                        // 成功後跳轉到 /FinishWidget，或可改成 pop 回到上一頁
-                        Navigator.pushNamed(
-                          context,
-                          '/FinishWidget',
-                          arguments: widget.userId,
-                        );
-                      }
-                    },
-                    child: const Text(
-                      "填答完成",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    ),
+  if (success) {
+    Navigator.pushNamed(
+      context,
+      '/KnowledgeScore',
+      arguments: {
+        'userId': widget.userId,
+        'totalScore': totalScore,
+      },
+    );
+  }
+},
+child: const Text(
+  "填答完成",
+  style: TextStyle(fontSize: 18, color: Colors.white),
+),
+
                   ),
               ],
             ),
@@ -205,43 +209,62 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
     );
   }
 
+// 正確答案表
+final Map<int, String> correctAnswers = {
+  0: "正確", // 題號是從0開始
+  2: "正確",
+  6: "正確",
+  7: "正確",
+  8: "正確",
+  9: "正確",
+  11: "正確",
+  14: "正確",
+  15: "正確",
+  17: "正確",
+  18: "正確",
+  19: "正確",
+  20: "正確",
+  21: "正確",
+  23: "正確",
+  24: "正確",
+};
+
   /// 儲存問卷答案，並將 knowledgeCompleted 設為 true
-  Future<bool> _saveAnswersToFirebase() async {
-    try {
-      final String documentName = "KnowledgeWidget";
+ Future<bool> _saveAnswersToFirebase(int totalScore) async {
+  try {
+    final String documentName = "KnowledgeWidget";
 
-      // 先整理答案，key 用題號，value 用選項
-      final Map<String, String?> formattedAnswers = answers.map(
-        (key, value) => MapEntry(key.toString(), value),
-      );
+    final Map<String, String?> formattedAnswers = answers.map(
+      (key, value) => MapEntry(key.toString(), value),
+    );
 
-      // 1. 儲存問卷答案到 users/{userId}/questions/{documentName}
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(widget.userId)
-          .collection("questions")
-          .doc(documentName)
-          .set({
-        "answers": formattedAnswers,
-        "timestamp": Timestamp.now(),
-      });
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(widget.userId)
+        .collection("questions")
+        .doc(documentName)
+        .set({
+      "answers": formattedAnswers,
+      "totalScore": totalScore, // ⭐新增儲存總分
+      "timestamp": Timestamp.now(),
+    });
 
-      // 2. 將 knowledgeCompleted 設為 true，讓主頁能亮燈
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(widget.userId)
-          .update({"knowledgeCompleted": true});
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(widget.userId)
+        .update({"knowledgeCompleted": true});
 
-      logger.i("✅ 問卷已成功儲存，並更新 knowledgeCompleted！");
-   await sendKnowledgeAnswersToMySQL(widget.userId, answers);
-      return true;
-    } catch (e) {
-      logger.e("❌ 儲存問卷時發生錯誤：$e");
-      return false;
-    }
+    logger.i("✅ 知識問卷已成功儲存，總分: $totalScore");
+   // await sendKnowledgeAnswersToMySQL(widget.userId, answers);
+    return true;
+  } catch (e) {
+    logger.e("❌ 儲存問卷時發生錯誤：$e");
+    return false;
   }
+}
 
- Future<void> sendKnowledgeAnswersToMySQL(String userId, Map<int, String?> answers) async {
+
+ /*Future<void> sendKnowledgeAnswersToMySQL(String userId, Map<int, String?> answers) async {
   final url = Uri.parse('http://163.13.201.85:3000/knowledge');
 
   final answerMap = {
@@ -276,5 +299,25 @@ if (response.statusCode >= 200 && response.statusCode < 300) {
 } else {
   throw Exception("❌ 生產支持問卷同步失敗：${response.body}");
 }
- }
+ }*/
+
+ int _calculateTotalScore() {
+  int totalScore = 0;
+
+  answers.forEach((index, userAnswer) {
+    if (userAnswer != null && userAnswer != "不知道") { // 只要不是不知道才檢查
+      // 該題是「正確」答案的話
+      if (correctAnswers[index] == "正確" && userAnswer == "正確") {
+        totalScore += 4;
+      }
+      // 該題是「錯誤」答案的話
+      else if (!correctAnswers.containsKey(index) && userAnswer == "錯誤") {
+        totalScore += 4;
+      }
+    }
+  });
+
+  return totalScore.clamp(0, 100);
+}
+
 }
