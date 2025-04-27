@@ -1,10 +1,10 @@
 //產後憂鬱量表
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import 'dart:math' as math;
 
 final Logger logger = Logger();
 
@@ -95,15 +95,22 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
               children: [
                 /// 返回按鈕
                 GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Transform.rotate(
-                    angle: math.pi,
-                    child: Image.asset(
-                      'assets/images/back.png',
-                      width: screenWidth * 0.12,
-                    ),
-                  ),
-                ),
+  onTap: () {
+    Navigator.pushReplacementNamed(
+      context,
+      '/QuestionWidget',
+      arguments: widget.userId,
+    );
+  },
+  child: Transform.rotate(
+    angle: math.pi,
+    child: Image.asset(
+      'assets/images/back.png',
+      width: screenWidth * 0.12,
+    ),
+  ),
+),
+
 
                 /// 只有全部題目都回答後才顯示「下一步」按鈕
                 if (_isAllQuestionsAnswered())
@@ -116,16 +123,21 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
                       backgroundColor: Colors.brown.shade400,
                     ),
                     onPressed: () async {
-                      await _saveAnswersToFirebase();
-                      if (!context.mounted) return;
+  await _saveAnswersToFirebase();
+  if (!context.mounted) return;
 
-                      /// 完成後導頁，可自行更改
-                      Navigator.pushNamed(
-                        context,
-                        '/FinishWidget',
-                        arguments: widget.userId,
-                      );
-                    },
+  int totalScore = _calculateTotalScore();
+
+  Navigator.pushNamed(
+    context,
+    '/Melancholyscore',
+    arguments: {
+      'userId': widget.userId,
+      'totalScore': totalScore,
+    },
+  );
+},
+
                     child: Text(
                       "填答完成",
                       style: TextStyle(
@@ -194,36 +206,41 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
 
   /// 將作答結果儲存到 Firestore，並更新 melancholyCompleted = true
   Future<void> _saveAnswersToFirebase() async {
-    try {
-      // 1. 整理使用者的作答
-      final Map<String, String?> formattedAnswers = answers.map(
-        (key, value) => MapEntry(key.toString(), value),
-      );
+  try {
+    // 1. 整理使用者的作答
+    final Map<String, String?> formattedAnswers = answers.map(
+      (key, value) => MapEntry(key.toString(), value),
+    );
 
-      // 2. 儲存到 users/{userId}/questions/melancholy
-      final CollectionReference userResponses = FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .collection("questions");
+    // 2. 計算總分
+    final int totalScore = _calculateTotalScore();
 
-      await userResponses.doc('melancholy').set({
-        'answers': formattedAnswers,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+    // 3. 儲存到 Firestore
+    final CollectionReference userResponses = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection("questions");
 
-      // 3. 更新「melancholyCompleted = true」讓主問卷列表顯示已完成
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .update({"melancholyCompleted": true});
+    await userResponses.doc('melancholy').set({
+      'answers': formattedAnswers,
+      'totalScore': totalScore,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
 
-      logger.i("✅ 憂鬱量表問卷已成功儲存，並更新 melancholyCompleted！");
-      await sendMelancholyAnswersToMySQL(widget.userId, answers);
+    // 4. 更新「melancholyCompleted = true」讓主問卷列表顯示已完成
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .update({"melancholyCompleted": true});
 
-    } catch (e) {
-      logger.e("❌ 儲存憂鬱量表問卷時發生錯誤：$e");
-    }
+    logger.i("✅ 憂鬱量表問卷已成功儲存，並更新 melancholyCompleted！");
+    await sendMelancholyAnswersToMySQL(widget.userId, answers);
+
+  } catch (e) {
+    logger.e("❌ 儲存憂鬱量表問卷時發生錯誤：$e");
   }
+}
+
  Future<void> sendMelancholyAnswersToMySQL(String userId, Map<int, String?> answers) async {
   final url = Uri.parse('http://163.13.201.85:3000/dour');
 
@@ -259,4 +276,28 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
 }
 
 }
+
+int _calculateTotalScore() {
+  int totalScore = 0;
+
+  answers.forEach((index, answer) {
+    final options = questionOptions[index];
+    if (options != null && answer != null) {
+      int optionIndex = options.indexOf(answer);
+
+      if (optionIndex != -1) {
+        if (index == 0 || index == 1) {
+          // 第1、2題是正向計分 (0,1,2,3)
+          totalScore += optionIndex;
+        } else {
+          // 第3～10題是反向計分 (3,2,1,0)
+          totalScore += (3 - optionIndex);
+        }
+      }
+    }
+  });
+
+  return totalScore;
+}
+
 }

@@ -16,7 +16,10 @@ import 'package:doctor_2/home/delete_acc.dart';
 import 'package:doctor_2/home/deta.dart';
 import 'package:doctor_2/home/fa_home_screen.dart';
 import 'package:doctor_2/home/home_screen.dart';
+import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/revise.dart';
+import 'package:doctor_2/questionGroup/melancholyGroup/dour_introduce1.dart';
+import 'package:doctor_2/questionGroup/melancholyGroup/melancholyscore.dart';
 import 'package:doctor_2/questionGroup/parentchildGroup/adaptscore.dart';
 import 'package:doctor_2/questionGroup/parentchildGroup/closescore.dart';
 import 'package:doctor_2/questionGroup/parentchildGroup/parentchild1.dart';
@@ -24,7 +27,7 @@ import 'package:doctor_2/questionGroup/parentchildGroup/promisescore.dart';
 import 'package:doctor_2/questionGroup/parentchildGroup/respondscore.dart';
 //import 'package:doctor_2/questionGroup/parentchildGroup/attachment.dart';
 import 'package:doctor_2/questionGroup/knowledge_widget.dart';
-import 'package:doctor_2/questionGroup/melancholy.dart';
+import 'package:doctor_2/questionGroup/melancholyGroup/melancholy.dart';
 import 'package:doctor_2/questionGroup/painscale.dart';
 import 'package:doctor_2/questionGroup/production.dart';
 import 'package:doctor_2/questionGroup/roommate.dart';
@@ -106,7 +109,7 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) =>  HomeScreenWidget(userId: '8', isManUser: false, ), // 主畫面
+        '/': (context) =>  DourIntroduce1Page(userId: '8',  ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
@@ -175,6 +178,12 @@ class _MyAppState extends State<MyApp> {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => BornWidget(userId: userId),
+          );
+        }
+         if (settings.name == '/QuestionWidget') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => QuestionWidget(userId: userId),
           );
         }
         if (settings.name == '/FrequencyWidget') {
@@ -362,6 +371,16 @@ if (settings.name == '/Respondscore') {
     ),
   );
 }
+if (settings.name == '/Melancholyscore') {
+          final args = settings.arguments as Map<String, dynamic>; 
+             return MaterialPageRoute(
+    builder: (context) => Melancholyscore(
+      userId: args['userId'] as String,
+      totalScore: args['totalScore'] as int,
+    ),
+  );
+}
+
         return null;
       },
     );

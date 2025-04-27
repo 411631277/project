@@ -179,9 +179,16 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                     top:  screenHeight * 0.88,
                     left: screenWidth  * 0.1,
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context); // 返回上一頁
-                      },
+                     onTap: () {
+  Navigator.pushNamed(
+    context,
+    '/HomeScreenWidget',
+    arguments: {
+      'userId': widget.userId,
+      'isManUser': false, 
+    },
+  );
+},
                       child: Transform.rotate(
                         angle: 180 * (math.pi / 180), // 旋轉 180 度
                         child: Container(
