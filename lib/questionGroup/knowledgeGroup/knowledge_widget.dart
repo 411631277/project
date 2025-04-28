@@ -1,8 +1,8 @@
 //母乳哺餵知識量表
-//import 'dart:convert';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
 
@@ -52,7 +52,9 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
+    return PopScope(
+    canPop: false, // ❗這行就是鎖定返回鍵
+    child: Scaffold(
       body: Container(
         color: const Color.fromRGBO(233, 227, 213, 1), //頁面背景顏色
         padding: const EdgeInsets.all(16),
@@ -183,7 +185,7 @@ child: const Text(
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildHeaderCell(String label) {
@@ -255,7 +257,7 @@ final Map<int, String> correctAnswers = {
         .update({"knowledgeCompleted": true});
 
     logger.i("✅ 知識問卷已成功儲存，總分: $totalScore");
-   // await sendKnowledgeAnswersToMySQL(widget.userId, answers);
+    await sendKnowledgeAnswersToMySQL(widget.userId, answers, totalScore);
     return true;
   } catch (e) {
     logger.e("❌ 儲存問卷時發生錯誤：$e");
@@ -264,7 +266,7 @@ final Map<int, String> correctAnswers = {
 }
 
 
- /*Future<void> sendKnowledgeAnswersToMySQL(String userId, Map<int, String?> answers) async {
+ Future<void> sendKnowledgeAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
   final url = Uri.parse('http://163.13.201.85:3000/knowledge');
 
   final answerMap = {
@@ -277,29 +279,32 @@ final Map<int, String> correctAnswers = {
     "user_id": int.parse(userId),
     "knowledge_question_content": "哺乳衛教問卷",
     "knowledge_test_date": DateTime.now().toIso8601String().split('T')[0],
-
+    "knowledge_score": totalScore, // ⭐️ 新增總分
   };
 
-  // 把回答依序對應到欄位 knowledge_answer_1 ~ _25
+  // 把回答依序對應到欄位 knowledge_answer_1 ~ knowledge_answer_25
   for (int i = 0; i < 25; i++) {
-  final selected = answers[i]; // 取出使用者回答
-  final mapped = answerMap[selected] ?? "none"; // 對應成 "true" / "false" / "none"
-  payload["knowledge_answer_${i + 1}"] = mapped;
-}
+    final selected = answers[i];
+    final mapped = answerMap[selected] ?? "no";
+    payload["knowledge_answer_${i + 1}"] = mapped;
+  }
+
+  logger.i("📦 知識問卷送出 payload: $payload");
 
   final response = await http.post(
-  url,
-  headers: {'Content-Type': 'application/json'},
-  body: jsonEncode(payload),
-);
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode(payload),
+  );
 
-if (response.statusCode >= 200 && response.statusCode < 300) {
-  final result = jsonDecode(response.body);
-  logger.i("✅ 生產支持問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
-} else {
-  throw Exception("❌ 生產支持問卷同步失敗：${response.body}");
+  if (response.statusCode >= 200 && response.statusCode < 300) {
+    final result = jsonDecode(response.body);
+    logger.i("✅ 知識問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
+  } else {
+    throw Exception("❌ 知識問卷同步失敗：${response.body}");
+  }
 }
- }*/
+
 
  int _calculateTotalScore() {
   int totalScore = 0;

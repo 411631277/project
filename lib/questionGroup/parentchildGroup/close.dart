@@ -1,7 +1,10 @@
 //1.親近
 //import 'dart:convert';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 //import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
@@ -210,6 +213,7 @@ SizedBox(height: screenHeight * 0.02),
         .update({"attachmentCompleted": true});
 
     logger.i("✅ close問卷已成功合併並儲存！");
+    await sendCloseAnswersToMySQL(widget.userId, close, totalScore);
     return true;
   } catch (e) {
     logger.e("❌ 儲存close問卷時發生錯誤：$e");
@@ -226,5 +230,42 @@ int _calculateTotalScore() {
     return score;
   }).fold(0, (acc, element) => acc + element);
 }
+
+Future<void> sendCloseAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
+  final url = Uri.parse('http://163.13.201.85:3000/attachment'); // ✅ 同一個表
+
+  final Map<String, dynamic> payload = {
+    'user_id': int.parse(userId),
+    ' attachment_question_content': 'CLOSE', // ✅ 這裡應該是 type，不是 question_content
+    'attachment_test_date': DateTime.now().toIso8601String().split('T')[0],
+    'attachment_score_a': totalScore,
+  };
+
+  // 🔥 將 close 頁面上的 1~7 題答案直接「文字」填進 payload
+  for (int i = 0; i < 7; i++) {
+    final answerText = answers[i];
+    payload['attachment_answer_${i + 1}'] = (answerText != null && answerText.isNotEmpty) ? answerText : 'none';
+  }
+
+  logger.i("📦 Close payload: $payload");
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(payload),
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      logger.i("✅ Close 同步成功");
+    } else {
+      logger.e("❌ Close 同步失敗: ${response.body}");
+    }
+  } catch (e) {
+    logger.e("🔥 發送 Close 時錯誤: $e");
+  }
+}
+
+
 
 }

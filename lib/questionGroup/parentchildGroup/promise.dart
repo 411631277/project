@@ -1,7 +1,10 @@
 //3.承諾
 //import 'dart:convert';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 //import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
@@ -232,6 +235,41 @@ int _calculateTotalScore() {
                     .indexOf(entry.value!) + 1;
     return score;
   }).fold(0, (acc, element) => acc + element);
+}
+
+Future<void> sendAttachmentAnswersToMySQL(String userId, Map<int, String?> answers) async {
+  final url = Uri.parse('http://163.13.201.85:3000/attachment');
+
+  // 取得今天日期（格式：2025-04-19）
+  final now = DateTime.now();
+  final formattedDate =
+      "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+  final payload = {
+    'user_id': int.parse(userId),
+    'attachment_question_content': '親子依附量表',
+    'attachment_test_date': formattedDate,
+  };
+
+  
+  for (int i = 0; i < 25; i++) {
+    final answer = answers[i] ?? '未填';
+    payload['attachment_answer_${i + 1}'] = answer;
+  }
+
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode(payload),
+  );
+
+  if (response.statusCode >= 200 && response.statusCode < 300) {
+    final result = jsonDecode(response.body);
+    logger.i("✅ Attachment 資料同步成功：${result['message']} (insertId: ${result['insertId']})");
+  } else {
+    logger.e("❌ Attachment 資料同步失敗：${response.body}");
+    throw Exception("同步失敗：${response.body}");
+  }
 }
 
 }

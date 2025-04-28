@@ -245,14 +245,14 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
         .update({"melancholyCompleted": true});
 
     logger.i("✅ 憂鬱量表問卷已成功儲存，並更新 melancholyCompleted！");
-    //await sendMelancholyAnswersToMySQL(widget.userId, answers);
+    await sendMelancholyAnswersToMySQL(widget.userId, answers , totalScore);
 
   } catch (e) {
     logger.e("❌ 儲存憂鬱量表問卷時發生錯誤：$e");
   }
 }
 
- Future<void> sendMelancholyAnswersToMySQL(String userId, Map<int, String?> answers) async {
+ Future<void> sendMelancholyAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
   final url = Uri.parse('http://163.13.201.85:3000/dour');
 
   // 取得今天日期（格式：2025-04-19）
@@ -263,30 +263,37 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     'user_id': int.parse(userId),
     "dour_question_content": "產後憂鬱量表",
     'dour_test_date': formattedDate,
+    'dour_score': totalScore, // 🔥 新增總分
   };
 
   // 把答案轉成 ENUM 對應的 '0'~'3'
   for (int i = 0; i < 10; i++) {
     final selectedText = answers[i];
     final optionIndex = questionOptions[i]?.indexOf(selectedText ?? '') ?? -1;
-     payload['dour_answer_${i + 1}'] = (optionIndex >= 0) ? optionIndex.toString() : 'none';
-
+    payload['dour_answer_${i + 1}'] = (optionIndex >= 0) ? optionIndex.toString() : 'none';
   }
 
-  final response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode(payload),
-  );
+  logger.i("📦 準備送出憂鬱量表資料 payload：$payload");
 
- if (response.statusCode >= 200 && response.statusCode < 300) {
-  final result = jsonDecode(response.body);
-  logger.i("✅ 憂鬱問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
-} else {
-  throw Exception("❌ 憂鬱問卷同步失敗：${response.body}");
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(payload),
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final result = jsonDecode(response.body);
+      logger.i("✅ 憂鬱問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
+    } else {
+      logger.e("❌ 憂鬱問卷同步失敗：${response.body}");
+      throw Exception("憂鬱問卷同步失敗");
+    }
+  } catch (e) {
+    logger.e("❌ 發送憂鬱問卷到MySQL時出錯：$e");
+  }
 }
 
-}
 
 int _calculateTotalScore() {
   int totalScore = 0;
