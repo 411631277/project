@@ -24,7 +24,9 @@ class Closescore extends StatelessWidget {
       ? '媽媽最近和孩子相處有遇到什麼問題嗎？\n\n如果有需求可以使用app的AI問答功能，或是撥打以下電話諮詢喔！'
       : '和寶寶的關係不錯呢，繼續保持溫暖的互動吧！';
 
-    return Scaffold(
+     return PopScope(
+    canPop: false, // ❗這行就是鎖定返回鍵
+    child: Scaffold(
       backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
       body: SafeArea(
         child: Padding(
@@ -102,7 +104,9 @@ child: Text(
 
           
   
-          ),);
+          ),
+    ))
+          ;
         
   }
 }

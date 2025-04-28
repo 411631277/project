@@ -50,7 +50,9 @@ class _RespondWidgetState extends State<RespondWidget> {
     final screenHeight = MediaQuery.of(context).size.height;
     final double fontSize = screenWidth * 0.045; // 自適應字體大小
 
-    return Scaffold(
+     return PopScope(
+    canPop: false, // ❗這行就是鎖定返回鍵
+    child: Scaffold(
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
         decoration: const BoxDecoration(
@@ -124,7 +126,7 @@ class _RespondWidgetState extends State<RespondWidget> {
          
         
         ),
-      
+    )
     );
   }
 

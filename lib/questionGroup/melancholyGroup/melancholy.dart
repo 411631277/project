@@ -58,7 +58,18 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     final screenHeight = MediaQuery.of(context).size.height;
     final double fontSize = screenWidth * 0.045; // 自適應字體大小
 
-    return Scaffold(
+    return PopScope(
+  canPop: false,
+  // ignore: deprecated_member_use
+  onPopInvoked: (didPop) {
+    if (didPop) return; // 系統已處理就不管
+    Navigator.pushReplacementNamed(
+      context,
+      '/QuestionWidget',
+      arguments: widget.userId,
+    );
+  },
+  child: Scaffold(
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
         decoration: const BoxDecoration(
@@ -152,7 +163,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   /// 建立單題的選項 UI
@@ -234,7 +245,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
         .update({"melancholyCompleted": true});
 
     logger.i("✅ 憂鬱量表問卷已成功儲存，並更新 melancholyCompleted！");
-    await sendMelancholyAnswersToMySQL(widget.userId, answers);
+    //await sendMelancholyAnswersToMySQL(widget.userId, answers);
 
   } catch (e) {
     logger.e("❌ 儲存憂鬱量表問卷時發生錯誤：$e");

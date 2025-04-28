@@ -24,7 +24,9 @@ class Respondscore extends StatelessWidget {
       ? '媽媽不知道寶寶想跟您表達什麼意思嗎？\n\n可以利用APP的AI問答或是或是撥打以下電話諮詢喔！'
       : '媽媽對寶寶很了解呢！';
 
-    return Scaffold(
+     return PopScope(
+    canPop: false, // ❗這行就是鎖定返回鍵
+    child: Scaffold(
       backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
       body: SafeArea(
         child: Padding(
@@ -102,7 +104,7 @@ child: Text(
 
           
          ),
-         );
+      ) );
         
   }
 }

@@ -29,7 +29,9 @@ class Melancholyscore extends StatelessWidget {
   message = '您的身心健康狀況可能需要醫療專業的協助，請找專業醫師協助處理';
 }
 
-    return Scaffold(
+    return PopScope(
+    canPop: false, // ❗這行就是鎖定返回鍵
+    child: Scaffold(
       backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
       body: SafeArea(
         child: Padding(
@@ -107,7 +109,7 @@ child: Text(
 
           
          ),
-         );
+         ));
         
   }
 }

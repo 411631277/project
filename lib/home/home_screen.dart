@@ -442,7 +442,9 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     // 根據當前步數與目標步數，決定顯示文字
     String statusText = (_stepCount >= _targetSteps) ? "今日步數已達標" : "今日步數未達標";
 
-    return Scaffold(
+   return PopScope(
+    canPop: false, // ❗這行就是鎖定返回鍵
+    child: Scaffold(
       body: Container(
         color: const Color.fromRGBO(233, 227, 213, 1),
         child: Stack(
@@ -743,7 +745,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
           ],
         ),
       ),
-    );
+    ));
   }
   Future<void> sendStepDataToMySQL() async {
     

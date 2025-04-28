@@ -24,7 +24,9 @@ class Promisescore extends StatelessWidget {
       ? '最近照顧寶寶有遇到什麼挫折嗎？\n\n還是說照顧寶寶帶給您什麼樣的負擔呢？媽媽可以利用APP的AI問答或是或是撥打以下電話諮詢喔！'
       : '看來您花了很多心思在照顧寶寶呢～';
 
-    return Scaffold(
+    return PopScope(
+    canPop: false, // ❗這行就是鎖定返回鍵
+    child: Scaffold(
       backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
       body: SafeArea(
         child: Padding(
@@ -102,6 +104,7 @@ child: Text(
 
           
          ),
+    )
          );
         
   }

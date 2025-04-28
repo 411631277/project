@@ -68,7 +68,22 @@ class _QuestionWidgetState extends State<QuestionWidget> {
     final screenWidth  = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
+   return PopScope(
+  canPop: false, // 禁止 Flutter 自動 pop
+  // ignore: deprecated_member_use
+  onPopInvoked: (didPop) {
+    // 不管 didPop 是 true 還是 false，一律自己導回去
+    Navigator.pushReplacementNamed(
+      context,
+      '/HomeScreenWidget',
+     arguments: {
+    'userId': widget.userId,
+    'isManUser': false,  
+  },
+    );
+  },
+  child: Scaffold(
+
       body: Container(
         width:  screenWidth,
         height: screenHeight,
@@ -207,7 +222,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                 ],
               ),
       ),
-    );
+   ));
   }
 
   /// 建構問卷按鈕

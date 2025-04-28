@@ -13,7 +13,9 @@ class FinishWidget extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
+   return PopScope(
+    canPop: false, // ❗這行就是鎖定返回鍵
+    child: Scaffold(
       body: Container(
         width: screenWidth,
         height: screenHeight,
@@ -91,6 +93,6 @@ class FinishWidget extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }

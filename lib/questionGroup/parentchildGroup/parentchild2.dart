@@ -18,7 +18,9 @@ class MaternalConnectionPage2 extends StatelessWidget {
     final textColor = const Color(0xFF4A4132);
     final buttonColor = const Color(0xFFB0A28D);
 
-    return Scaffold(
+     return PopScope(
+    canPop: false, // ❗這行就是鎖定返回鍵
+    child: Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
         child: Column(
@@ -85,6 +87,6 @@ class MaternalConnectionPage2 extends StatelessWidget {
           ],
         ),
       ),
-    );
+      ) );
   }
 }

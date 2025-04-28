@@ -17,7 +17,9 @@ class DourIntroduce1Page extends StatelessWidget {
     final bgColor   = const Color(0xFFE9E3D5);
     final textColor = const Color(0xFF4A4132);
 
-    return Scaffold(
+     return PopScope(
+    canPop: false, // ❗這行就是鎖定返回鍵
+    child: Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
         child: Column(
@@ -83,6 +85,6 @@ class DourIntroduce1Page extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }
