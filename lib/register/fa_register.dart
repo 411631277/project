@@ -96,7 +96,18 @@ class FaRegisterWidget extends StatefulWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
+   return PopScope(
+  canPop: false, // 禁止 Flutter 自動 pop
+  // ignore: deprecated_member_use
+  onPopInvoked: (didPop) {
+    // 不管 didPop 是 true 還是 false，一律自己導回去
+    Navigator.pushReplacementNamed(
+      context,
+      '/MainScreenWidget',
+      
+    );
+  },
+  child: Scaffold(
       body: Container(
         width: screenWidth,
         height: screenHeight,
@@ -273,7 +284,7 @@ class FaRegisterWidget extends StatefulWidget {
           ),
         ),
       ),
-    );
+    ));
      }
 
  Widget _buildAccountRow() {

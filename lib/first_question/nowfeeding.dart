@@ -28,7 +28,9 @@ class _Nowfeeding extends State<Nowfeeding> {
     // 檢查是否所有問題都填答
     final isAllAnswered = purebreastmilk != null && firstime != null;
 
-    return Scaffold(
+    return PopScope(
+    canPop: false,
+    child: Scaffold(
       body: Container(
         width: screenWidth,
         height: screenHeight,
@@ -238,7 +240,7 @@ class _Nowfeeding extends State<Nowfeeding> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Future<void> sendNowFeedingToMySQL(

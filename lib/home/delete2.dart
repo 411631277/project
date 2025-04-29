@@ -22,7 +22,9 @@ class Delete2Widget extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
+     return PopScope(
+ canPop: false,
+ child: Scaffold(
       body: Container(
         width: screenWidth,
         height: screenHeight,
@@ -83,7 +85,7 @@ class Delete2Widget extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   /// 將使用者資料「搬移」到 freeze 下的 man_user 或 user，再刪除原本資料

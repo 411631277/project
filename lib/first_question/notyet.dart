@@ -30,7 +30,9 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
         complicationAnswer != null &&
         selectedBabyCount != null;
 
-    return Scaffold(
+    return PopScope(
+    canPop: false,
+    child: Scaffold(
       body: Container(
         width: screenWidth,
         height: screenHeight,
@@ -251,7 +253,7 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Future<void> sendNotYetDataToMySQL(String userId, String babyCount,

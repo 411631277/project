@@ -30,7 +30,9 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
         deliveryCount != null &&
         breastfeedingAnswer != null;
 
-    return Scaffold(
+    return PopScope(
+    canPop: false,
+    child: Scaffold(
       body: Container(
         width: screenWidth,
         height: screenHeight,
@@ -234,7 +236,7 @@ class _FrequencyWidgetState extends State<FrequencyWidget> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Future<void> sendFrequencyToMySQL(String userId, String pregnancy,

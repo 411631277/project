@@ -24,7 +24,9 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
+    return PopScope(
+    canPop: false,
+    child: Scaffold(
       body: Container(
         width: screenWidth,
         height: screenHeight,
@@ -119,7 +121,7 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   /// **Firestore 更新 + 頁面跳轉**

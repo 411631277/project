@@ -35,7 +35,9 @@ class _StopWidgetState extends State<StopWidget> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
+    return PopScope(
+    canPop: false,
+    child: Scaffold(
       body: Container(
         width: screenWidth,
         height: screenHeight,
@@ -139,7 +141,7 @@ class _StopWidgetState extends State<StopWidget> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Future<void> sendStopReasonToMySQL(String userId, String reason) async {

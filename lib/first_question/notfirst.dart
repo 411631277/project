@@ -71,7 +71,9 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
     final isAllAnswered =
         painindex != null && brokenskin != null && selectedDuration != null;
 
-    return Scaffold(
+    return PopScope(
+    canPop: false,
+    child: Scaffold(
       body: Container(
         width: screenWidth,
         height: screenHeight,
@@ -259,7 +261,7 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Future<void> sendNotFirstDataToMySQL(String userId, String painIndex,

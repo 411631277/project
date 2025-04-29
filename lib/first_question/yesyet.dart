@@ -35,7 +35,9 @@ class _YesyetWidgetState extends State<YesyetWidget> {
         complicationAnswer != null &&
         breastfeedingAnswer != null;
 
-    return Scaffold(
+    return PopScope(
+    canPop: false,
+    child: Scaffold(
       body: Container(
         width: screenWidth,
         height: screenHeight,
@@ -406,7 +408,7 @@ class _YesyetWidgetState extends State<YesyetWidget> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Future<void> sendYesYetDataToMySQL(

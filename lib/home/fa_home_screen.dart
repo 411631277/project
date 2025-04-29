@@ -192,7 +192,9 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
+     return PopScope(
+ canPop: false,
+ child: Scaffold(
       body: Container(
         color: const Color.fromRGBO(233, 227, 213, 1),
         child: Stack(
@@ -390,6 +392,6 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
           ],
         ),
       ),
-    );
+    ));
   }
 }
