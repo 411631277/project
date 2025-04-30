@@ -84,7 +84,17 @@ class _SleepWidgetState extends State<SleepWidget> {
     final w = MediaQuery.of(context).size.width;
 final h = MediaQuery.of(context).size.height;
 final base = math.min(w, h); 
-    return Scaffold(
+    return PopScope(
+canPop: false,
+// ignore: deprecated_member_use
+onPopInvoked: (didPop) {
+Navigator.pushReplacementNamed(
+context,
+'/QuestionWidget',
+arguments: widget.userId, //如果有需要才加
+);
+},
+child: Scaffold(
       body: Container(
         color: const Color.fromRGBO(233, 227, 213, 1),
         padding: const EdgeInsets.all(16),
@@ -167,30 +177,37 @@ final base = math.min(w, h);
 
             const SizedBox(height: 24),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Transform.rotate(
-                    angle: math.pi,
-                    child: Image.asset('assets/images/back.png', width: w * 0.15),
-                  ),
-                ),
-                if (_isAllAnswered)
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                      backgroundColor: Colors.brown.shade400,
-                    ),
-                    onPressed: _handleSubmit,
-                    child: Text("提交完成", style: TextStyle(fontSize: base * 0.045, color: Colors.white)),
-                  ),
-              ],
-            ),
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    GestureDetector(
+      onTap: () {
+        Navigator.pushReplacementNamed(
+          context,
+          '/QuestionWidget',
+          arguments: widget.userId,
+        );
+      },
+      child: Transform.rotate(
+        angle: math.pi,
+        child: Image.asset('assets/images/back.png', width: w * 0.15),
+      ),
+    ),
+    if (_isAllAnswered)
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+          backgroundColor: Colors.brown.shade400,
+        ),
+        onPressed: _handleSubmit,
+        child: Text("提交完成", style: TextStyle(fontSize: base * 0.045, color: Colors.white)),
+      ),
+  ],
+),
+
           ]),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildFillQuestion(Map<String, dynamic> q , double base) {

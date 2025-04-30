@@ -32,7 +32,8 @@ import 'package:doctor_2/questionGroup/melancholyGroup/melancholy.dart';
 import 'package:doctor_2/questionGroup/painscale.dart';
 import 'package:doctor_2/questionGroup/production.dart';
 import 'package:doctor_2/questionGroup/roommate.dart';
-import 'package:doctor_2/questionGroup/sleep.dart';
+import 'package:doctor_2/questionGroup/sleepGroup/sleep.dart';
+import 'package:doctor_2/questionGroup/sleepGroup/sleep_introduce.dart';
 import 'package:doctor_2/register/fa_success.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
@@ -154,6 +155,12 @@ class _MyAppState extends State<MyApp> {
               isManUser: args['isManUser'],
               updateStepCount: (steps) {},
             ),
+          );
+        }
+          if (settings.name == '/SleepIntroducePage') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => SleepIntroducePage(userId: userId),
           );
         }
         if (settings.name == '/SuccessWidget') {

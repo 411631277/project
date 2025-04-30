@@ -234,18 +234,20 @@ int _calculateTotalScore() {
 Future<void> sendCloseAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
   final url = Uri.parse('http://163.13.201.85:3000/attachment'); // ✅ 同一個表
 
-  final Map<String, dynamic> payload = {
-    'user_id': int.parse(userId),
-    ' attachment_question_content': 'CLOSE', // ✅ 這裡應該是 type，不是 question_content
-    'attachment_test_date': DateTime.now().toIso8601String().split('T')[0],
-    'attachment_score_a': totalScore,
-  };
+final Map<String, dynamic> payload = {
+  'user_id': int.parse(userId),
+  'attachment_question_content': 'CLOSE',
+  'attachment_test_date': DateTime.now().toIso8601String().split('T')[0],
+  'attachment_score_a': totalScore,
+ 
+};
 
-  // 🔥 將 close 頁面上的 1~7 題答案直接「文字」填進 payload
-  for (int i = 0; i < 7; i++) {
-    final answerText = answers[i];
-    payload['attachment_answer_${i + 1}'] = (answerText != null && answerText.isNotEmpty) ? answerText : 'none';
+  // 🔥 只傳有回答的題目
+ answers.forEach((index, answerText) {
+  if (answerText != null && answerText.isNotEmpty) {
+    payload['attachment_answer_${index + 1}'] = answerText;
   }
+});
 
   logger.i("📦 Close payload: $payload");
 
