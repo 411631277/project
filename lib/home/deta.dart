@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
 
@@ -298,36 +301,43 @@ class _DetaWidgetState extends State<DetaWidget> {
 
   /// Picker 通用
   void _showPicker(BuildContext context, TextEditingController controller,
-      int min, int max, String unit) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext builder) {
-        return SizedBox(
-          height: 250,
-          child: Column(
-            children: [
-              SizedBox(
-                height: 200,
-                child: CupertinoPicker(
-                  itemExtent: 40,
-                  onSelectedItemChanged: (int index) {
-                    controller.text = "${min + index}$unit";
-                  },
-                  children: List<Widget>.generate(max - min + 1, (int index) {
-                    return Center(child: Text("${min + index}$unit"));
-                  }),
-                ),
+    int min, int max, String unit) {
+  int selectedValue = int.tryParse(controller.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? min;
+
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext builder) {
+      return SizedBox(
+        height: 250,
+        child: Column(
+          children: [
+            SizedBox(
+              height: 200,
+              child: CupertinoPicker(
+                scrollController: FixedExtentScrollController(initialItem: selectedValue - min),
+                itemExtent: 40,
+                onSelectedItemChanged: (int index) {
+                  selectedValue = min + index;
+                },
+                children: List<Widget>.generate(max - min + 1, (int index) {
+                  return Center(child: Text("${min + index}$unit"));
+                }),
               ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("確定"),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+            ),
+            ElevatedButton(
+              onPressed: () {
+                controller.text = "$selectedValue$unit";
+                Navigator.pop(context);
+              },
+              child: const Text("確定"),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 
   /// 更新使用者資料
   Future<void> _updateUserData() async {
@@ -372,13 +382,48 @@ class _DetaWidgetState extends State<DetaWidget> {
             ? emergencyPhone2.text
             : existingData["緊急聯絡人2_電話"],
       };
-
+      await _updateUserDataToMySQL();
       await users.doc(widget.userId).update(updatedData);
       logger.i("✅ 使用者資料成功更新：${widget.isManUser ? 'Man_users' : 'users'}/${widget.userId}");
     } catch (e) {
       logger.e("❌ 更新使用者資料時發生錯誤：$e");
     }
   }
+
+
+  Future<void> _updateUserDataToMySQL() async {
+    final url = Uri.parse('http://163.13.201.85:3000/users');
+  final Map<String, dynamic> payload = {
+    'user_id': int.parse(widget.userId),
+  };
+
+ if (nameController.text.isNotEmpty) payload['user_name'] = nameController.text;
+if (birthDateController.text.isNotEmpty) payload['user_birthdate'] = birthDateController.text;
+if (heightController.text.isNotEmpty) payload['user_height'] = heightController.text;
+if (weightController.text.isNotEmpty) payload['current_weight'] = weightController.text;
+if (emergencyName1.text.isNotEmpty) payload['emergency_contact_name'] = emergencyName1.text;
+if (emergencyRelation1.text.isNotEmpty) payload['emergency_contact_relation'] = emergencyRelation1.text;
+if (emergencyPhone1.text.isNotEmpty) payload['emergency_contact_phone'] = emergencyPhone1.text;
+if (emergencyName2.text.isNotEmpty) payload['emergency_contact_name2'] = emergencyName2.text;
+if (emergencyRelation2.text.isNotEmpty) payload['emergency_contact_relation2'] = emergencyRelation2.text;
+if (emergencyPhone2.text.isNotEmpty) payload['emergency_contact_phone2'] = emergencyPhone2.text;
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(payload),
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      logger.i("✅ MySQL 更新成功");
+    } else {
+      logger.e("❌ MySQL 更新失敗: ${response.body}");
+    }
+  } catch (e) {
+    logger.e("❌ MySQL 通訊錯誤: $e");
+  }
+}
 
   Widget _buildButton(String text, Color color, VoidCallback onPressed) {
     return SizedBox(

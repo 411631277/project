@@ -293,7 +293,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
     final countSnapshot = await FirebaseFirestore.instance.collection('users').count().get();
     final userId = ((countSnapshot.count ?? 0) + 1).toString();
     final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
-
+     final pairingCode = generatePairingCode();
     // 2. 準備資料
     final Map<String, dynamic> data = {
       '帳號': accountController.text,
@@ -315,29 +315,27 @@ class RegisterWidgetState extends State<RegisterWidget> {
             ? (otherDiseaseController.text.isNotEmpty ? otherDiseaseController.text : null)
             : true
       },
-      '配對碼': generatePairingCode(),
+      '配對碼': pairingCode,
     };
 
     try {
-      // 3. 先寫 Firestore
-      await docRef.set(data);
-      logger.i('✅ Firestore 已寫入，用戶ID：$userId');
+    // ✅ 改：先送 MySQL
+    final bool sqlOK = await sendDataToMySQL(userId, pairingCode);
+    if (!sqlOK) throw Exception('MySQL 同步失敗');
 
-      // 4. 再同步 MySQL
-      final bool sqlOK = await sendDataToMySQL(userId);
-      if (!sqlOK) throw Exception('MySQL 同步失敗');
+    // ✅ 再寫 Firebase
+    await docRef.set(data);
+    logger.i('✅ Firestore 已寫入，用戶ID：$userId');
 
-      return userId;
-    } catch (e) {
-      // 5. 回滾 Firestore
-      await docRef.delete();
-      logger.e('❌ 儲存失敗，已回滾：$e');
-      return null;
-    }
+    return userId;
+  } catch (e) {
+    logger.e('❌ 註冊流程失敗：$e');
+    return null;
   }
+}
 
   /// 同步到 MySQL，回傳是否成功
-  Future<bool> sendDataToMySQL(String userId) async {
+  Future<bool> sendDataToMySQL(String userId , String pairingCode) async {
     final url = Uri.parse('http://163.13.201.85:3000/users');
     final response = await http.post(
       url,
@@ -367,7 +365,11 @@ class RegisterWidgetState extends State<RegisterWidget> {
         'chronic_illness_details': otherDiseaseController.text,
         'user_account': accountController.text,
         'user_password': passwordController.text,
-      }),
+        'pairing_code': pairingCode,
+        
+      }
+      ),
+      
     );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       logger.i('✅ 同步資料到 MySQL 成功');

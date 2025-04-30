@@ -217,7 +217,7 @@ class _RespondWidgetState extends State<RespondWidget> {
         .collection("users")
         .doc(widget.userId)
         .update({"attachmentCompleted": true});
-
+    await sendRespondAnswersToMySQL(widget.userId, respond, totalScore);
     logger.i("✅ 問卷已成功合併並儲存！");
     return true;
   } catch (e) {
@@ -236,39 +236,42 @@ int _calculateTotalScore() {
   }).fold(0, (acc, element) => acc + element);
 }
 
-Future<void> sendAttachmentAnswersToMySQL(String userId, Map<int, String?> answers) async {
+Future<void> sendRespondAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
   final url = Uri.parse('http://163.13.201.85:3000/attachment');
-
-  // 取得今天日期（格式：2025-04-19）
-  final now = DateTime.now();
-  final formattedDate =
-      "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
   final payload = {
     'user_id': int.parse(userId),
-    'attachment_question_content': '親子依附量表',
-    'attachment_test_date': formattedDate,
+    'attachment_question_content': 'attachment', // ✅ 固定問卷分類
+    'attachment_test_date': DateTime.now().toIso8601String().split('T')[0],
+    'attachment_score_d': totalScore, // ✅ Respond 對應 D 分數欄位
   };
 
-  
-  for (int i = 0; i < 25; i++) {
-    final answer = answers[i] ?? '未填';
-    payload['attachment_answer_${i + 1}'] = answer;
-  }
+  const int baseIndex = 19; // 從 attachment_answer_20 開始
+  answers.forEach((index, answerText) {
+    if (answerText != null && answerText.isNotEmpty) {
+      payload['attachment_answer_${baseIndex + index + 1}'] = answerText;
+    }
+  });
 
-  final response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode(payload),
-  );
+  logger.i("📦 Respond payload: $payload");
 
-  if (response.statusCode >= 200 && response.statusCode < 300) {
-    final result = jsonDecode(response.body);
-    logger.i("✅ Attachment 資料同步成功：${result['message']} (insertId: ${result['insertId']})");
-  } else {
-    logger.e("❌ Attachment 資料同步失敗：${response.body}");
-    throw Exception("同步失敗：${response.body}");
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(payload),
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final result = jsonDecode(response.body);
+      logger.i("✅ Respond 資料同步成功：${result['message']} (insertId: ${result['insertId']})");
+    } else {
+      logger.e("❌ Respond 資料同步失敗：${response.body}");
+    }
+  } catch (e) {
+    logger.e("🔥 發送 Respond 時發生錯誤: $e");
   }
 }
+
 
 }

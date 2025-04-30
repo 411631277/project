@@ -108,7 +108,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         '慢性病',
                         userData['是否有慢性病'] == true
                             ? '有'
-                            : (userData['是否有慢性病'] == false ? '否' : '未提供'),
+                            : (userData['是否有慢性病'] == false ? '否' : '無'),
                       ),
                       infoTile('婚姻狀況', userData['婚姻狀況'] ?? '未提供'),
                       infoTile(

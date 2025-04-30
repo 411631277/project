@@ -1,6 +1,6 @@
 import 'package:doctor_2/function/extensions.dart';
 import 'package:doctor_2/home/mate.dart';
-import 'package:doctor_2/profile.dart';
+import 'package:doctor_2/home/profile.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'fa_home_screen.dart';

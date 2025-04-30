@@ -236,7 +236,7 @@ Future<void> sendCloseAnswersToMySQL(String userId, Map<int, String?> answers, i
 
 final Map<String, dynamic> payload = {
   'user_id': int.parse(userId),
-  'attachment_question_content': 'CLOSE',
+  'attachment_question_content': 'attachment',
   'attachment_test_date': DateTime.now().toIso8601String().split('T')[0],
   'attachment_score_a': totalScore,
  

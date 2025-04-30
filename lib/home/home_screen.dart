@@ -70,40 +70,38 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   }
 
   Future<void> _saveTargetStepsToFirebase(int newTarget) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .collection('count')
-          .doc(_currentDay)
-          .set({'目標步數': newTarget}, SetOptions(merge: true)); // 或 set() 也行
-      logger.i("✅ 已將目標步數更新為 $newTarget");
-    } catch (e) {
-      logger.e("❌ 更新目標步數失敗: $e");
-    }
+  try {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .set({'targetSteps': newTarget}, SetOptions(merge: true));
+    logger.i("✅ 已將目標步數更新為 $newTarget");
+  } catch (e) {
+    logger.e("❌ 更新目標步數失敗: $e");
   }
+}
 
-  Future<void> _loadTargetStepsFromFirebase() async {
-    try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .collection('count')
-          .doc(_currentDay)
-          .get();
 
-      if (userDoc.exists && userDoc.data() != null) {
-        Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
-        int firebaseTarget = data['目標步數'] ?? 5000; // 預設 5000
-        setState(() {
-          _targetSteps = firebaseTarget;
-        });
-        logger.i("載入目標步數: $_targetSteps");
-      }
-    } catch (e) {
-      logger.e("❌ 載入目標步數失敗: $e");
+ Future<void> _loadTargetStepsFromFirebase() async {
+  try {
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .get();
+
+    if (userDoc.exists && userDoc.data() != null) {
+      Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+      int firebaseTarget = data['targetSteps'] ?? 5000;
+      setState(() {
+        _targetSteps = firebaseTarget;
+      });
+      logger.i("載入目標步數: $_targetSteps");
     }
+  } catch (e) {
+    logger.e("❌ 載入目標步數失敗: $e");
   }
+}
+
 
   /// **🔹 從 Firebase 讀取「今天」的步數資料**
   Future<void> _loadStepsForToday() async {

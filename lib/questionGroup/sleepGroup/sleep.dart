@@ -28,29 +28,30 @@ class _SleepWidgetState extends State<SleepWidget> {
     {"type":"fill","question":"過去一個月來，您通常何時上床？","index":0,"hasHour":true,"hasMinute":true},
     {"type":"fill","question":"過去一個月來，您通常多久才能入睡？","index":1,"hasHour":false,"hasMinute":true},
     {"type":"fill","question":"過去一個月來，您早上通常何時起床？","index":2,"hasHour":true,"hasMinute":true},
-    {"type":"fill","question":"過去一個月來，您通常實際睡眠可以入睡幾小時？","index":3,"hasHour":true,"hasMinute":false},
-    {"type":"fill","question":"過去一個月來，您平均一天睡幾小時？","index":4,"hasHour":true,"hasMinute":false},
-    {"type":"choice","question":"您覺得睡眠品質好嗎?","options":["很好","好","不好","很不好"]},
-    {"type":"choice","question":"過去一個月來，整體而言，您覺得自己的睡眠品質如何？","options":["很好","好","不好","很不好"]},
-    {"type":"choice","question":"過去一個月來，您通常一星期幾個晚上需要使用藥物幫忙睡眠？","options":["從未發生","約一兩次","三次或以上"]},
-    {"type":"choice","question":"過去一個月來，您是否曾在用餐、開車或社交場合瞌睡而無法保持清醒，每星期約幾次?","options":["從未發生","約一兩次","三次或以上"]},
-    {"type":"choice","question":"過去一個月來，您會感到無心完成該做的事","options":["沒有","有一點","的確有","很嚴重"]},
+    {"type":"fill","question":"過去一個月來，您通常實際睡眠可以入睡幾小時？(這可能不同於您在床上的時間)","index":3,"hasHour":true,"hasMinute":false},
+    //下面是選擇題
+    {"type":"choice","question":"過去一個月內，您多常服用藥物幫助入睡?(處方或非處方)","options":["從未發生","每週少於一次","每週一或二次","每週三次或以上"]},
+    {"type":"choice","question":"過去一個月內，您多常在用餐、開車或社交場合活動時感到困倦，難以保持清醒?","options":["從未發生","每週少於一次","每週一或二次","每週三次或以上"]},
+    {"type":"choice","question":"過去一個月內，保持足夠的熱情去完成事情對您來說有多大的問題?","options":["完全沒有問擾","很少困擾","有些困擾","有很大的困擾"]},
+    {"type":"choice","question":"過去一個月來，整體而言，您覺得自己的睡眠品質如何？","options":["非常滿意","還可以","不滿意","非常不滿意"]},
+
   ];
   final Map<int, String?> _a1 = {};
 
   // 第二部分：表格題
-  final List<String> _q2 = [
-    "無法在 30 分鐘內入睡",
-    "半夜或凌晨便清醒",
-    "必須起來上廁所",
-    "覺得呼吸不順暢",
-    "大聲打鼾或咳嗽",
-    "會覺得冷",
-    "覺得躁熱",
-    "睡覺時常會做惡夢",
-    "身上有疼痛",
+    final List<Map<String, dynamic>> _q2 = [
+    {"question": "無法在 30 分鐘內入睡", "options": ["從未發生","每週少於一次","每週一或二次","每週三次或以上"]},
+    {"question": "半夜或凌晨便清醒", "options": ["從未發生","每週少於一次","每週一或二次","每週三次或以上"]},
+    {"question": "必須起來上廁所", "options": ["從未發生","每週少於一次","每週一或二次","每週三次或以上"]},
+    {"question": "無法舒適呼吸", "options": ["從未發生","每週少於一次","每週一或二次","每週三次或以上"]},
+    {"question": "大聲打呼或咳嗽", "options": ["從未發生","每週少於一次","每週一或二次","每週三次或以上"]},
+    {"question": "會覺得冷", "options": ["從未發生","每週少於一次","每週一或二次","每週三次或以上"]},
+    {"question": "覺得躁熱", "options": ["從未發生","每週少於一次","每週一或二次","每週三次或以上"]},
+    {"question": "睡覺時常會做惡夢", "options": ["從未發生","每週少於一次","每週一或二次","每週三次或以上"]},
+    {"question": "身上有疼痛", "options": ["從未發生","每週少於一次","每週一或二次","每週三次或以上"]},
   ];
   final Map<int, String?> _a2 = {};
+  
 
   bool get _isAllAnswered {
     // 填空題
@@ -63,7 +64,9 @@ class _SleepWidgetState extends State<SleepWidget> {
       if ((_a1[i] ?? '').isEmpty) return false;
     }
     // 第二部分表格題
-    if (_a2.length != _q2.length) return false;
+   for (var i = 0; i < _q2.length; i++) {
+      if ((_a2[i] ?? '').isEmpty) return false;
+    }
     return true;
   }
 
@@ -123,7 +126,7 @@ child: Scaffold(
 
             // ==== 第二部分 ==== //
             Text(
-              "以下問題選擇一個適當的答案打勾，請全部作答",
+              "在過去一個月內，以下哪些因素讓您難以入眠、保持睡眠或影響睡眠品質?",
               style: TextStyle(
                 fontSize: base * 0.05,
                 fontWeight: FontWeight.bold,
@@ -131,49 +134,12 @@ child: Scaffold(
               ),
             ),
             const SizedBox(height: 8),
-            Table(
-              columnWidths: const {
-                0: FlexColumnWidth(2),
-                1: FlexColumnWidth(1),
-                2: FlexColumnWidth(1),
-                3: FlexColumnWidth(1),
-              },
-              border: const TableBorder.symmetric(
-                inside: BorderSide(color: Colors.black12),
-              ),
-              children: [
-                TableRow(
-                  decoration: const BoxDecoration(
-                    color: Color.fromRGBO(233, 227, 213, 1),
-                  ),
-                  children: [
-                    _buildHeaderCell("題目",base),
-                    _buildHeaderCell("從未發生",base),
-                    _buildHeaderCell("約一兩次",base),
-                    _buildHeaderCell("三次或以上",base),
-                  ],
-                ),
-                ...List.generate(_q2.length, (i) {
-                  return TableRow(
-                    decoration: BoxDecoration(
-                      color: _a2[i] != null
-                          ? const Color.fromARGB(255, 241, 215, 237)
-                          : const Color.fromRGBO(233, 227, 213, 1),
-                    ),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text("${i + 1}. ${_q2[i]}",
-                            style: TextStyle(fontSize: base * 0.04)),
-                      ),
-                      _buildRadioCell(i, "從未發生"),
-                      _buildRadioCell(i, "約一兩次"),
-                      _buildRadioCell(i, "三次或以上"),
-                    ],
-                  );
-                }),
-              ],
-            ),
+            Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: List.generate(_q2.length, (i) {
+    return _buildSecondChoiceQuestion(i, _q2[i], base);
+  }),
+),
 
             const SizedBox(height: 24),
             Row(
@@ -273,26 +239,6 @@ child: Scaffold(
     );
   }
 
- Widget _buildHeaderCell(String label, double base) => SizedBox(
-  height: 40,
-  child: Center(
-    child: Text(
-      label,
-      style: TextStyle(
-        fontSize: base * 0.035, // ✅ 字體跟著螢幕大小調整
-      ),
-    ),
-  ),
-);
-
-
-  Widget _buildRadioCell(int idx, String val) => Center(
-        child: Radio<String>(
-          value: val,
-          groupValue: _a2[idx],
-          onChanged: (v) => setState(() => _a2[idx] = v),
-        ),
-      );
 
   Future<void> _handleSubmit() async {
     final doc = FirebaseFirestore.instance
@@ -399,5 +345,25 @@ child: Scaffold(
     logger.e("MySQL 同步例外: $e");
   }
 }
-
+ Widget _buildSecondChoiceQuestion(int i, Map<String, dynamic> q, double base) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text("${i + 1}.  ${q['question']}",
+            style: TextStyle(fontSize: base * 0.035, color: Color.fromRGBO(147, 129, 108, 1))),
+        const SizedBox(height: 4),
+        ...List.generate((q['options'] as List<String>).length, (j) {
+          final opt = q['options'][j];
+          return Row(children: [
+            Radio<String>(
+              value: opt,
+              groupValue: _a2[i],
+              onChanged: (v) => setState(() => _a2[i] = v),
+            ),
+            Expanded(child: Text(opt, style: TextStyle(fontSize: base * 0.035, color: Color.fromRGBO(147, 129, 108, 1)))),
+          ]);
+        }),
+      ]),
+    );
+  }
 }
