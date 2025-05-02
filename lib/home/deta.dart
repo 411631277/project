@@ -396,11 +396,19 @@ class _DetaWidgetState extends State<DetaWidget> {
   final Map<String, dynamic> payload = {
     'user_id': int.parse(widget.userId),
   };
+if (heightController.text.isNotEmpty) {
+  // 例如: 去掉 'cm'，再轉數字
+  String cleanHeight = heightController.text.replaceAll(RegExp(r'[^0-9.]'), '');
+  payload['user_height'] = int.tryParse(cleanHeight) ?? 0; // 或 null
+}
+
+if (weightController.text.isNotEmpty) {
+  String cleanWeight = weightController.text.replaceAll(RegExp(r'[^0-9.]'), '');
+  payload['current_weight'] = double.tryParse(cleanWeight) ?? 0;
+}
 
  if (nameController.text.isNotEmpty) payload['user_name'] = nameController.text;
 if (birthDateController.text.isNotEmpty) payload['user_birthdate'] = birthDateController.text;
-if (heightController.text.isNotEmpty) payload['user_height'] = heightController.text;
-if (weightController.text.isNotEmpty) payload['current_weight'] = weightController.text;
 if (emergencyName1.text.isNotEmpty) payload['emergency_contact_name'] = emergencyName1.text;
 if (emergencyRelation1.text.isNotEmpty) payload['emergency_contact_relation'] = emergencyRelation1.text;
 if (emergencyPhone1.text.isNotEmpty) payload['emergency_contact_phone'] = emergencyPhone1.text;
