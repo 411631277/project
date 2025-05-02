@@ -241,8 +241,6 @@ child: Scaffold(
 
 
   Future<void> _handleSubmit() async {
-    logger.i("👤 提交者 userId: ${widget.userId}");
-
     final doc = FirebaseFirestore.instance
         .collection("users")
         .doc(widget.userId)
@@ -258,7 +256,7 @@ child: Scaffold(
       final part2 = m.isNotEmpty ? "$m分" : "";
       formatted1["填空${i + 1}"] = [part1, part2].where((s) => s.isNotEmpty).join(" ");
     }
-    for (var i = 4; i < _q1.length; i++) {
+    for (var i = 5; i < _q1.length; i++) {
       formatted1["選擇${i + 1}"] = _a1[i]!;
     }
 
@@ -267,19 +265,17 @@ child: Scaffold(
     for (var i = 0; i < _q2.length; i++) {
       formatted2["${i + 1}"] = _a2[i]!;
     }
-formatted1["主觀睡眠分數"] = _calculateSubjectiveSleepQualityScore().toString();
 
     // Firestore 合併寫入
     await doc.set({
       "answers": {
         "SleepWidget": {"data": formatted1, "timestamp": Timestamp.now()},
         "Sleep2Widget": {"data": formatted2, "timestamp": Timestamp.now()},
-        
       }
     }, SetOptions(merge: true));
     await FirebaseFirestore.instance
         .collection("users")
-        .doc(widget.userId.toString())
+        .doc(widget.userId)
         .update({"sleepCompleted": true});
 
     // 同步到 MySQL
@@ -299,31 +295,29 @@ formatted1["主觀睡眠分數"] = _calculateSubjectiveSleepQualityScore().toStr
   final date = "${now.year}-${now.month.toString().padLeft(2,'0')}-${now.day.toString().padLeft(2,'0')}";
 
   // 1) 先組固定欄位 & Q1 填空題（1–5）
- final Map<String, dynamic> payload = {
-  'user_id': int.parse(widget.userId),
-  'sleep_question_content': "睡眠品質量表",
-  'sleep_test_date': date,
-  'sleep_answer_1_a': int.tryParse(hourControllers[0]?.text.trim() ?? '') ?? 0,
-  'sleep_answer_1_b': int.tryParse(minuteControllers[0]?.text.trim() ?? '') ?? 0,
-  'sleep_answer_2':   int.tryParse(minuteControllers[1]?.text.trim() ?? '') ?? 0,
-  'sleep_answer_3_a': int.tryParse(hourControllers[2]?.text.trim() ?? '') ?? 0,
-  'sleep_answer_3_b': int.tryParse(minuteControllers[2]?.text.trim() ?? '') ?? 0,
-  'sleep_answer_4':   int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0,
-  'sleep_score_subjective_quality': _calculateSubjectiveSleepQualityScore(),
+  final Map<String, dynamic> payload = {
+    'user_id': int.parse(widget.userId),
+    'sleep_question_content': "睡眠品質量表",
+    'sleep_test_date': date,
+    'sleep_answer_1_a': int.tryParse(hourControllers[0]!.text.trim()) ?? 0,
+    'sleep_answer_1_b': int.tryParse(minuteControllers[0]!.text.trim()) ?? 0,
+    'sleep_answer_2':   int.tryParse(minuteControllers[1]!.text.trim()) ?? 0,
+    'sleep_answer_3_a': int.tryParse(hourControllers[2]!.text.trim()) ?? 0,
+    'sleep_answer_3_b': int.tryParse(minuteControllers[2]!.text.trim()) ?? 0,
+    'sleep_answer_4':   int.tryParse(hourControllers[3]!.text.trim()) ?? 0,
   };
 
   // 2) Q1 的選擇題（6–10）
- for (var i = 4; i < _q1.length; i++) {
-  payload['sleep_answer_${i + 1}'] = _a1[i] ?? 'none';
-}
+  for (var i = 0; i < 5; i++) {
+    // _a1[5] 對應第 6 題，以此類推
+    payload['sleep_answer_${6 + i}'] = _a1[5 + i]!;
+  }
 
   // 3) Q2 的表格題（11–19）
   for (var i = 0; i < _q2.length; i++) {
     // 如果沒選，預設 'none'
-    payload['sleep_answer_${9 + i}'] = _a2[i] ?? 'none';
+    payload['sleep_answer_${11 + i}'] = _a2[i] ?? 'none';
   }
-
-payload['sleep_score_subjective_quality'] = _calculateSubjectiveSleepQualityScore();
 
   // 4) payload 檢查：列出哪些欄位是 'none'
   final noneKeys = payload.entries
@@ -371,17 +365,4 @@ payload['sleep_score_subjective_quality'] = _calculateSubjectiveSleepQualityScor
       ]),
     );
   }
-  int _calculateSubjectiveSleepQualityScore() {
-  const mapping = {
-    '非常滿意': 0,
-    '還可以': 1,
-    '不滿意': 2,
-    '非常不滿意': 3,
-  };
-
-  final answer = _a1[7]; // 第一部分第 8 題（index 7）
-
-  return mapping[answer] ?? 0; // 預設給 0 分（避免 null）
-}
-
 }
