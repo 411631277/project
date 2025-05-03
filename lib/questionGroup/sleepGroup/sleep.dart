@@ -1,6 +1,7 @@
 // sleep_combined.dart
 import 'dart:convert';
 import 'dart:math' as math;
+import 'package:doctor_2/questionGroup/sleepGroup/sleepscore.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
@@ -67,7 +68,7 @@ class _SleepWidgetState extends State<SleepWidget> {
     {
       "type": "choice",
       "question": "過去一個月內，保持足夠的熱情去完成事情對您來說有多大的問題?",
-      "options": ["完全沒有問擾", "很少困擾", "有些困擾", "有很大的困擾"]
+      "options": ["完全沒有困擾", "很少困擾", "有些困擾", "有很大的困擾"]
     },
     {
       "type": "choice",
@@ -359,7 +360,8 @@ class _SleepWidgetState extends State<SleepWidget> {
       formatted2["${i + 1}"] = _a2[i]!;
     }
 
-    formatted1["主觀睡眠分數"] = _calculateSubjectiveSleepQualityScore().toString();
+    final subsleepScore = _calculateSubjectiveSleepQualityScore();
+    formatted1["主觀睡眠分數"] = subsleepScore.toString();
 
     final sleepDifficulty = _calculateSleepDifficultyScore();
     formatted1["入睡困難分數"] = sleepDifficulty.toString();
@@ -379,7 +381,8 @@ class _SleepWidgetState extends State<SleepWidget> {
     final daytimeScore = _calculateSleepDaytimeFunctionScore();
     formatted1["日間功能分數"] = daytimeScore.toString();
 
-    formatted1["總分"] = _calculateSleepTotalScore().toString();
+    final sleeptotal = _calculateSleepTotalScore();
+    formatted1["總分"] = sleeptotal.toString();
 
 // ✅ DEBUG log 檢查
     logger.i("📤 最終要上傳的 formatted1 結果：$formatted1");
@@ -400,7 +403,24 @@ class _SleepWidgetState extends State<SleepWidget> {
 
     if (context.mounted) {
       if (!mounted) return;
-      Navigator.pushNamed(context, '/FinishWidget', arguments: widget.userId);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Sleepscore(
+            userId: widget.userId,
+            totalScore: sleeptotal,
+            scoreMap: {
+              "主觀睡眠品質分數": subsleepScore,
+              "入睡困難分數": sleepDifficulty,
+              "睡眠持續時間分數": durationScore,
+              "睡眠效率分數": efficiencyScore,
+              "睡眠干擾分數": disturbanceScore,
+              "藥物使用分數": medicationScore,
+              "日間功能分數": daytimeScore,
+            },
+          ),
+        ),
+      );
     }
   }
 

@@ -30,7 +30,8 @@ class RegisterWidgetState extends State<RegisterWidget> {
   final TextEditingController birthController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
-  final TextEditingController prePregnancyWeightController = TextEditingController();
+  final TextEditingController prePregnancyWeightController =
+      TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController accountController = TextEditingController();
@@ -92,148 +93,189 @@ class RegisterWidgetState extends State<RegisterWidget> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    
-    return PopScope(
-  canPop: false, // 禁止 Flutter 自動 pop
-  // ignore: deprecated_member_use
-  onPopInvoked: (didPop) {
-    // 不管 didPop 是 true 還是 false，一律自己導回去
-    Navigator.pushReplacementNamed(
-      context,
-      '/MainScreenWidget',
-      
-    );
-  },
-  child: Scaffold(
 
-      body: Container(
-        width: screenWidth,
-        height: screenHeight,
-        color: const Color.fromRGBO(233, 227, 213, 1),
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(screenWidth * 0.05),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 🔹 表單欄位（姓名、生日、身高、體重、帳號、密碼、聯絡喜好、是非題、慢性病、婚姻、新手媽媽）
-              Row(
+    return PopScope(
+        canPop: false, // 禁止 Flutter 自動 pop
+        // ignore: deprecated_member_use
+        onPopInvoked: (didPop) {
+          // 不管 didPop 是 true 還是 false，一律自己導回去
+          Navigator.pushReplacementNamed(
+            context,
+            '/MainScreenWidget',
+          );
+        },
+        child: Scaffold(
+          body: Container(
+            width: screenWidth,
+            height: screenHeight,
+            color: const Color.fromRGBO(233, 227, 213, 1),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(screenWidth * 0.05),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: _buildLabeledTextField('姓名', nameController)),
-                  SizedBox(width: screenWidth * 0.05),
-                  Expanded(child: _buildDatePickerField('生日', birthController)),
-                  SizedBox(width: screenWidth * 0.05),
-                  Expanded(child: _buildheightPickerField(context, '身高', heightController)),
-                ],
-              ),
-              SizedBox(height: screenHeight * 0.02),
-              Row(
-                children: [
-                  Expanded(child: _buildWeightPickerField(context, '目前體重', weightController)),
-                  SizedBox(width: screenWidth * 0.05),
-                  Expanded(child: _buildWeightPickerField(context, '孕前體重', prePregnancyWeightController)),
-                ],
-              ),
-              SizedBox(height: screenHeight * 0.02),
-              _buildAccountRow(),
-              _buildPasswordField(),
-              _buildLabeledTextField('E-Mail', emailController),
-              _buildLabeledTextField('電話', phoneController),
-              _buildLabel('聯絡偏好設定'),
-              Row(
-                children: [
-                  Expanded(child: _buildCheckbox('E-Mail', isEmailPreferred, (v) => setState(() => isEmailPreferred = v ?? false))),
-                  Expanded(child: _buildCheckbox('電話', isPhonePreferred, (v) => setState(() => isPhonePreferred = v ?? false))),
-                ],
-              ),
-              SizedBox(height: screenHeight * 0.02),
-              ...answers.keys.map((q) => _buildYesNoRow(q)),
-              SizedBox(height: screenHeight * 0.02),
-              _buildLabel('有無慢性病'),
-              CheckboxListTile(
-                title: const Text('有慢性病'),
-                value: hasChronicDisease ?? false,
-                onChanged: (v) => setState(() => hasChronicDisease = v),
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
-              if (hasChronicDisease == true) ...[const SizedBox(height: 10), _buildLabel('請選擇慢性病種類：'),
-                ...chronicDiseaseOptions.entries.map((e) => CheckboxListTile(
-                  title: Text(e.key),
-                  value: e.value,
-                  onChanged: (v) => setState(() => chronicDiseaseOptions[e.key] = v!),
-                  controlAffinity: ListTileControlAffinity.leading,
-                )),
-                if (chronicDiseaseOptions['其他'] == true)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: TextField(
-                      controller: otherDiseaseController,
-                      decoration: const InputDecoration(
-                        labelText: '請輸入其他慢性病',
-                        border: OutlineInputBorder(),
-                        filled: true, fillColor: Colors.white,
+                  // 🔹 表單欄位（姓名、生日、身高、體重、帳號、密碼、聯絡喜好、是非題、慢性病、婚姻、新手媽媽）
+                  Row(
+                    children: [
+                      Expanded(
+                          child: _buildLabeledTextField('姓名', nameController)),
+                      SizedBox(width: screenWidth * 0.05),
+                      Expanded(
+                          child: _buildDatePickerField('生日', birthController)),
+                      SizedBox(width: screenWidth * 0.05),
+                      Expanded(
+                          child: _buildheightPickerField(
+                              context, '身高', heightController)),
+                    ],
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: _buildWeightPickerField(
+                              context, '目前體重', weightController)),
+                      SizedBox(width: screenWidth * 0.05),
+                      Expanded(
+                          child: _buildWeightPickerField(
+                              context, '孕前體重', prePregnancyWeightController)),
+                    ],
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  _buildAccountRow(),
+                  _buildPasswordField(),
+                  _buildLabeledTextField('E-Mail', emailController),
+                  _buildLabeledTextField('電話', phoneController),
+                  _buildLabel('聯絡偏好設定'),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: _buildCheckbox(
+                              'E-Mail',
+                              isEmailPreferred,
+                              (v) => setState(
+                                  () => isEmailPreferred = v ?? false))),
+                      Expanded(
+                          child: _buildCheckbox(
+                              '電話',
+                              isPhonePreferred,
+                              (v) => setState(
+                                  () => isPhonePreferred = v ?? false))),
+                    ],
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  ...answers.keys.map((q) => _buildYesNoRow(q)),
+                  SizedBox(height: screenHeight * 0.02),
+                  _buildLabel('有無慢性病'),
+                  CheckboxListTile(
+                    title: const Text('有慢性病'),
+                    value: hasChronicDisease ?? false,
+                    onChanged: (v) => setState(() => hasChronicDisease = v),
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                  if (hasChronicDisease == true) ...[
+                    const SizedBox(height: 10),
+                    _buildLabel('請選擇慢性病種類：'),
+                    ...chronicDiseaseOptions.entries.map((e) =>
+                        CheckboxListTile(
+                          title: Text(e.key),
+                          value: e.value,
+                          onChanged: (v) =>
+                              setState(() => chronicDiseaseOptions[e.key] = v!),
+                          controlAffinity: ListTileControlAffinity.leading,
+                        )),
+                    if (chronicDiseaseOptions['其他'] == true)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: TextField(
+                          controller: otherDiseaseController,
+                          decoration: const InputDecoration(
+                            labelText: '請輸入其他慢性病',
+                            border: OutlineInputBorder(),
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
+                  ],
+                  _buildLabel('目前婚姻狀況'),
+                  DropdownButtonFormField<String>(
+                    value: maritalStatus,
+                    decoration: _inputDecoration(),
+                    hint: const Text('選擇婚姻狀況'),
+                    items: ['結婚', '未婚', '離婚', '喪偶']
+                        .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                        .toList(),
+                    onChanged: (v) => setState(() => maritalStatus = v),
                   ),
-              ],
-              _buildLabel('目前婚姻狀況'),
-              DropdownButtonFormField<String>(
-                value: maritalStatus,
-                decoration: _inputDecoration(),
-                hint: const Text('選擇婚姻狀況'),
-                items: ['結婚', '未婚', '離婚', '喪偶'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-                onChanged: (v) => setState(() => maritalStatus = v),
-              ),
-              SizedBox(height: screenHeight * 0.02),
-              _buildLabel('是否為新手媽媽'),
-              Row(
-                children: [
-                  Expanded(child: _buildCheckbox('是', isNewMom == true, (v) => setState(() => isNewMom = true))),
-                  Expanded(child: _buildCheckbox('否', isNewMom == false, (v) => setState(() => isNewMom = false))),
+                  SizedBox(height: screenHeight * 0.02),
+                  _buildLabel('是否為新手媽媽'),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: _buildCheckbox('是', isNewMom == true,
+                              (v) => setState(() => isNewMom = true))),
+                      Expanded(
+                          child: _buildCheckbox('否', isNewMom == false,
+                              (v) => setState(() => isNewMom = false))),
+                    ],
+                  ),
+                  const Divider(),
+                  SizedBox(height: screenHeight * 0.02),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildButton('返回', Colors.grey, () {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const MainScreenWidget()));
+                      }),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          iconColor: Colors.grey,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: isSubmitting
+                            ? null
+                            : () async {
+                                setState(() => isSubmitting = true);
+                                final userId = await _saveUserData();
+                                if (mounted) {
+                                  setState(() => isSubmitting = false);
+                                  if (userId != null) {
+                                    if (!context.mounted) return;
+                                    Navigator.pushNamed(
+                                        context, '/SuccessWidget',
+                                        arguments: userId);
+                                  } else {
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text('儲存失敗，請稍後再試')));
+                                  }
+                                }
+                              },
+                        child: isSubmitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2))
+                            : const Text('下一步',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16)),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-              const Divider(),
-              SizedBox(height: screenHeight * 0.02),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildButton('返回', Colors.grey, () {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainScreenWidget()));
-                  }),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      iconColor: Colors.grey,
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: isSubmitting
-                        ? null
-                        : () async {
-                            setState(() => isSubmitting = true);
-                            final userId = await _saveUserData();
-                            if (mounted) {
-                              setState(() => isSubmitting = false);
-                              if (userId != null) {
-                                if (!context.mounted) return;
-                                Navigator.pushNamed(context, '/SuccessWidget', arguments: userId);
-                              } else {
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('儲存失敗，請稍後再試')));
-                              }
-                            }
-                          },
-                    child: isSubmitting
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Text('下一步', style: TextStyle(color: Colors.white, fontSize: 16)),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
-    ));
+        ));
   }
 
   Widget _buildAccountRow() {
@@ -244,11 +286,16 @@ class RegisterWidgetState extends State<RegisterWidget> {
         Row(
           children: [
             Expanded(
-              child: TextField(controller: accountController, decoration: _inputDecoration()),
+              child: TextField(
+                  controller: accountController,
+                  decoration: _inputDecoration()),
             ),
             const SizedBox(width: 8),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)), backgroundColor: const Color.fromARGB(255, 148, 235, 235)),
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)),
+                  backgroundColor: const Color.fromARGB(255, 148, 235, 235)),
               onPressed: _checkAccountDuplicate,
               child: const Text('檢查'),
             ),
@@ -257,7 +304,8 @@ class RegisterWidgetState extends State<RegisterWidget> {
         if (_accountCheckMessage != null)
           Padding(
             padding: const EdgeInsets.only(top: 4),
-            child: Text(_accountCheckMessage!, style: TextStyle(color: _accountCheckColor)),
+            child: Text(_accountCheckMessage!,
+                style: TextStyle(color: _accountCheckColor)),
           ),
       ],
     );
@@ -266,34 +314,58 @@ class RegisterWidgetState extends State<RegisterWidget> {
   Future<void> _checkAccountDuplicate() async {
     final acc = accountController.text.trim();
     if (acc.isEmpty) {
-      setState(() { _accountCheckMessage = '請先輸入帳號'; _accountCheckColor = Colors.red; });
+      setState(() {
+        _accountCheckMessage = '請先輸入帳號';
+        _accountCheckColor = Colors.red;
+      });
       return;
     }
     try {
-      final userQuery = await FirebaseFirestore.instance.collection('users').where('帳號', isEqualTo: acc).limit(1).get();
+      final userQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .where('帳號', isEqualTo: acc)
+          .limit(1)
+          .get();
       if (userQuery.docs.isNotEmpty) {
-        setState(() { _accountCheckMessage = '很抱歉，此帳號已註冊'; _accountCheckColor = Colors.red; });
+        setState(() {
+          _accountCheckMessage = '很抱歉，此帳號已註冊';
+          _accountCheckColor = Colors.red;
+        });
         return;
       }
-      final manUserQuery = await FirebaseFirestore.instance.collection('Man_users').where('帳號', isEqualTo: acc).limit(1).get();
+      final manUserQuery = await FirebaseFirestore.instance
+          .collection('Man_users')
+          .where('帳號', isEqualTo: acc)
+          .limit(1)
+          .get();
       if (manUserQuery.docs.isNotEmpty) {
-        setState(() { _accountCheckMessage = '很抱歉，此帳號已註冊'; _accountCheckColor = Colors.red; });
+        setState(() {
+          _accountCheckMessage = '很抱歉，此帳號已註冊';
+          _accountCheckColor = Colors.red;
+        });
         return;
       }
-      setState(() { _accountCheckMessage = '此帳號可以使用'; _accountCheckColor = Colors.green; });
+      setState(() {
+        _accountCheckMessage = '此帳號可以使用';
+        _accountCheckColor = Colors.green;
+      });
     } catch (e) {
       logger.e('檢查帳號錯誤: $e');
-      setState(() { _accountCheckMessage = '檢查時發生錯誤，請稍後再試'; _accountCheckColor = Colors.red; });
+      setState(() {
+        _accountCheckMessage = '檢查時發生錯誤，請稍後再試';
+        _accountCheckColor = Colors.red;
+      });
     }
   }
 
   /// 儲存使用者資料：原子性處理 Firestore + MySQL
   Future<String?> _saveUserData() async {
     // 1. 計算新 userId
-    final countSnapshot = await FirebaseFirestore.instance.collection('users').count().get();
+    final countSnapshot =
+        await FirebaseFirestore.instance.collection('users').count().get();
     final userId = ((countSnapshot.count ?? 0) + 1).toString();
     final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
-     final pairingCode = generatePairingCode();
+    final pairingCode = generatePairingCode();
     // 2. 準備資料
     final Map<String, dynamic> data = {
       '帳號': accountController.text,
@@ -311,37 +383,40 @@ class RegisterWidgetState extends State<RegisterWidget> {
       'answers': answers,
       '慢性病症狀': {
         for (var e in chronicDiseaseOptions.entries)
-          if (e.value) e.key == '其他'
-            ? (otherDiseaseController.text.isNotEmpty ? otherDiseaseController.text : null)
-            : true
+          if (e.value)
+            e.key == '其他'
+                ? (otherDiseaseController.text.isNotEmpty
+                    ? otherDiseaseController.text
+                    : null)
+                : true
       },
       '配對碼': pairingCode,
     };
 
     try {
-    // ✅ 改：先送 MySQL
-    final bool sqlOK = await sendDataToMySQL(userId, pairingCode);
-    if (!sqlOK) throw Exception('MySQL 同步失敗');
+      // ✅ 改：先送 MySQL
+      final bool sqlOK = await sendDataToMySQL(userId, pairingCode);
+      if (!sqlOK) throw Exception('MySQL 同步失敗');
 
-    // ✅ 再寫 Firebase
-    await docRef.set(data);
-    logger.i('✅ Firestore 已寫入，用戶ID：$userId');
+      // ✅ 再寫 Firebase
+      await docRef.set(data);
+      logger.i('✅ Firestore 已寫入，用戶ID：$userId');
 
-    return userId;
-  } catch (e) {
-    logger.e('❌ 註冊流程失敗：$e');
-    return null;
+      return userId;
+    } catch (e) {
+      logger.e('❌ 註冊流程失敗：$e');
+      return null;
+    }
   }
-}
 
   /// 同步到 MySQL，回傳是否成功
-  Future<bool> sendDataToMySQL(String userId , String pairingCode) async {
+  Future<bool> sendDataToMySQL(String userId, String pairingCode) async {
     final url = Uri.parse('http://163.13.201.85:3000/users');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'user_id': int.parse(userId),
+        //'user_id': int.parse(userId),
         'user_name': nameController.text,
         'user_email': emailController.text,
         'user_gender': widget.role == '媽媽' ? '女' : '男',
@@ -349,27 +424,39 @@ class RegisterWidgetState extends State<RegisterWidget> {
         'user_birthdate': formatBirthForMySQL(birthController.text),
         'user_phone': phoneController.text,
         'user_id_number': accountController.text,
-        'user_height': double.tryParse(heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
-        'current_weight': double.tryParse(weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
+        'user_height': double.tryParse(
+                heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+            0.0,
+        'current_weight': double.tryParse(
+                weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+            0.0,
         'emergency_contact_name': '',
         'emergency_contact_phone': '',
         'betel_nut_habit': answers['是否會嚼食檳榔'] == true ? '有' : '無',
         'smoking_habit': answers['是否會吸菸?'] == true ? '有' : '無',
         'drinking_habit': answers['是否會喝酒?'] == true ? '有' : '無',
-        'pre_pregnancy_weight': double.tryParse(prePregnancyWeightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
+        'pre_pregnancy_weight': double.tryParse(prePregnancyWeightController
+                .text
+                .replaceAll(RegExp(r'[^0-9.]'), '')) ??
+            0.0,
         'marital_status': maritalStatus ?? '未婚',
-        'contact_preference': [if (isEmailPreferred) 'e-mail', if (isPhonePreferred) '電話'].join(','),
+        'contact_preference': [
+          if (isEmailPreferred) 'e-mail',
+          if (isPhonePreferred) '電話'
+        ].join(','),
         'chronic_illness': hasChronicDisease == true
-          ? [...chronicDiseaseOptions.entries.where((e) => e.value && e.key != '其他').map((e) => e.key), if (chronicDiseaseOptions['其他'] == true) '其他'].join(',')
-          : '無',
+            ? [
+                ...chronicDiseaseOptions.entries
+                    .where((e) => e.value && e.key != '其他')
+                    .map((e) => e.key),
+                if (chronicDiseaseOptions['其他'] == true) '其他'
+              ].join(',')
+            : '無',
         'chronic_illness_details': otherDiseaseController.text,
         'user_account': accountController.text,
         'user_password': passwordController.text,
         'pairing_code': pairingCode,
-        
-      }
-      ),
-      
+      }),
     );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       logger.i('✅ 同步資料到 MySQL 成功');
@@ -390,141 +477,203 @@ class RegisterWidgetState extends State<RegisterWidget> {
   }
 
   // 以下為 UI helper methods
-  InputDecoration _inputDecoration() => const InputDecoration(filled: true, fillColor: Colors.white, border: OutlineInputBorder());
+  InputDecoration _inputDecoration() => const InputDecoration(
+      filled: true, fillColor: Colors.white, border: OutlineInputBorder());
 
-  Widget _buildLabeledTextField(String label, TextEditingController c, {bool obscureText = false}) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildLabel(label),
-      TextField(controller: c, obscureText: obscureText, decoration: _inputDecoration()),
-    ],
-  );
+  Widget _buildLabeledTextField(String label, TextEditingController c,
+          {bool obscureText = false}) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(label),
+          TextField(
+              controller: c,
+              obscureText: obscureText,
+              decoration: _inputDecoration()),
+        ],
+      );
 
   Widget _buildPasswordField() => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildLabel('密碼'),
-      TextField(
-        controller: passwordController,
-        obscureText: _obscurePassword,
-        decoration: InputDecoration(
-          filled: true, fillColor: Colors.white, border: const OutlineInputBorder(),
-          suffixIcon: IconButton(
-            icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel('密碼'),
+          TextField(
+            controller: passwordController,
+            obscureText: _obscurePassword,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
+              ),
+            ),
           ),
-        ),
-      ),
-    ],
-  );
+        ],
+      );
 
   Widget _buildYesNoRow(String question) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildLabel(question),
-      Row(children: [
-        Expanded(child: _buildCheckbox('是', answers[question] == true, (v) => setState(() => answers[question] = true))),
-        Expanded(child: _buildCheckbox('否', answers[question] == false, (v) => setState(() => answers[question] = false))),
-      ]),
-      const Divider(),
-    ],
-  );
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(question),
+          Row(children: [
+            Expanded(
+                child: _buildCheckbox('是', answers[question] == true,
+                    (v) => setState(() => answers[question] = true))),
+            Expanded(
+                child: _buildCheckbox('否', answers[question] == false,
+                    (v) => setState(() => answers[question] = false))),
+          ]),
+          const Divider(),
+        ],
+      );
 
   Widget _buildDatePickerField(String label, TextEditingController c) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildLabel(label),
-      TextField(
-        controller: c, readOnly: true, decoration: _inputDecoration(),
-        onTap: () async { 
-          final d = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(1950), lastDate: DateTime.now(), locale: const Locale('zh','TW'));
-          if (d != null) setState(() => c.text = DateFormat('yyyy年MM月dd日','zh_TW').format(d));
-        },
-      ),
-    ],
-  );
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(label),
+          TextField(
+            controller: c,
+            readOnly: true,
+            decoration: _inputDecoration(),
+            onTap: () async {
+              final d = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(1950),
+                  lastDate: DateTime.now(),
+                  locale: const Locale('zh', 'TW'));
+              if (d != null) {
+                setState(() =>
+                    c.text = DateFormat('yyyy年MM月dd日', 'zh_TW').format(d));
+              }
+            },
+          ),
+        ],
+      );
 
-  Widget _buildWeightPickerField(BuildContext ctx, String l, TextEditingController c) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildLabel(l),
-      TextField(
-        controller: c, readOnly: true, decoration: _inputDecoration(),
-        onTap: () => _showWeightPicker(ctx, c),
-      ),
-    ],
-  );
+  Widget _buildWeightPickerField(
+          BuildContext ctx, String l, TextEditingController c) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(l),
+          TextField(
+            controller: c,
+            readOnly: true,
+            decoration: _inputDecoration(),
+            onTap: () => _showWeightPicker(ctx, c),
+          ),
+        ],
+      );
 
   void _showWeightPicker(BuildContext ctx, TextEditingController c) {
-    int val = c.text.isNotEmpty ? int.parse(c.text.replaceAll(' kg','')) : 50;
-    showModalBottomSheet(context: ctx, builder: (_) => StatefulBuilder(
-      builder: (_, setM) => SizedBox(
-        height: 250,
-        child: Column(children: [
-          SizedBox(
-            height: 200,
-            child: CupertinoPicker(
-              scrollController: FixedExtentScrollController(initialItem: val-30),
-              itemExtent: 40,
-              onSelectedItemChanged: (i) => setM(() => val = i+30),
-              children: List.generate(121, (i) => Center(child: Text('${i+30} kg'))),
-            ),
-          ),
-          ElevatedButton(onPressed: () { c.text = '$val kg'; Navigator.pop(ctx); }, child: const Text('確定'))
-        ]),
-      ),
-    ));
+    int val = c.text.isNotEmpty ? int.parse(c.text.replaceAll(' kg', '')) : 50;
+    showModalBottomSheet(
+        context: ctx,
+        builder: (_) => StatefulBuilder(
+              builder: (_, setM) => SizedBox(
+                height: 250,
+                child: Column(children: [
+                  SizedBox(
+                    height: 200,
+                    child: CupertinoPicker(
+                      scrollController:
+                          FixedExtentScrollController(initialItem: val - 30),
+                      itemExtent: 40,
+                      onSelectedItemChanged: (i) => setM(() => val = i + 30),
+                      children: List.generate(
+                          121, (i) => Center(child: Text('${i + 30} kg'))),
+                    ),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        c.text = '$val kg';
+                        Navigator.pop(ctx);
+                      },
+                      child: const Text('確定'))
+                ]),
+              ),
+            ));
   }
 
-  Widget _buildheightPickerField(BuildContext ctx, String l, TextEditingController c) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildLabel(l),
-      TextField(controller: c, readOnly: true, decoration: _inputDecoration(), onTap: () => _showheightPicker(ctx, c)),
-    ],
-  );
+  Widget _buildheightPickerField(
+          BuildContext ctx, String l, TextEditingController c) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(l),
+          TextField(
+              controller: c,
+              readOnly: true,
+              decoration: _inputDecoration(),
+              onTap: () => _showheightPicker(ctx, c)),
+        ],
+      );
 
   void _showheightPicker(BuildContext ctx, TextEditingController c) {
-    int val = c.text.isNotEmpty ? int.parse(c.text.replaceAll(' cm','')) : 150;
-    showModalBottomSheet(context: ctx, builder: (_) => StatefulBuilder(
-      builder: (_, setM) => SizedBox(
-        height: 250,
-        child: Column(children: [
-          SizedBox(
-            height: 200,
-            child: CupertinoPicker(
-              scrollController: FixedExtentScrollController(initialItem: val-100),
-              itemExtent: 40,
-              onSelectedItemChanged: (i) => setM(() => val = i+100),
-              children: List.generate(121, (i) => Center(child: Text('${i+100} cm'))),
-            ),
-          ),
-          ElevatedButton(onPressed: () { c.text = '$val cm'; Navigator.pop(ctx); }, child: const Text('確定'))
-        ]),
-      ),
-    ));
+    int val = c.text.isNotEmpty ? int.parse(c.text.replaceAll(' cm', '')) : 150;
+    showModalBottomSheet(
+        context: ctx,
+        builder: (_) => StatefulBuilder(
+              builder: (_, setM) => SizedBox(
+                height: 250,
+                child: Column(children: [
+                  SizedBox(
+                    height: 200,
+                    child: CupertinoPicker(
+                      scrollController:
+                          FixedExtentScrollController(initialItem: val - 100),
+                      itemExtent: 40,
+                      onSelectedItemChanged: (i) => setM(() => val = i + 100),
+                      children: List.generate(
+                          121, (i) => Center(child: Text('${i + 100} cm'))),
+                    ),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        c.text = '$val cm';
+                        Navigator.pop(ctx);
+                      },
+                      child: const Text('確定'))
+                ]),
+              ),
+            ));
   }
 
   Widget _buildLabel(String txt) => Padding(
-    padding: const EdgeInsets.only(top: 8, bottom: 4),
-    child: Text(txt, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-  );
+        padding: const EdgeInsets.only(top: 8, bottom: 4),
+        child: Text(txt,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      );
 
-  Widget _buildCheckbox(String txt, bool val, ValueChanged<bool?> onCh) => CheckboxListTile(
-    title: Text(txt), value: val, onChanged: onCh, controlAffinity: ListTileControlAffinity.leading,
-  );
+  Widget _buildCheckbox(String txt, bool val, ValueChanged<bool?> onCh) =>
+      CheckboxListTile(
+        title: Text(txt),
+        value: val,
+        onChanged: onCh,
+        controlAffinity: ListTileControlAffinity.leading,
+      );
 
-  Widget _buildButton(String txt, Color col, VoidCallback onP) => ElevatedButton(
-    style: ElevatedButton.styleFrom(backgroundColor: col, padding: const EdgeInsets.symmetric(horizontal: 30,vertical:12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-    onPressed: onP,
-    child: Text(txt, style: const TextStyle(color: Colors.white, fontSize: 16)),
-  );
+  Widget _buildButton(String txt, Color col, VoidCallback onP) =>
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+            backgroundColor: col,
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+        onPressed: onP,
+        child: Text(txt,
+            style: const TextStyle(color: Colors.white, fontSize: 16)),
+      );
 
   String generatePairingCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final rng = Random();
-    return String.fromCharCodes(
-      Iterable.generate(6, (_) => chars.codeUnitAt(rng.nextInt(chars.length)))
-    );
+    return String.fromCharCodes(Iterable.generate(
+        6, (_) => chars.codeUnitAt(rng.nextInt(chars.length))));
   }
 }

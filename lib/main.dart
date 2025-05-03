@@ -34,6 +34,7 @@ import 'package:doctor_2/questionGroup/production.dart';
 import 'package:doctor_2/questionGroup/roommate.dart';
 import 'package:doctor_2/questionGroup/sleepGroup/sleep.dart';
 import 'package:doctor_2/questionGroup/sleepGroup/sleep_introduce.dart';
+import 'package:doctor_2/questionGroup/sleepGroup/sleepscore.dart';
 import 'package:doctor_2/register/fa_success.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
@@ -110,7 +111,10 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) =>  HomeScreenWidget(userId: '8', isManUser: false,), // 主畫面
+        '/': (context) => HomeScreenWidget(
+              userId: '8',
+              isManUser: false,
+            ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
@@ -157,7 +161,7 @@ class _MyAppState extends State<MyApp> {
             ),
           );
         }
-          if (settings.name == '/SleepIntroducePage') {
+        if (settings.name == '/SleepIntroducePage') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => SleepIntroducePage(userId: userId),
@@ -175,13 +179,13 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => Notyet1Widget(userId: userId),
           );
         }
-         if (settings.name == '/MaternalConnectionPage') {
+        if (settings.name == '/MaternalConnectionPage') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => MaternalConnectionPage(userId: userId),
           );
         }
-          if (settings.name == '/DourIntroduce1Page') {
+        if (settings.name == '/DourIntroduce1Page') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => DourIntroduce1Page(userId: userId),
@@ -193,7 +197,7 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => BornWidget(userId: userId),
           );
         }
-         if (settings.name == '/QuestionWidget') {
+        if (settings.name == '/QuestionWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
             builder: (context) => QuestionWidget(userId: userId),
@@ -235,7 +239,7 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => BreastfeedingDurationWidget(userId: userId),
           );
         }
-        
+
         if (settings.name == '/StopWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
@@ -343,62 +347,70 @@ class _MyAppState extends State<MyApp> {
             ),
           );
         }
-         if (settings.name == '/Closescore') {
-          final args = settings.arguments as Map<String, dynamic>; 
-             return MaterialPageRoute(
-    builder: (context) => Closescore(
-      userId: args['userId'] as String,
-      totalScore: args['totalScore'] as int,
-    ),
-  );
-}
-if (settings.name == '/Adaptscore') {
-          final args = settings.arguments as Map<String, dynamic>; 
-             return MaterialPageRoute(
-    builder: (context) => Adaptscore(
-      userId: args['userId'] as String,
-      totalScore: args['totalScore'] as int,
-    ),
-  );
-}
-if (settings.name == '/Promisescore') {
-          final args = settings.arguments as Map<String, dynamic>; 
-             return MaterialPageRoute(
-    builder: (context) => Promisescore(
-      userId: args['userId'] as String,
-      totalScore: args['totalScore'] as int,
-    ),
-  );
-}
-if (settings.name == '/Respondscore') {
-          final args = settings.arguments as Map<String, dynamic>; 
-             return MaterialPageRoute(
-    builder: (context) => Respondscore(
-      userId: args['userId'] as String,
-      totalScore: args['totalScore'] as int,
-    ),
-  );
-}
-if (settings.name == '/Melancholyscore') {
-          final args = settings.arguments as Map<String, dynamic>; 
-             return MaterialPageRoute(
-    builder: (context) => Melancholyscore(
-      userId: args['userId'] as String,
-      totalScore: args['totalScore'] as int,
-    ),
-  );
-}
-if (settings.name == '/KnowledgeScore') {
-          final args = settings.arguments as Map<String, dynamic>; 
-             return MaterialPageRoute(
-    builder: (context) => KnowledgeScore(
-      userId: args['userId'] as String,
-      totalScore: args['totalScore'] as int,
-    ),
-  );
-}
-
-
+        if (settings.name == '/Closescore') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => Closescore(
+              userId: args['userId'] as String,
+              totalScore: args['totalScore'] as int,
+            ),
+          );
+        }
+        if (settings.name == '/Adaptscore') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => Adaptscore(
+              userId: args['userId'] as String,
+              totalScore: args['totalScore'] as int,
+            ),
+          );
+        }
+        if (settings.name == '/Promisescore') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => Promisescore(
+              userId: args['userId'] as String,
+              totalScore: args['totalScore'] as int,
+            ),
+          );
+        }
+        if (settings.name == '/Respondscore') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => Respondscore(
+              userId: args['userId'] as String,
+              totalScore: args['totalScore'] as int,
+            ),
+          );
+        }
+        if (settings.name == '/Melancholyscore') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => Melancholyscore(
+              userId: args['userId'] as String,
+              totalScore: args['totalScore'] as int,
+            ),
+          );
+        }
+        if (settings.name == '/KnowledgeScore') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => KnowledgeScore(
+              userId: args['userId'] as String,
+              totalScore: args['totalScore'] as int,
+            ),
+          );
+        }
+        if (settings.name == '/Sleepscore') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => Sleepscore(
+              userId: args['userId'] as String,
+              totalScore: args['totalScore'] as int,
+              scoreMap: args['scoreMap'] as Map<String, int>,
+            ),
+          );
+        }
         return null;
       },
     );
