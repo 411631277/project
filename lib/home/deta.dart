@@ -396,11 +396,12 @@ class _DetaWidgetState extends State<DetaWidget> {
     ? 'http://163.13.201.85:3000/man_users'
     : 'http://163.13.201.85:3000/users');
 
- final Map<String, dynamic> payload = {
-  'user_id': int.parse(widget.userId),
+final isMan = widget.isManUser;
+
+final Map<String, dynamic> payload = {
+  isMan ? 'man_user_id' : 'user_id': int.parse(widget.userId),
 };
 
-final isMan = widget.isManUser;
 
 if (heightController.text.isNotEmpty) {
   String cleanHeight = heightController.text.replaceAll(RegExp(r'[^0-9.]'), '');

@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 final FirestoreService firestoreService = FirestoreService();
 final Logger logger = Logger();
@@ -144,7 +145,24 @@ class RegisterWidgetState extends State<RegisterWidget> {
                   _buildAccountRow(),
                   _buildPasswordField(),
                   _buildLabeledTextField('E-Mail', emailController),
-                  _buildLabeledTextField('電話', phoneController),
+
+                 Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    _buildLabel('電話'),
+    TextField(
+      controller: phoneController,
+      keyboardType: TextInputType.number,
+      maxLength: 10,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(10),
+      ],
+      decoration: _inputDecoration().copyWith(counterText: ""), // 去除下方字數顯示
+    ),
+  ],
+),
+
                   _buildLabel('聯絡偏好設定'),
                   Row(
                     children: [

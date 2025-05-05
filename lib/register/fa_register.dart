@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter/services.dart';
 import 'package:doctor_2/function/main.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -148,7 +148,22 @@ class FaRegisterWidget extends StatefulWidget {
                _buildAccountRow(), //帳號
               _buildPasswordField(),
               _buildLabeledTextField('E-Mail', emailController),
-              _buildLabeledTextField('電話', phoneController),
+              Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    _buildLabel('電話'),
+    TextField(
+      controller: phoneController,
+      keyboardType: TextInputType.number,
+      maxLength: 10,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(10),
+      ],
+      decoration: _inputDecoration().copyWith(counterText: ""), // 去除下方字數顯示
+    ),
+  ],
+),
 
               // 🔹 聯絡偏好設定
               _buildLabel('聯絡偏好設定'),
@@ -253,14 +268,14 @@ class FaRegisterWidget extends StatefulWidget {
                 ],
               ),
  // 🔹 配對碼（選填）與檢查按鈕
-          _buildLabel('配對碼（選填）'),
+          _buildLabel('配偶分享碼（若沒有可略過）'),
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: pairingCodeController,
                   decoration: InputDecoration(
-                    hintText: '請輸入配對碼（可不填）',
+                    hintText: '請輸入分享碼',
                     filled: true,
                     fillColor: Colors.white,
                     border: const OutlineInputBorder(),

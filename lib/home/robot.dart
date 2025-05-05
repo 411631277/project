@@ -33,7 +33,7 @@ class _RobotWidgetState extends State<RobotWidget> {
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String>> _messages = [];
   final ScrollController _scrollController = ScrollController();
-  final String apiUrl = "http://180.176.211.159:8000/query";
+  final String apiUrl = "http://163.13.202.126:8000/query";
 
   /// 第一組快速回覆
   final List<String> _quickReplies = [
