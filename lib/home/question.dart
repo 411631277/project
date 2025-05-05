@@ -17,9 +17,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
 
   bool isLoading = true;
 
-  // 用來存放問卷是否完成的狀態
-  // key 與問卷對應，value 為該問卷是否完成
-  // 例如：{'knowledgeCompleted': true, 'melancholyCompleted': false, ...}
+
   Map<String, bool> surveyStatus = {};
 
   @override
@@ -41,7 +39,6 @@ class _QuestionWidgetState extends State<QuestionWidget> {
           // 假設 Firestore 中使用這些欄位紀錄是否完成
           surveyStatus['knowledgeCompleted'] = data['knowledgeCompleted'] ?? false;
           surveyStatus['melancholyCompleted'] = data['melancholyCompleted'] ?? false;
-          //surveyStatus['produtionCompleted'] = data['produtionCompleted'] ?? false;
           surveyStatus['attachmentCompleted'] = data['attachmentCompleted'] ?? false;
           surveyStatus['painScaleCompleted'] = data['painScaleCompleted'] ?? false;
           surveyStatus['sleepCompleted'] = data['sleepCompleted'] ?? false;

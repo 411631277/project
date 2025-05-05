@@ -18,9 +18,7 @@ class _QuestionWidgetState extends State<FaQuestionWidget> {
 
   bool isLoading = true;
 
-  // 用來存放問卷是否完成的狀態
-  // key 與問卷對應，value 為該問卷是否完成
-  // 例如：{'knowledgeCompleted': true, 'melancholyCompleted': false, ...}
+
   Map<String, bool> surveyStatus = {};
 
   @override
@@ -33,7 +31,7 @@ class _QuestionWidgetState extends State<FaQuestionWidget> {
   Future<void> _fetchSurveyStatus() async {
     try {
       final docRef =
-          FirebaseFirestore.instance.collection('users').doc(widget.userId);
+          FirebaseFirestore.instance.collection('Man_users').doc(widget.userId);
       final docSnap = await docRef.get();
 
       if (docSnap.exists) {
@@ -43,6 +41,7 @@ class _QuestionWidgetState extends State<FaQuestionWidget> {
           surveyStatus['knowledgeCompleted'] = data['knowledgeCompleted'] ?? false;
           surveyStatus['melancholyCompleted'] = data['melancholyCompleted'] ?? false;
           surveyStatus['sleepCompleted'] = data['sleepCompleted'] ?? false;
+    
           isLoading = false;
         });
       } else {
