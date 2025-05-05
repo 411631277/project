@@ -48,7 +48,7 @@ class _MateWidgetState extends State<MateWidget> {
       }
     } catch (e) {
       setState(() {
-        pairingCode = "載入錯誤";
+        pairingCode = "已配對";
       });
       logger.e("❌ 讀取配對碼錯誤: $e");
     }

@@ -36,6 +36,9 @@ class FaRegisterWidget extends StatefulWidget {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController accountController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+   final TextEditingController pairingCodeController = TextEditingController();
+  String? pairingCodeErrorMessage;
+  String? pairingResult; 
   
   // 🔹 用戶選擇資料
   String? _accountCheckMessage;
@@ -88,6 +91,7 @@ class FaRegisterWidget extends StatefulWidget {
     phoneController.dispose();
     accountController.dispose();
     passwordController.dispose();
+    pairingCodeController.dispose();
     super.dispose();
   }
 
@@ -100,7 +104,6 @@ class FaRegisterWidget extends StatefulWidget {
   canPop: false, // 禁止 Flutter 自動 pop
   // ignore: deprecated_member_use
   onPopInvoked: (didPop) {
-    // 不管 didPop 是 true 還是 false，一律自己導回去
     Navigator.pushReplacementNamed(
       context,
       '/MainScreenWidget',
@@ -249,6 +252,59 @@ class FaRegisterWidget extends StatefulWidget {
                 (value) => setState(() => isNewMom = false))),
                 ],
               ),
+ // 🔹 配對碼（選填）與檢查按鈕
+          _buildLabel('配對碼（選填）'),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: pairingCodeController,
+                  decoration: InputDecoration(
+                    hintText: '請輸入配對碼（可不填）',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: const OutlineInputBorder(),
+                    errorText: pairingCodeErrorMessage,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () async {
+                  final code = pairingCodeController.text.trim();
+                  if (code.isEmpty) {
+                    setState(() => pairingResult = '請輸入配對碼');
+                    return;
+                  }
+
+                  final query = await FirebaseFirestore.instance
+                      .collection('users')
+                      .where('配對碼', isEqualTo: code)
+                      .get();
+
+                  if (query.docs.isNotEmpty) {
+                    final doc = query.docs.first;
+                    final name = doc['名字'] ?? '未知';
+                    setState(() => pairingResult = '配對人為 $name');
+                  } else {
+                    setState(() => pairingResult = '無此配對碼');
+                  }
+                },
+                child: const Text('檢查'),
+              ),
+            ],
+          ),
+          if (pairingResult != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                pairingResult!,
+                style: TextStyle(
+                  color: pairingResult!.startsWith('配對人為') ? Colors.green : Colors.red,
+                  fontSize: 14,
+                ),
+              ),
+            ),
 
               // 🔹 按鈕
               const Divider(),
@@ -265,27 +321,50 @@ class FaRegisterWidget extends StatefulWidget {
                   }
                   ),
                   _buildButton('下一步', Colors.blue, () async {
-                    final String? userId =
-                    await _saveUserData(); // ✅ 儲存資料並獲取 userId
-                    if (!context.mounted) return;
-                    if (userId != null && mounted) {
-                      // 只有當 Widget 仍然掛載時，才導航到成功頁面
-                      Navigator.pushNamed(
-                        context,
-                        '/FaSuccessWidget',
-                        arguments: userId, //傳遞'userId'
-                      );
-                    }
-                  }
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+            setState(() => pairingCodeErrorMessage = null);
+            final code = pairingCodeController.text.trim();
+            if (code.isNotEmpty) {
+              final isValid = await _validatePairingCode(code);
+              if (!isValid) {
+                setState(() => pairingCodeErrorMessage = '配對碼錯誤或已被使用');
+                return;
+              }
+            }
+            final userId = await _saveUserData();
+            if (!context.mounted) return;
+            if (userId != null) {
+              Navigator.pushNamed(context, '/FaSuccessWidget', arguments: userId);
+            }
+          }),
+        ],
       ),
-    ));
-     }
+   ]
+   )
+   ) 
+   )
+   )
+   );
+  }
+
+Future<bool> _validatePairingCode(String inputCode) async {
+    try {
+      final query = await FirebaseFirestore.instance
+          .collection('users')
+          .where('配對碼', isEqualTo: inputCode)
+          .get();
+
+      if (query.docs.isNotEmpty) {
+        final doc = query.docs.first;
+        final used = doc.data()['配對碼已使用'] ?? false;
+        return !used;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      logger.e("配對碼驗證錯誤: $e");
+      return false;
+    }
+  }
 
  Widget _buildAccountRow() {
     return Column(
@@ -418,54 +497,83 @@ class FaRegisterWidget extends StatefulWidget {
   }
 
   //儲存使用者資料
-  Future<String?> _saveUserData() async {
-    try {
-      AggregateQuerySnapshot countSnapshot = await FirebaseFirestore.instance
-          .collection('Man_users')
-          .count()
-          .get();
+ Future<String?> _saveUserData() async {
+  try {
+    AggregateQuerySnapshot countSnapshot = await FirebaseFirestore.instance
+        .collection('Man_users')
+        .count()
+        .get();
 
-      Map<String, dynamic> selectedChronicDiseases = {
-        for (var entry in chronicDiseaseOptions.entries)
-          if (entry.value) entry.key: true
-      };
+    int newId = (countSnapshot.count ?? 0) + 1;
+    String userId = newId.toString();
 
-      if (selectedChronicDiseases.containsKey("其他")) {
-        selectedChronicDiseases["其他"] = otherDiseaseController.text.isNotEmpty
-            ? otherDiseaseController.text
-            : null;
-      }
+    // ✅ 先送 MySQL，若失敗就跳出
+    await sendDataToMySQL(userId).then((success) async {
+      if (!success) throw Exception('MySQL 同步失敗');
+    });
 
-      int newId = (countSnapshot.count ?? 0) + 1; // 新 ID = 目前總數 + 1
-      String userId = newId.toString(); // 確保 userId 是字串
-      await FirebaseFirestore.instance.collection('Man_users').doc(userId).set({
-        '帳號': accountController.text,
-        '密碼': passwordController.text,
-        '名字': nameController.text,
-        '生日': birthController.text,
-        '身高': heightController.text,
-        '目前體重': weightController.text,
-        '孕前體重': prePregnancyWeightController.text,
-        '電子信箱': emailController.text,
-        '手機號碼': phoneController.text,
-        '婚姻狀況': maritalStatus,
-        '是否為新手媽咪': isNewMom,
-        '聯絡偏好': {'email': isEmailPreferred, 'phone': isPhonePreferred},
-        'answers': answers,
-        '是否有慢性病': hasChronicDisease,
-        '慢性病症狀': selectedChronicDiseases,
-        
-      });
-      await sendDataToMySQL(userId);
-      logger.i("✅ 使用者資料已存入 Firestore，ID：$userId");
-      return userId; //回傳 userId
-    } catch (e) {
-      logger.e("❌ Firestore 儲存錯誤: $e");
-      return null;
+    // 🔽 MySQL 成功後再寫 Firebase
+    Map<String, dynamic> selectedChronicDiseases = {
+      for (var entry in chronicDiseaseOptions.entries)
+        if (entry.value) entry.key: true
+    };
+    if (selectedChronicDiseases.containsKey("其他")) {
+      selectedChronicDiseases["其他"] = otherDiseaseController.text.isNotEmpty
+          ? otherDiseaseController.text
+          : null;
     }
-  }
 
-Future<void> sendDataToMySQL(String userId) async {
+    await FirebaseFirestore.instance
+    .collection('Man_users')
+    .doc(userId) 
+    .set({
+      '帳號': accountController.text,
+      '密碼': passwordController.text,
+      '名字': nameController.text,
+      '生日': birthController.text,
+      '身高': heightController.text,
+      '目前體重': weightController.text,
+      '孕前體重': prePregnancyWeightController.text,
+      '電子信箱': emailController.text,
+      '手機號碼': phoneController.text,
+      '婚姻狀況': maritalStatus,
+      '是否為新手媽咪': isNewMom,
+      '聯絡偏好': {'email': isEmailPreferred, 'phone': isPhonePreferred},
+      'answers': answers,
+      '是否有慢性病': hasChronicDisease,
+      '慢性病症狀': selectedChronicDiseases,
+    });
+
+    // ✅ 標記配對碼為已使用
+    if (pairingCodeController.text.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .where('配對碼', isEqualTo: pairingCodeController.text.trim())
+          .limit(1)
+          .get()
+          .then((query) async {
+            if (query.docs.isNotEmpty) {
+              final docId = query.docs.first.id;
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(docId)
+                  .update({'配對碼已使用': true});
+              logger.i('✅ 配對碼已標記為使用');
+            }
+          });
+    }
+
+    logger.i("✅ 使用者資料已存入 Firebase，ID：$userId");
+    return userId;
+
+  } catch (e) {
+    logger.e("❌ 註冊流程錯誤：$e");
+    return null;
+  }
+}
+
+
+Future<bool> sendDataToMySQL(String userId) async {
   final url = Uri.parse('http://163.13.201.85:3000/man_users');
 
   final response = await http.post(
@@ -510,8 +618,10 @@ Future<void> sendDataToMySQL(String userId) async {
 
   if (response.statusCode >= 200 && response.statusCode < 300) {
     logger.i("✅ 爸爸資料同步至 MySQL 成功");
+    return true;
   } else {
     logger.e("❌ 爸爸同步 MySQL 失敗: ${response.body}");
+    return false;
   }
 }
 
