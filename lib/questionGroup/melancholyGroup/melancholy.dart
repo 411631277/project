@@ -1,6 +1,7 @@
 //產後憂鬱量表
 import 'dart:convert';
 import 'dart:math' as math;
+import 'package:doctor_2/home/fa_question.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
@@ -62,14 +63,28 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     return PopScope(
   canPop: false,
   // ignore: deprecated_member_use
-  onPopInvoked: (didPop) {
-    if (didPop) return; // 系統已處理就不管
+ onPopInvoked: (didPop) {
+  if (widget.isManUser) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FaQuestionWidget(
+          userId: widget.userId,
+          isManUser: true,
+        ),
+      ),
+    );
+  } else {
     Navigator.pushReplacementNamed(
       context,
       '/QuestionWidget',
-      arguments: widget.userId,
+      arguments: {
+        'userId': widget.userId,
+        'isManUser': false,
+      },
     );
-  },
+  }
+},
   child: Scaffold(
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
@@ -108,12 +123,27 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
                 /// 返回按鈕
                 GestureDetector(
   onTap: () {
+    if (widget.isManUser) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FaQuestionWidget(
+          userId: widget.userId,
+          isManUser: true,
+        ),
+      ),
+    );
+  } else {
     Navigator.pushReplacementNamed(
       context,
       '/QuestionWidget',
-      arguments: widget.userId,
+      arguments: {
+        'userId': widget.userId,
+        'isManUser': false,
+      },
     );
-  },
+  }
+},
   child: Transform.rotate(
     angle: math.pi,
     child: Image.asset(
@@ -146,7 +176,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     arguments: {
       'userId': widget.userId,
       'totalScore': totalScore,
-      'ismanuser': widget.isManUser,
+      'isManUser': widget.isManUser,
     },
   );
 },

@@ -6,7 +6,7 @@ import 'dart:math' as math;
 class QuestionWidget extends StatefulWidget {
   final String userId; // 接收 userId 資訊
 
-  const QuestionWidget({super.key, required this.userId});
+  const QuestionWidget({super.key, required this.userId, required bool isManUser});
 
   @override
   State<QuestionWidget> createState() => _QuestionWidgetState();
@@ -273,7 +273,10 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                 Navigator.pushNamed(
                   context,
                   routeName,
-                  arguments: widget.userId,
+                  arguments: {
+    'userId': widget.userId,
+    'isManUser': false, 
+  },
                 );
               },
               child: Text(

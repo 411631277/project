@@ -1,3 +1,4 @@
+import 'package:doctor_2/home/fa_home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
@@ -72,14 +73,31 @@ class FinishWidget extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    logger.i(
-                        "🟢 FinishWidget 正在導航到 HomeScreenWidget，userId: $userId");
+  logger.i("🟢 FinishWidget 正在導航到 Home，userId: $userId");
 
-                    Navigator.pushNamed(context, '/HomeScreenWidget',
-                        arguments: {
-                          'userId': userId, 'isManUser': isManUser, // ✅ 傳遞 userId
-                        });
-                  },
+  if (isManUser) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FaHomeScreenWidget(
+          userId: userId,
+          isManUser: true,
+          updateStepCount: (_) {}, // 如果有步數同步功能再加上
+        ),
+      ),
+    );
+  } else {
+    Navigator.pushReplacementNamed(
+      context,
+      '/HomeScreenWidget',
+      arguments: {
+        'userId': userId,
+        'isManUser': false,
+      },
+    );
+  }
+},
+
                   child: const Text(
                     '下一步',
                     style: TextStyle(

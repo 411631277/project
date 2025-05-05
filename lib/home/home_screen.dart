@@ -563,7 +563,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => QuestionWidget(
-                        userId: widget.userId,
+                        userId: widget.userId, isManUser: false,
                       ),
                     ),
                   );

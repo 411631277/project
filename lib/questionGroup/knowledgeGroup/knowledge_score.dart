@@ -42,7 +42,7 @@ class KnowledgeScore extends StatelessWidget {
               Spacer(flex: 2),
 
               Text(
-                '你的總分：$totalScore',
+                '你的哺乳知識總分：$totalScore',
                 style: TextStyle(
                   fontSize: base * 0.08,
                   color: const Color.fromRGBO(147, 129, 108, 1),

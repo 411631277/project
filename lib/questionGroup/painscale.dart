@@ -254,9 +254,11 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
 
                       // 成功儲存後導頁 (或可改成 pop 回到上一頁)
                       Navigator.pushNamed(
-                        context,
-                        '/FinishWidget',
-                        arguments: widget.userId,
+                    context,
+                    '/FinishWidget',
+                      arguments: {
+                    'userId': widget.userId,
+                    'isManUser': false, } 
                       );
                     },
                     child: const Text(

@@ -1,6 +1,7 @@
 // sleep_combined.dart
 import 'dart:convert';
 import 'dart:math' as math;
+import 'package:doctor_2/home/fa_question.dart';
 import 'package:doctor_2/questionGroup/sleepGroup/sleepscore.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -162,15 +163,27 @@ class _SleepWidgetState extends State<SleepWidget> {
         canPop: false,
 // ignore: deprecated_member_use
         onPopInvoked: (didPop) {
-          Navigator.pushReplacementNamed(
-            context,
-            '/QuestionWidget',
-           arguments: {
-    'userId': widget.userId,
-    'isManUser': widget.isManUser,
-  }, //如果有需要才加
-          );
-        },
+         if (widget.isManUser) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FaQuestionWidget(
+          userId: widget.userId,
+          isManUser: true,
+        ),
+      ),
+    );
+  } else {
+    Navigator.pushReplacementNamed(
+      context,
+      '/QuestionWidget',
+      arguments: {
+        'userId': widget.userId,
+        'isManUser': false,
+      },
+    );
+  }
+},
         child: Scaffold(
           body: Container(
             color: const Color.fromRGBO(233, 227, 213, 1),
@@ -224,15 +237,27 @@ class _SleepWidgetState extends State<SleepWidget> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Navigator.pushReplacementNamed(
-                              context,
-                              '/QuestionWidget',
-                              arguments: {
-                           'userId': widget.userId,
-                         'isManUser': widget.isManUser,
-                             },
-                            );
-                          },
+                            if (widget.isManUser) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FaQuestionWidget(
+          userId: widget.userId,
+          isManUser: true,
+        ),
+      ),
+    );
+  } else {
+    Navigator.pushReplacementNamed(
+      context,
+      '/QuestionWidget',
+      arguments: {
+        'userId': widget.userId,
+        'isManUser': false,
+      },
+    );
+  }
+},
                           child: Transform.rotate(
                             angle: math.pi,
                             child: Image.asset('assets/images/back.png',

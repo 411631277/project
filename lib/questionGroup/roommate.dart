@@ -110,10 +110,12 @@ class _RoommateWidgetState extends State<RoommateWidget> {
                       if (!context.mounted || !success) return;
 
                       // 跳轉到 FinishWidget，可自行更改
-                      Navigator.pushNamed(
-                        context,
-                        '/FinishWidget',
-                        arguments: widget.userId,
+                     Navigator.pushNamed(
+                    context,
+                    '/FinishWidget',
+                      arguments: {
+                    'userId': widget.userId,
+                    'isManUser': false, } 
                       );
                     },
                     child: Text(

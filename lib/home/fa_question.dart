@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_2/home/fa_home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
@@ -66,17 +67,29 @@ class _QuestionWidgetState extends State<FaQuestionWidget> {
    return PopScope(
   canPop: false, // 禁止 Flutter 自動 pop
   // ignore: deprecated_member_use
-  onPopInvoked: (didPop) {
-    // 不管 didPop 是 true 還是 false，一律自己導回去
+ onPopInvoked: (didPop) {
+  if (widget.isManUser) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FaHomeScreenWidget(
+          userId: widget.userId,
+          isManUser: true,
+          updateStepCount: (_) {}, // 如果有步數同步功能再補上
+        ),
+      ),
+    );
+  } else {
     Navigator.pushReplacementNamed(
       context,
       '/HomeScreenWidget',
-     arguments: {
-    'userId': widget.userId,
-    'isManUser': widget.isManUser,
-  },
+      arguments: {
+        'userId': widget.userId,
+        'isManUser': false,
+      },
     );
-  },
+  }
+},
   child: Scaffold(
 
       body: Container(
@@ -155,14 +168,28 @@ class _QuestionWidgetState extends State<FaQuestionWidget> {
                     left: screenWidth  * 0.1,
                     child: GestureDetector(
                      onTap: () {
-  Navigator.pushNamed(
+  if (widget.isManUser) {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => FaHomeScreenWidget(
+        userId: widget.userId,
+        isManUser: true,
+        updateStepCount: (_) {}, // 如需步數功能請自行傳入方法
+      ),
+    ),
+  );
+} else {
+  Navigator.pushReplacementNamed(
     context,
     '/HomeScreenWidget',
     arguments: {
       'userId': widget.userId,
-      'isManUser': widget.isManUser,
+      'isManUser': false,
     },
   );
+}
+
 },
                       child: Transform.rotate(
                         angle: 180 * (math.pi / 180), // 旋轉 180 度
