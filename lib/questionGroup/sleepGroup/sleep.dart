@@ -11,7 +11,8 @@ final Logger logger = Logger();
 
 class SleepWidget extends StatefulWidget {
   final String userId;
-  const SleepWidget({super.key, required this.userId});
+  final bool isManUser;
+  const SleepWidget({super.key, required this.userId , required this.isManUser});
 
   @override
   State<SleepWidget> createState() => _SleepWidgetState();
@@ -164,7 +165,10 @@ class _SleepWidgetState extends State<SleepWidget> {
           Navigator.pushReplacementNamed(
             context,
             '/QuestionWidget',
-            arguments: widget.userId, //如果有需要才加
+           arguments: {
+    'userId': widget.userId,
+    'isManUser': widget.isManUser,
+  }, //如果有需要才加
           );
         },
         child: Scaffold(
@@ -223,7 +227,10 @@ class _SleepWidgetState extends State<SleepWidget> {
                             Navigator.pushReplacementNamed(
                               context,
                               '/QuestionWidget',
-                              arguments: widget.userId,
+                              arguments: {
+                           'userId': widget.userId,
+                         'isManUser': widget.isManUser,
+                             },
                             );
                           },
                           child: Transform.rotate(
@@ -332,10 +339,12 @@ class _SleepWidgetState extends State<SleepWidget> {
   }
 
   Future<void> _handleSubmit() async {
+    final collectionName = widget.isManUser ? "Man_users" : "users";
+
     logger.i("👤 提交者 userId: ${widget.userId}");
 
     final doc = FirebaseFirestore.instance
-        .collection("users")
+        .collection(collectionName)
         .doc(widget.userId)
         .collection("questions")
         .doc("SleepWidget");
@@ -394,7 +403,7 @@ class _SleepWidgetState extends State<SleepWidget> {
       }
     }, SetOptions(merge: true));
     await FirebaseFirestore.instance
-        .collection("users")
+        .collection(collectionName)
         .doc(widget.userId.toString())
         .update({"sleepCompleted": true});
 
@@ -409,6 +418,7 @@ class _SleepWidgetState extends State<SleepWidget> {
           builder: (context) => Sleepscore(
             userId: widget.userId,
             totalScore: sleeptotal,
+            isManUser: widget.isManUser,
             scoreMap: {
               "主觀睡眠品質分數": subsleepScore,
               "入睡困難分數": sleepDifficulty,
@@ -417,7 +427,7 @@ class _SleepWidgetState extends State<SleepWidget> {
               "睡眠干擾分數": disturbanceScore,
               "藥物使用分數": medicationScore,
               "日間功能分數": daytimeScore,
-            },
+            }, 
           ),
         ),
       );

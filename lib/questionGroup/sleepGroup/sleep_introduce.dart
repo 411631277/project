@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 
 class SleepIntroducePage extends StatelessWidget {
    final String userId;
-  const SleepIntroducePage({super.key, required this.userId});
+   final bool isManUser;
+  const SleepIntroducePage({super.key, required this.userId , required this.isManUser});
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +69,7 @@ class SleepIntroducePage extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => SleepWidget(
                           userId: userId,
+                          isManUser: isManUser,
                         ),
                       ),
                     );

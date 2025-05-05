@@ -10,7 +10,8 @@ final Logger logger = Logger();
 
 class MelancholyWidget extends StatefulWidget {
   final String userId;
-  const MelancholyWidget({super.key, required this.userId});
+  final bool isManUser;
+  const MelancholyWidget({super.key, required this.userId, required this.isManUser});
 
   @override
   State<MelancholyWidget> createState() => _MelancholyWidgetState();
@@ -145,6 +146,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     arguments: {
       'userId': widget.userId,
       'totalScore': totalScore,
+      'ismanuser': widget.isManUser,
     },
   );
 },
@@ -217,6 +219,8 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
 
   /// 將作答結果儲存到 Firestore，並更新 melancholyCompleted = true
   Future<void> _saveAnswersToFirebase() async {
+  final collectionName = widget.isManUser ? "Man_users" : "users";
+
   try {
     // 1. 整理使用者的作答
     final Map<String, String?> formattedAnswers = answers.map(
@@ -228,7 +232,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
 
     // 3. 儲存到 Firestore
     final CollectionReference userResponses = FirebaseFirestore.instance
-        .collection('users')
+        .collection(collectionName)
         .doc(widget.userId)
         .collection("questions");
 
@@ -240,7 +244,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
 
     // 4. 更新「melancholyCompleted = true」讓主問卷列表顯示已完成
     await FirebaseFirestore.instance
-        .collection('users')
+        .collection(collectionName)
         .doc(widget.userId)
         .update({"melancholyCompleted": true});
 

@@ -119,7 +119,7 @@ class _StopWidgetState extends State<StopWidget> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                FinishWidget(userId: widget.userId),
+                                FinishWidget(userId: widget.userId, isManUser: false,),
                           ),
                         );
                       }

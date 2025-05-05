@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 
 class DourIntroduce2Page extends StatelessWidget {
    final String userId;
-  const DourIntroduce2Page({super.key, required this.userId});
+   final bool isManUser;
+  const DourIntroduce2Page({super.key, required this.userId, required  this.isManUser});
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +69,7 @@ class DourIntroduce2Page extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => MelancholyWidget(
                           userId: userId,
+                          isManUser: isManUser,
                         ),
                       ),
                     );

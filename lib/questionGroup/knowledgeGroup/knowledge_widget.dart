@@ -10,7 +10,8 @@ final Logger logger = Logger();
 
 class KnowledgeWidget extends StatefulWidget {
   final String userId; // ✅ 接收 userId
-  const KnowledgeWidget({super.key, required this.userId});
+  final bool isManUser;
+  const KnowledgeWidget({super.key, required this.userId , required this.isManUser});
 
   @override
   State<KnowledgeWidget> createState() => _KnowledgeWidgetState();
@@ -169,6 +170,7 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
       '/KnowledgeScore',
       arguments: {
         'userId': widget.userId,
+        'isManUser': widget.isManUser,
         'totalScore': totalScore,
       },
     );
@@ -233,6 +235,7 @@ final Map<int, String> correctAnswers = {
 
   /// 儲存問卷答案，並將 knowledgeCompleted 設為 true
  Future<bool> _saveAnswersToFirebase(int totalScore) async {
+  final collectionName = widget.isManUser ? "Man_users" : "users";
   try {
     final String documentName = "KnowledgeWidget";
 
@@ -241,7 +244,7 @@ final Map<int, String> correctAnswers = {
     );
 
     await FirebaseFirestore.instance
-        .collection("users")
+        .collection(collectionName)
         .doc(widget.userId)
         .collection("questions")
         .doc(documentName)
@@ -252,7 +255,7 @@ final Map<int, String> correctAnswers = {
     });
 
     await FirebaseFirestore.instance
-        .collection("users")
+        .collection(collectionName)
         .doc(widget.userId)
         .update({"knowledgeCompleted": true});
 

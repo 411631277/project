@@ -5,7 +5,8 @@ final Logger logger = Logger();
 
 class FinishWidget extends StatelessWidget {
   final String userId;
-  const FinishWidget({super.key, required this.userId});
+  final bool isManUser; 
+  const FinishWidget({super.key, required this.userId, required this.isManUser});
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +77,7 @@ class FinishWidget extends StatelessWidget {
 
                     Navigator.pushNamed(context, '/HomeScreenWidget',
                         arguments: {
-                          'userId': userId, 'isManUser': false, // ✅ 傳遞 userId
+                          'userId': userId, 'isManUser': isManUser, // ✅ 傳遞 userId
                         });
                   },
                   child: const Text(

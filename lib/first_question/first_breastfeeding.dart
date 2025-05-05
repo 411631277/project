@@ -117,7 +117,7 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  FinishWidget(userId: widget.userId),
+                                  FinishWidget(userId: widget.userId, isManUser: false,),
                             ),
                           );
                         }

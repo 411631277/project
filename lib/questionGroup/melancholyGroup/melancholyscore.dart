@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 class Melancholyscore extends StatelessWidget {
   final String userId;
   final int totalScore;
-
+  final bool isManUser;
   const Melancholyscore({
     super.key,
     required this.userId,
     required this.totalScore,
+    required this.isManUser
   });
 
   @override
@@ -88,7 +89,8 @@ class Melancholyscore extends StatelessWidget {
     context,
     MaterialPageRoute(
       builder: (context) => FinishWidget(
-        userId: userId, // 這邊傳遞 id
+        userId: userId, 
+        isManUser: isManUser , 
       ),
     ),
   );

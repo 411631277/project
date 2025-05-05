@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:doctor_2/home/baby.dart';
+import 'package:doctor_2/home/fa_question.dart';
 import 'package:doctor_2/home/robot.dart';
 import 'package:doctor_2/home/setting.dart';
+import 'package:doctor_2/home/tgos.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -358,7 +360,32 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
                 ),
               ),
             ),
-
+              Positioned(
+              top: screenHeight * 0.05,
+              left: screenWidth * 0.6,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FaQuestionWidget(
+                        userId: widget.userId, isManUser: true,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: screenWidth * 0.12,
+                  height: screenHeight * 0.08,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/Question.png'),
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             // 需要協助嗎 區塊
             Positioned(
               top: screenHeight * 0.8,
@@ -386,6 +413,31 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
                   color: const Color.fromRGBO(255, 255, 255, 1),
                   fontFamily: 'Inter',
                   fontSize: screenWidth * 0.045,
+                ),
+              ),
+            ),
+             //tgos
+            Positioned(
+              top: screenHeight * 0.83,
+              left: screenWidth * 0.08,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TgosMapPage(),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: screenWidth * 0.35,
+                  height: screenHeight * 0.25,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/tgos.png'),
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
                 ),
               ),
             ),

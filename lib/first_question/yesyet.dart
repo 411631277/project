@@ -386,7 +386,7 @@ class _YesyetWidgetState extends State<YesyetWidget> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  FinishWidget(userId: widget.userId),
+                                  FinishWidget(userId: widget.userId, isManUser: false,),
                             ),
                           );
                         }

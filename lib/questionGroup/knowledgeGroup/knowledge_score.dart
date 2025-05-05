@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 
 class KnowledgeScore extends StatelessWidget {
   final String userId;
+  final bool isManUser; 
   final int totalScore;
 
   const KnowledgeScore({
     super.key,
     required this.userId,
     required this.totalScore,
+    required this.isManUser
   });
 
   @override
@@ -85,6 +87,7 @@ class KnowledgeScore extends StatelessWidget {
     MaterialPageRoute(
       builder: (context) => FinishWidget(
         userId: userId, // 這邊傳遞 id
+        isManUser: isManUser,
       ),
     ),
   );

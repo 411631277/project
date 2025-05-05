@@ -148,7 +148,7 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => FinishWidget(userId: widget.userId),
+            builder: (context) => FinishWidget(userId: widget.userId, isManUser: false,),
           ),
         );
       } else {

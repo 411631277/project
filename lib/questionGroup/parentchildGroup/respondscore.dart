@@ -83,7 +83,7 @@ class Respondscore extends StatelessWidget {
     context,
     MaterialPageRoute(
       builder: (context) => FinishWidget(
-        userId: userId, // 這邊傳遞 id
+        userId: userId, isManUser: false, // 這邊傳遞 id
       ),
     ),
   );

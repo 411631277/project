@@ -1,9 +1,10 @@
 import 'dart:math' as math;
-import 'package:doctor_2/questionGroup/parentchildGroup/promise.dart';
+import 'package:doctor_2/first_question/finish.dart';
 import 'package:flutter/material.dart';
 
 class Sleepscore extends StatelessWidget {
   final String userId;
+  final bool isManUser;
   final int totalScore;
   final Map<String, int> scoreMap;
 
@@ -11,6 +12,7 @@ class Sleepscore extends StatelessWidget {
     super.key,
     required this.userId,
     required this.totalScore,
+    required this.isManUser,
     required this.scoreMap,
   });
 
@@ -108,7 +110,7 @@ class Sleepscore extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PromiseWidget(userId: userId),
+                            builder: (context) => FinishWidget(userId: userId, isManUser: isManUser,),
                           ),
                         );
                       },

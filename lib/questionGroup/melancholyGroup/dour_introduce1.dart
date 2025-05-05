@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 /// 憂鬱量表說明頁面
 class DourIntroduce1Page extends StatelessWidget {
   final String userId;
-
-  const DourIntroduce1Page({super.key, required this.userId});
+  final bool isManUser;
+  const DourIntroduce1Page({super.key, required this.userId ,  required this.isManUser,});
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +67,7 @@ class DourIntroduce1Page extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => DourIntroduce2Page(
                           userId: userId,
+                          isManUser: isManUser,
                         ),
                       ),
                     );
