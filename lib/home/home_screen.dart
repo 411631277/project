@@ -35,6 +35,7 @@ class HomeScreenWidget extends StatefulWidget {
 class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   String userName = "載入中...";
   String babyName = "小寶";
+  
   String? _profileImageUrl;
   final ImagePicker _picker = ImagePicker();
 
@@ -49,6 +50,11 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
   /// **記錄目前是哪一天 (YYYY-MM-DD)，對應到 Firebase docId**
   String _currentDay = "";
+
+double getCaloriesBurned() {
+  return _stepCount * 0.03;
+}
+
 
   StreamSubscription<StepCount>? _stepSubscription;
 
@@ -438,7 +444,6 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
      final base = math.min(screenWidth, screenHeight);
 
     // 根據當前步數與目標步數，決定顯示文字
-    String statusText = (_stepCount >= _targetSteps) ? "今日步數已達標" : "今日步數未達標";
 
    return PopScope(
     canPop: false, // ❗這行就是鎖定返回鍵
@@ -470,88 +475,112 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               ),
             ),
 
-            // **顯示當前步數 & 目標步數 (可點擊)**
-            Positioned(
-              top: screenHeight * 0.5,
-              left: screenWidth * 0.08,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 第一行: 當前步數 & 目標步數
-                  Row(
-                    children: [
-                      Text(
-                        "當前步數：$_stepCount",
-                        style: TextStyle(
-                          fontSize: base * 0.05,
-                          color: const Color.fromRGBO(165, 146, 125, 1),
-                        ),
-                      ),
-                      SizedBox(width: screenWidth * 0.15),
-                      GestureDetector(
-                        onTap: _showTargetStepsDialog, // 點擊修改目標步數
-                        child: Text(
-                          "目標步數：$_targetSteps",
-                          style: TextStyle(
-                            fontSize: base * 0.05,
-                            color: const Color.fromRGBO(165, 146, 125, 1),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: screenHeight * 0.02),
-
-                  // 第二行: 已達標 / 未達標
-                  Text(
-                    statusText,
-                    style: TextStyle(
-                      fontSize: base * 0.05,
-                      color: (_stepCount >= _targetSteps)
-                          ? Colors.green
-                          : Colors.red,
-                    ),
-                  ),
-                ],
+            // 步數區塊
+Positioned(
+  top: screenHeight * 0.5,
+  left: screenWidth * 0.08,
+  right: screenWidth * 0.08,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // 第 1 行：當前步數與目標步數
+      Row(
+        children: [
+          Text(
+            "當前步數：$_stepCount",
+            style: TextStyle(
+              fontSize: base * 0.05,
+              color: const Color.fromRGBO(165, 146, 125, 1),
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: _showTargetStepsDialog,
+            child: Text(
+              "目標步數：$_targetSteps",
+              style: TextStyle(
+                fontSize: base * 0.05,
+                color: const Color.fromRGBO(165, 146, 125, 1),
               ),
             ),
+          ),
+        ],
+      ),
 
-            // 設定按鈕
-            Positioned(
-              top: screenHeight * 0.05,
-              left: screenWidth * 0.77,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingWidget(
-                        userId: widget.userId,
-                        isManUser: false,
-                        stepCount: _stepCount,
-                        updateStepCount: (val) {
-                          setState(() {
-                            _stepCount = val;
-                          });
-                          _saveStepsForToday();
-                        },
-                      ),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: screenWidth * 0.15,
-                  height: screenHeight * 0.08,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/Setting.png'),
-                      fit: BoxFit.fitWidth,
-                    ),
-                  ),
+      SizedBox(height: screenHeight * 0.02),
+
+      // 第 2 行：達標狀態與卡路里
+      Row(
+        children: [
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                (_stepCount >= _targetSteps)
+                    ? "步數已達標"
+                    : "步數未達標",
+                style: TextStyle(
+                  fontSize: base * 0.05,
+                  color: (_stepCount >= _targetSteps)
+                      ? Colors.green
+                      : Colors.red,
                 ),
               ),
             ),
+          ),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                "消耗熱量約${getCaloriesBurned().toStringAsFixed(1)} Cal",
+                style: TextStyle(
+                  fontSize: base * 0.05,
+                  color: const Color.fromRGBO(165, 146, 125, 1),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+
+           // 設定按鈕
+Positioned(
+  top: screenHeight * 0.05,
+  left: screenWidth * 0.77,
+  child: GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SettingWidget(
+            userId: widget.userId,
+            isManUser: widget.isManUser,
+            stepCount: _stepCount,
+            updateStepCount: (val) {
+              setState(() {
+                _stepCount = val;
+              });
+              _saveStepsForToday();
+            },
+          ),
+        ),
+      );
+    },
+    child: Container(
+      width: screenWidth * 0.15,
+      height: screenHeight * 0.08,
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/Setting.png'),
+          fit: BoxFit.fitWidth,
+        ),
+      ),
+    ),
+  ),
+),
 
             // 問題按鈕
             Positioned(
@@ -740,10 +769,11 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-    ));
+  ]
+  )
+  )
+  )
+  );
   }
   Future<void> sendStepDataToMySQL() async {
     
