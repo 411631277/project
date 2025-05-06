@@ -1,50 +1,41 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>TGOS MAP API 測試地圖</title>
+  <meta charset="utf-8" />
+  <title>TGOS 地圖</title>
   <style>
-    html, body, #mapDiv {
-      width: 100%;
-      height: 100%;
+    html, body {
       margin: 0;
       padding: 0;
+      height: 100%;
+    }
+
+    #TGMap {
+      width: 100%;
+      height: 100vh;
     }
   </style>
-  <!-- ✅ 正確 TGOS API 載入 -->
-  <script src="https://api.tgos.tw/TGOS_MAP_API_3/tgos?APIKey=EiWY6yNoXSkbyuKhTWu5D0kMErKGOUIrqye3XbHS/22HRoScqlSi95k+450dBjZvXgsmMI7KkY9yDqaQHlwhnP2wOSKaaH/7GwaTACJyYt+evShst0JE+WQPQMgBRcp3"></script>
+  <script type="text/javascript" src="https://api.tgos.tw/MOIMAPService/MOIMAP?APIKEY=EiWY6yNoXSkbyuKhTWu5D0kMErKGOUIrqye3XbHS/22HRoScqlSi95k+450dBjZvXgsmMI7KkY9yDqaQHlwhnP2wOSKaaH/7GwaTACJyYt+evShst0JE+WQPQMgBRcp3"></script>
+  <script type="text/javascript">
+    function InitWnd() {
+      var pOMap = document.getElementById("TGMap");
+      var pMap = new TGOS.OnlineMap(pOMap, TGOS.CoordSys.EPSG3826, { mapControl: true });
 
-</head>
-<body>
-  <div id="mapDiv">載入中...</div>
-
-  <script>
-    function initMap() {
-      console.log("✅ initMap 被呼叫了！");
-      try {
-        let map = new TGMap("mapDiv", {
-          APIKey: "EiWY6yNoXSkbyuKhTWu5D0kMErKGOUIrqye3XbHS/22HRoScqlSi95k+450dBjZvXgsmMI7KkY9yDqaQHlwhnP2wOSKaaH/7GwaTACJyYt+evShst0JE+WQPQMgBRcp3",
-          ShowMarker: true,
-          Zoom: 12,
-          Center: { x: 121.5654, y: 25.0330 },
-          MapType: "ROADMAP"
+      // 🔥 1 秒後放大右下角控制按鈕
+      setTimeout(() => {
+        const controls = document.querySelectorAll("div[style*='bottom'][style*='right']");
+        controls.forEach(ctrl => {
+          ctrl.style.transform = "scale(2.5)";
+          ctrl.style.transformOrigin = "bottom right";
         });
-        console.log("✅ 地圖建立成功！");
-      } catch (err) {
-        console.error("❌ 地圖建立失敗：", err);
-        alert("地圖建立失敗，請打開 F12 看 console.log");
-      }
+      }, 1000);
     }
-
-    window.onload = function () {
-      console.log("🌐 嘗試 TGOS.TGInit...");
-      if (typeof TGOS !== 'undefined' && TGOS.TGInit) {
-        TGOS.TGInit(initMap);
-      } else {
-        console.error("❌ TGOS.TGInit 無法使用");
-        alert("TGOS API 未載入成功，請檢查網路或 API 網址");
-      }
-    };
   </script>
+</head>
+<body onload="InitWnd();">
+  <div id="TGMap"></div>
 </body>
 </html>
+
+
+
