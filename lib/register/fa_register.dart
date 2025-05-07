@@ -598,7 +598,7 @@ Future<bool> sendDataToMySQL(String userId) async {
       'man_user_name': nameController.text,
       'user_id': int.parse(userId),
       'man_user_email': emailController.text,
-      'user_gender': "男",
+      'man_user_gender': "男",
       'man_user_salutation': isNewMom == true ? "是" : "否",
       'man_user_birthdate': formatBirthForMySQL(birthController.text),
       'man_user_phone': phoneController.text,
@@ -628,6 +628,7 @@ Future<bool> sendDataToMySQL(String userId) async {
           : '',
       'man_user_account': accountController.text,
       'man_user_password': passwordController.text,
+      'man_pairing_code': pairingCodeController.text.trim(),
     }),
   );
 

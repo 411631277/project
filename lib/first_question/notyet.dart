@@ -266,8 +266,8 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
       body: jsonEncode({
         'user_id': int.parse(userId),
         'pregnancy_babies_count': selectedBabyCount,
-        'pregnancy_complications': complicationAnswer == '是' ? '是' : '否',
-        'willing_to_breastfeed': breastfeedingAnswer == '是' ? '是' : '否',
+        'pregnancy_complications': complicationAnswer == 'yes' ? '是' : '否',
+        'willing_to_breastfeed': breastfeedingAnswer == 'yes' ? '是' : '否',
       }),
     );
 

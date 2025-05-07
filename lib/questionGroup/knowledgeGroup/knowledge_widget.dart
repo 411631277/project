@@ -278,8 +278,10 @@ final Map<int, String> correctAnswers = {
     "不知道": "none",
   };
 
+ final String idKey = widget.isManUser ? 'man_user_id' : 'user_id';
+
   final Map<String, dynamic> payload = {
-    "user_id": int.parse(userId),
+    idKey: int.parse(userId), 
     "knowledge_question_content": "哺乳衛教問卷",
     "knowledge_test_date": DateTime.now().toIso8601String().split('T')[0],
     "knowledge_score": totalScore, // ⭐️ 新增總分

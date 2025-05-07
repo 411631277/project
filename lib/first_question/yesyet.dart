@@ -428,8 +428,8 @@ class _YesyetWidgetState extends State<YesyetWidget> {
         'pregnancy_babies_count': babyCount,
         'pregnancy_count': pregnancyCount,
         'delivery_count': deliveryCount,
-        'pregnancy_complications': complicationAnswer  == '是' ? '是' : '否',
-        'currently_breastfeeding': breastfeedingAnswer == '是' ? '是' : '否',
+        'pregnancy_complications': complicationAnswer  == 'yes' ? '是' : '否',
+        'currently_breastfeeding': breastfeedingAnswer == 'yes' ? '是' : '否',
       }),
     );
 

@@ -60,12 +60,12 @@ class _SleepWidgetState extends State<SleepWidget> {
     {
       "type": "choice",
       "question": "過去一個月內，您多常服用藥物幫助入睡?(處方或非處方)",
-      "options": ["從未發生", "每週少於一次", "每週一或二次", "每週三次或以上"]
+      "options": ["從未發生", "每週少於一次", "每週一或兩次", "每週三次或以上"]
     },
     {
       "type": "choice",
       "question": "過去一個月內，您多常在用餐、開車或社交場合活動時感到困倦，難以保持清醒?",
-      "options": ["從未發生", "每週少於一次", "每週一或二次", "每週三次或以上"]
+      "options": ["從未發生", "每週少於一次", "每週一或兩次", "每週三次或以上"]
     },
     {
       "type": "choice",
@@ -84,39 +84,39 @@ class _SleepWidgetState extends State<SleepWidget> {
   final List<Map<String, dynamic>> _q2 = [
     {
       "question": "無法在 30 分鐘內入睡",
-      "options": ["從未發生", "每週少於一次", "每週一或二次", "每週三次或以上"]
+      "options": ["從未發生", "每週少於一次", "每週一或兩次", "每週三次或以上"]
     },
     {
       "question": "半夜或凌晨便清醒",
-      "options": ["從未發生", "每週少於一次", "每週一或二次", "每週三次或以上"]
+      "options": ["從未發生", "每週少於一次", "每週一或兩次", "每週三次或以上"]
     },
     {
       "question": "必須起來上廁所",
-      "options": ["從未發生", "每週少於一次", "每週一或二次", "每週三次或以上"]
+      "options": ["從未發生", "每週少於一次", "每週一或兩次", "每週三次或以上"]
     },
     {
       "question": "無法舒適呼吸",
-      "options": ["從未發生", "每週少於一次", "每週一或二次", "每週三次或以上"]
+      "options": ["從未發生", "每週少於一次", "每週一或兩次", "每週三次或以上"]
     },
     {
       "question": "大聲打呼或咳嗽",
-      "options": ["從未發生", "每週少於一次", "每週一或二次", "每週三次或以上"]
+      "options": ["從未發生", "每週少於一次", "每週一或兩次", "每週三次或以上"]
     },
     {
       "question": "會覺得冷",
-      "options": ["從未發生", "每週少於一次", "每週一或二次", "每週三次或以上"]
+      "options": ["從未發生", "每週少於一次", "每週一或兩次", "每週三次或以上"]
     },
     {
       "question": "覺得躁熱",
-      "options": ["從未發生", "每週少於一次", "每週一或二次", "每週三次或以上"]
+      "options": ["從未發生", "每週少於一次", "每週一或兩次", "每週三次或以上"]
     },
     {
       "question": "睡覺時常會做惡夢",
-      "options": ["從未發生", "每週少於一次", "每週一或二次", "每週三次或以上"]
+      "options": ["從未發生", "每週少於一次", "每週一或兩次", "每週三次或以上"]
     },
     {
       "question": "身上有疼痛",
-      "options": ["從未發生", "每週少於一次", "每週一或二次", "每週三次或以上"]
+      "options": ["從未發生", "每週少於一次", "每週一或兩次", "每週三次或以上"]
     },
   ];
   final Map<int, String?> _a2 = {};
@@ -464,10 +464,10 @@ class _SleepWidgetState extends State<SleepWidget> {
     final now = DateTime.now();
     final date =
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-
+    final String idKey = widget.isManUser ? 'man_user_id' : 'user_id';
     // 1) 先組固定欄位 & Q1 填空題（1–5）
     final Map<String, dynamic> payload = {
-      'user_id': int.parse(widget.userId),
+      idKey: int.parse(widget.userId),
       'sleep_question_content': "睡眠品質量表",
       'sleep_test_date': date,
       'sleep_answer_1_a':
@@ -596,7 +596,7 @@ class _SleepWidgetState extends State<SleepWidget> {
     const mappingQ9 = {
       '從未發生': 0,
       '每週少於一次': 1,
-      '每週一或二次': 2,
+      '每週一或兩次': 2,
       '每週三次或以上': 3,
     };
 
@@ -650,7 +650,7 @@ class _SleepWidgetState extends State<SleepWidget> {
     const scoreMap = {
       '從未發生': 0,
       '每週少於一次': 1,
-      '每週一或二次': 2,
+      '每週一或兩次': 2,
       '每週三次或以上': 3,
     };
 
@@ -673,7 +673,7 @@ class _SleepWidgetState extends State<SleepWidget> {
     const mapping = {
       '從未發生': 0,
       '每週少於一次': 1,
-      '每週一或二次': 2,
+      '每週一或兩次': 2,
       '每週三次或以上': 3,
     };
 
@@ -685,7 +685,7 @@ class _SleepWidgetState extends State<SleepWidget> {
     const mapping6 = {
       '從未發生': 0,
       '每週少於一次': 1,
-      '每週一或二次': 2,
+      '每週一或兩次': 2,
       '每週三次或以上': 3,
     };
 

@@ -111,7 +111,7 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) => MainScreenWidget(
+        '/': (context) => HomeScreenWidget(userId: '17', isManUser: false, 
              
             ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),

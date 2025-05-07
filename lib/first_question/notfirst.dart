@@ -274,7 +274,7 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
       body: jsonEncode({
         'user_id': int.parse(userId),
         'previous_nipple_pain_level': painIndex,
-        'nipple_cracking': brokenSkin == '是' ? '是'  : '否',
+        'nipple_cracking': brokenSkin == 'yes' ? '是'  : '否',
         'previous_breastfeeding_selectedDuration_months': int.parse(selectedDuration),
       }),
     );

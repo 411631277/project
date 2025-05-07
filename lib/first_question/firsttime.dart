@@ -173,7 +173,7 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
       'user_id': int.parse(userId),
-       'first_time_delivery': firstTimeAnswer == '是' ? '是' : '否', 
+       'first_time_delivery': firstTimeAnswer == 'yes' ? '是' : '否', 
     }),
   );
 

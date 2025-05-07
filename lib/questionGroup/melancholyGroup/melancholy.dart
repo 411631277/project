@@ -292,9 +292,11 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
   // 取得今天日期（格式：2025-04-19）
   final now = DateTime.now();
   final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+  final String idKey = widget.isManUser ? 'man_user_id' : 'user_id';
+
 
   final Map<String, dynamic> payload = {
-    'user_id': int.parse(userId),
+    idKey: int.parse(userId),
     "dour_question_content": "產後憂鬱量表",
     'dour_test_date': formattedDate,
     'dour_score': totalScore, // 🔥 新增總分
