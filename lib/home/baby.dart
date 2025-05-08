@@ -247,53 +247,63 @@ class _BabyWidgetState extends State<BabyWidget> {
   }
 
   Widget _buildGenderSelector() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 90,
-            child: Text(
-              '性別',
-              style: const TextStyle(
-                fontSize: 18,
-                color: Color.fromRGBO(147, 129, 108, 1),
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 90,
+          child: Text(
+            '性別',
+            style: const TextStyle(
+              fontSize: 18,
+              color: Color.fromRGBO(147, 129, 108, 1),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Wrap(
+            alignment: WrapAlignment.spaceEvenly,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Radio<String>(
+                    value: '男生',
+                    groupValue: babyGenderController.text,
+                    onChanged: (value) {
+                      setState(() {
+                        babyGenderController.text = value ?? '';
+                      });
+                    },
+                  ),
+                  const Text('男生'),
+                ],
               ),
-            ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Radio<String>(
+                    value: '女生',
+                    groupValue: babyGenderController.text,
+                    onChanged: (value) {
+                      setState(() {
+                        babyGenderController.text = value ?? '';
+                      });
+                    },
+                  ),
+                  const Text('女生'),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(width: 100),
-          Expanded(
-            child: Row(
-              children: [
-                Radio<String>(
-                  value: '男生',
-                  groupValue: babyGenderController.text,
-                  onChanged: (value) {
-                    setState(() {
-                      babyGenderController.text = value ?? '';
-                    });
-                  },
-                ),
-                const Text('男生'),
-                const SizedBox(width: 30),
-                Radio<String>(
-                  value: '女生',
-                  groupValue: babyGenderController.text,
-                  onChanged: (value) {
-                    setState(() {
-                      babyGenderController.text = value ?? '';
-                    });
-                  },
-                ),
-                const Text('女生'),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildWeightPickerField(
       String label, TextEditingController controller) {
