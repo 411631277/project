@@ -35,14 +35,22 @@ class _BabyWidgetState extends State<BabyWidget> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-        body: Container(
-      width: screenWidth,
-      height: screenHeight,
-      decoration: const BoxDecoration(
-        color: Color.fromRGBO(233, 227, 213, 1),
+  body: GestureDetector(
+    onTap: () {
+      FocusScope.of(context).unfocus(); // 點擊空白處收起鍵盤
+    },
+    child: SingleChildScrollView(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom, // 避開鍵盤
       ),
-      child: Stack(
-        children: <Widget>[
+      child: Container(
+        width: screenWidth,
+        height: screenHeight,
+        decoration: const BoxDecoration(
+          color: Color.fromRGBO(233, 227, 213, 1),
+        ),
+        child: Stack(
+          children: <Widget>[
           // ---------- 原本的 Scrollable 欄位放這裡 ----------
           SingleChildScrollView(
             padding: const EdgeInsets.symmetric(vertical: 32),
@@ -176,7 +184,7 @@ class _BabyWidgetState extends State<BabyWidget> {
           ),
         ],
       ),
-    ));
+    ))));
   }
 
   // **返回按鈕**

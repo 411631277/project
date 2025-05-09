@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -36,7 +36,15 @@ class _DetaWidgetState extends State<DetaWidget> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      body: Container(
+  body: GestureDetector(
+    onTap: () {
+      FocusScope.of(context).unfocus(); // 點擊空白處收起鍵盤
+    },
+    child: SingleChildScrollView(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom, // 避開鍵盤
+      ),
+      child: Container(
         width: screenWidth,
         height: screenHeight,
         decoration: const BoxDecoration(
@@ -172,12 +180,12 @@ class _DetaWidgetState extends State<DetaWidget> {
             Positioned(
               top: screenHeight * 0.72,
               left: screenWidth * 0.05,
-              child: _textFieldWidget(emergencyPhone1, screenWidth * 0.4),
+              child: _textFieldWidget(emergencyPhone1, screenWidth * 0.4 ,isPhone: true),
             ),
             Positioned(
               top: screenHeight * 0.72,
               left: screenWidth * 0.55,
-              child: _textFieldWidget(emergencyPhone2, screenWidth * 0.4),
+              child: _textFieldWidget(emergencyPhone2, screenWidth * 0.4 , isPhone: true),
             ),
 
             // **返回按鈕**
@@ -219,7 +227,7 @@ class _DetaWidgetState extends State<DetaWidget> {
           ],
         ),
       ),
-    );
+    )));
   }
 
   //===========================
@@ -238,25 +246,31 @@ class _DetaWidgetState extends State<DetaWidget> {
     );
   }
 
-  Widget _textFieldWidget(TextEditingController controller, double width) {
-    return SizedBox(
-      width: width,
-      height: 35,
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5),
-            borderSide: BorderSide(color: Colors.grey.shade400),
-          ),
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+  Widget _textFieldWidget(TextEditingController controller, double width, {bool isPhone = false}) {
+  return SizedBox(
+    width: width,
+    height: 35,
+    child: TextField(
+      controller: controller,
+      keyboardType: isPhone ? TextInputType.number : TextInputType.text,
+      inputFormatters: isPhone
+          ? [
+              FilteringTextInputFormatter.digitsOnly, // 只允許數字
+              LengthLimitingTextInputFormatter(10),  // 最多 10 位
+            ]
+          : [],
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5),
+          borderSide: BorderSide(color: Colors.grey.shade400),
         ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       ),
-    );
-  }
+    ),
+  );
+}
 
   /// 日期選擇器：不回傳 Positioned，只回傳 GestureDetector + _textFieldWidget
   Widget _datePickerWidget(TextEditingController controller, double width) {
