@@ -4,9 +4,11 @@ import 'package:doctor_2/first_question/first_breastfeeding.dart';
 import 'package:doctor_2/first_question/firsttime.dart';
 import 'package:doctor_2/first_question/frequency.dart';
 import 'package:doctor_2/first_question/notyet.dart';
+import 'package:doctor_2/first_question/pregnancydate.dart';
 import 'package:doctor_2/first_question/stop.dart';
 import 'package:doctor_2/first_question/notfirst.dart';
 import 'package:doctor_2/first_question/nowfeeding.dart';
+import 'package:doctor_2/first_question/weekpregnancy.dart';
 import 'package:doctor_2/first_question/yesyet.dart';
 import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/baby_acc.dart';
@@ -111,7 +113,9 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) => MainScreenWidget(), // 主畫面
+        '/': (context) => PregnancyDate(
+              userId: '8',
+            ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
@@ -159,14 +163,14 @@ class _MyAppState extends State<MyApp> {
           );
         }
         if (settings.name == '/SleepIntroducePage') {
-      final args = settings.arguments as Map<String, dynamic>;
-      return MaterialPageRoute(
-        builder: (context) => SleepIntroducePage(
-          userId: args['userId'],
-          isManUser: args['isManUser'],
-        ),
-      );
-    }
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => SleepIntroducePage(
+              userId: args['userId'],
+              isManUser: args['isManUser'],
+            ),
+          );
+        }
         if (settings.name == '/SuccessWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
@@ -180,15 +184,14 @@ class _MyAppState extends State<MyApp> {
           );
         }
         if (settings.name == '/MaternalConnectionPage') {
-         final args = settings.arguments as Map<String, dynamic>;
-return MaterialPageRoute(
-  builder: (context) => MaternalConnectionPage(
-    userId: args['userId'],
-  ),
-);
-
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => MaternalConnectionPage(
+              userId: args['userId'],
+            ),
+          );
         }
-         if (settings.name == '/DourIntroduce1Page') {
+        if (settings.name == '/DourIntroduce1Page') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => DourIntroduce1Page(
@@ -203,18 +206,18 @@ return MaterialPageRoute(
             builder: (context) => BornWidget(userId: userId),
           );
         }
-     if (settings.name == '/QuestionWidget') {
-  final args = settings.arguments as Map<String, dynamic>;
-  final userId = args['userId'] as String;
-  final isManUser = args['isManUser'] as bool;
+        if (settings.name == '/QuestionWidget') {
+          final args = settings.arguments as Map<String, dynamic>;
+          final userId = args['userId'] as String;
+          final isManUser = args['isManUser'] as bool;
 
-  return MaterialPageRoute(
-    builder: (context) => QuestionWidget(
-      userId: userId,
-      isManUser: isManUser,
-    ),
-  );
-}
+          return MaterialPageRoute(
+            builder: (context) => QuestionWidget(
+              userId: userId,
+              isManUser: isManUser,
+            ),
+          );
+        }
         if (settings.name == '/FrequencyWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
@@ -272,6 +275,19 @@ return MaterialPageRoute(
             builder: (context) => YesyetWidget(userId: userId),
           );
         }
+        if (settings.name == '/PregnancyDate') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => PregnancyDate(userId: userId),
+          );
+        }
+        if (settings.name == '/WeekPregnancy') {
+          final userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => WeekPregnancy(userId: userId),
+          );
+        }
+
         if (settings.name == '/StopWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
@@ -301,23 +317,23 @@ return MaterialPageRoute(
                     isManUser: args['isManUser'],
                   ));
         }
-         if (settings.name == '/KnowledgeWidget') {
+        if (settings.name == '/KnowledgeWidget') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
               builder: (context) => KnowledgeWidget(
                     userId: args['userId'],
                     isManUser: args['isManUser'],
                   ));
-        }      
-         if (settings.name == '/MelancholyWidget') {
-      final args = settings.arguments as Map<String, dynamic>;
-      return MaterialPageRoute(
-        builder: (context) => MelancholyWidget(
-          userId: args['userId'],
-          isManUser: args['isManUser'],
-        ),
-      );
-    }
+        }
+        if (settings.name == '/MelancholyWidget') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => MelancholyWidget(
+              userId: args['userId'],
+              isManUser: args['isManUser'],
+            ),
+          );
+        }
         if (settings.name == '/ProdutionWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
@@ -330,32 +346,31 @@ return MaterialPageRoute(
             builder: (context) => AttachmentWidget(userId: userId),
           );
         }*/
-    
-          if (settings.name == '/SleepWidget') {
-      final args = settings.arguments as Map<String, dynamic>;
-      return MaterialPageRoute(
-        builder: (context) => SleepWidget(
-          userId: args['userId'],
-          isManUser: args['isManUser'],
-        ),
-      );
-    }
-        if (settings.name == '/PainScaleWidget') {
-         final args = settings.arguments as Map<String, dynamic>;
-return MaterialPageRoute(
-  builder: (context) => PainScaleWidget(
-    userId: args['userId'],
-  ),
-);
 
+        if (settings.name == '/SleepWidget') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => SleepWidget(
+              userId: args['userId'],
+              isManUser: args['isManUser'],
+            ),
+          );
+        }
+        if (settings.name == '/PainScaleWidget') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => PainScaleWidget(
+              userId: args['userId'],
+            ),
+          );
         }
         if (settings.name == '/RoommateWidget') {
-         final args = settings.arguments as Map<String, dynamic>;
-return MaterialPageRoute(
-  builder: (context) => RoommateWidget(
-    userId: args['userId'],
-  ),
-);
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => RoommateWidget(
+              userId: args['userId'],
+            ),
+          );
         }
         if (settings.name == '/DetaWidget') {
           final args = settings.arguments as Map<String, dynamic>;
@@ -411,17 +426,17 @@ return MaterialPageRoute(
             ),
           );
         }
-    
+
         if (settings.name == '/Melancholyscore') {
-      final args = settings.arguments as Map<String, dynamic>;
-      return MaterialPageRoute(
-        builder: (context) => Melancholyscore(
-          userId: args['userId'],
-          isManUser: args['isManUser'],
-          totalScore: args['totalScore'] as int,
-        ),
-      );
-    }
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => Melancholyscore(
+              userId: args['userId'],
+              isManUser: args['isManUser'],
+              totalScore: args['totalScore'] as int,
+            ),
+          );
+        }
         if (settings.name == '/KnowledgeScore') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
@@ -439,7 +454,7 @@ return MaterialPageRoute(
               userId: args['userId'] as String,
               totalScore: args['totalScore'] as int,
               scoreMap: args['scoreMap'] as Map<String, int>,
-               isManUser: args['isManUser'],
+              isManUser: args['isManUser'],
             ),
           );
         }
