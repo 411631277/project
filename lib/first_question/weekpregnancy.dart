@@ -104,7 +104,11 @@ class WeekPregnancyState extends State<WeekPregnancy> {
                     await _sendWeekDataToFirebase();
                     await _sendWeekDataToMySQL();
                     if (!context.mounted) return;
-                    Navigator.pushNamed(context, '/Notyet1Widget');
+                    Navigator.pushNamed(
+  context,
+  '/Notyet1Widget',
+  arguments: widget.userId, 
+);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.brown,

@@ -79,7 +79,7 @@ class PregnancyDateState extends State<PregnancyDate> {
                     await _sendWeekDataToFirebase();
                     await _sendWeekDataToMySQL();
                     if (!context.mounted) return;
-                    Navigator.pushNamed(context, '/YesyetWidget');
+                    Navigator.pushNamed(context, '/YesyetWidget' ,arguments: widget.userId,);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.brown,

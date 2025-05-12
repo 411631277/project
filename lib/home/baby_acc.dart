@@ -42,7 +42,7 @@ class BabyAccWidget extends StatelessWidget {
             // **成功訊息**
             Positioned(
               top: screenHeight * 0.40,
-              left: screenWidth * 0.27,
+              left: screenWidth * 0.3,
               child: const Text(
                 '寶寶資料創建成功',
                 textAlign: TextAlign.center,
