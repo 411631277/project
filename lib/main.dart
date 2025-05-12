@@ -113,8 +113,8 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) => PregnancyDate(
-              userId: '8',
+        '/': (context) => MainScreenWidget(
+           
             ), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),

@@ -1,6 +1,7 @@
 import 'package:doctor_2/function/agree.dart';
 import 'package:doctor_2/login/login.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 //註解已完成
 
@@ -25,7 +26,7 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
         bool shouldExit = await _showExitDialog(context);
         if (shouldExit && mounted) {
         if (!context.mounted) return;
-          Navigator.of(context).pop(); // 離開 App (在第一層會直接退出)
+          SystemNavigator.pop();  // 離開 App (在第一層會直接退出)
         }
       },
       child: Scaffold(

@@ -110,81 +110,88 @@ double getCaloriesBurned() {
 
 
   /// **🔹 從 Firebase 讀取「今天」的步數資料**
-  Future<void> _loadStepsForToday() async {
-    try {
-      _currentDay = DateTime.now().toString().substring(0, 10);
+Future<void> _loadStepsForToday() async {
+  try {
+    _currentDay = DateTime.now().toString().substring(0, 10);
 
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .collection('count')
-          .doc(_currentDay)
-          .get(GetOptions(source: Source.server));
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('count')
+        .doc(_currentDay)
+        .get(GetOptions(source: Source.server));
 
-      if (doc.exists && doc.data() != null) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        int firebaseSteps = data['步數'] ?? 0;
-        int firebaseLastDeviceSteps = data['lastDeviceSteps'] ?? 0;
+    int firebaseSteps = 0;
+    int firebaseLastDeviceSteps = 0;
 
-        setState(() {
-          _stepCount = firebaseSteps;
-          _lastDeviceSteps =
-              (firebaseLastDeviceSteps != 0) ? firebaseLastDeviceSteps : null;
-        });
-        logger.i(
-            "載入今天 $_currentDay 的步數: $_stepCount, lastDeviceSteps=$_lastDeviceSteps");
-      } else {
-        // 沒有資料 => 初始化
-        setState(() {
-          _stepCount = 0;
-          _lastDeviceSteps = null;
-        });
-        await _saveStepsForToday();
-        logger.i("今天 $_currentDay 尚無資料，已初始化: 步數=0, lastDeviceSteps=null");
-      }
-    } catch (e) {
-      logger.e("❌ 讀取 Firebase 步數錯誤: $e");
+    if (doc.exists && doc.data() != null) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      firebaseSteps = data['步數'] ?? 0;
+      firebaseLastDeviceSteps = data['lastDeviceSteps'] ?? 0;
     }
+
+    // 🔄 主動去獲取當前裝置的步數
+    StepCount initialStep = await Pedometer.stepCountStream.first;
+    int currentDeviceSteps = initialStep.steps;
+
+    int difference = 0;
+
+    // 如果裝置步數大於 Firebase 記錄，就進行補償
+    if (firebaseLastDeviceSteps != 0 && currentDeviceSteps > firebaseLastDeviceSteps) {
+      difference = currentDeviceSteps - firebaseLastDeviceSteps;
+    }
+
+    setState(() {
+      _stepCount = firebaseSteps + difference;
+      _lastDeviceSteps = currentDeviceSteps;
+    });
+
+    logger.i("🔄 啟動時同步裝置步數，補償差額 +$difference, 總步數：$_stepCount");
+
+    // 最後更新到 Firebase
+    await _saveStepsForToday();
+
+  } catch (e) {
+    logger.e("❌ 讀取 Firebase 步數錯誤: $e");
   }
+}
 
-  /// **🔹 監聽裝置計步器事件，若跨天就存檔到前一天，再切換到新的一天 doc**
+
+  /// **🔹 監聽裝置計步器事件，若跨天就存檔到前一天，再切換到新的一天 doc**(更新過的步數)
   void initPedometer() {
-    try {
-      _stepSubscription = Pedometer.stepCountStream.listen((StepCount event) {
-        if (!mounted) return;
+  try {
+    _stepSubscription = Pedometer.stepCountStream.listen((StepCount event) {
+      if (!mounted) return;
 
-        String today = DateTime.now().toString().substring(0, 10);
+      String today = DateTime.now().toString().substring(0, 10);
 
-        // 若日期變更 => 表示跨天
-        if (_currentDay != today) {
-          // 先把舊日最終步數存檔
-          _saveStepsForToday();
+      // 檢查是否是新的一天
+      if (_currentDay != today) {
+        // 儲存前一天的資料
+        _saveStepsForToday();
+        
+        // 換到新的一天
+        setState(() {
+          _currentDay = today;
+          _stepCount = 0;
+          _lastDeviceSteps = event.steps;
+        });
+        _saveStepsForToday();
+        logger.i("跨天: 由 $_currentDay 切換到 $today, 步數歸0, 基準=${event.steps}");
+        return;
+      }
 
-          // 切換到新的一天
-          setState(() {
-            _currentDay = today;
-            _stepCount = 0;
-            _lastDeviceSteps = event.steps; // 以當前裝置值作為新基準
-          });
-          _saveStepsForToday();
-          logger.i("跨天: 由 $_currentDay 切換到 $today, 步數歸0, 基準=${event.steps}");
-          return;
-        }
+      // 當天的累加
+      int currentDeviceSteps = event.steps;
 
-        // 沒跨天 => 正常累加
-        int currentDeviceSteps = event.steps;
-
-        // 第一次事件 => 設置基準
-        if (_lastDeviceSteps == null) {
-          setState(() {
-            _lastDeviceSteps = currentDeviceSteps;
-          });
-          _saveStepsForToday();
-          logger.i("第一次事件 => 設定基準: _lastDeviceSteps=$currentDeviceSteps");
-          return;
-        }
-
-        // 計算差量
+      if (_lastDeviceSteps == null) {
+        setState(() {
+          _lastDeviceSteps = currentDeviceSteps;
+          _stepCount = 0;
+        });
+        _saveStepsForToday();
+        logger.i("🔹 第一次啟動時的基準: $_lastDeviceSteps");
+      } else {
         int difference = currentDeviceSteps - _lastDeviceSteps!;
         if (difference > 0) {
           setState(() {
@@ -194,20 +201,22 @@ double getCaloriesBurned() {
           _saveStepsForToday();
           logger.i("步數增加 +$difference => 總步數 $_stepCount");
         } else if (difference < 0) {
-          // 如果計步器被重置或手機重開機 => 重新設定基準
+          // 計步器歸零，重啟裝置
           setState(() {
             _lastDeviceSteps = currentDeviceSteps;
           });
           _saveStepsForToday();
-          logger.w("計步器歸零/重開機，重設基準為 $currentDeviceSteps");
+          logger.w("⚠️ 計步器歸零，重新設定基準：$currentDeviceSteps");
         }
-      }, onError: (error) {
-        logger.e("計步器錯誤: $error");
-      });
-    } catch (e) {
-      logger.e("初始化計步器失敗: $e");
-    }
+      }
+    }, onError: (error) {
+      logger.e("計步器錯誤: $error");
+    });
+  } catch (e) {
+    logger.e("初始化計步器失敗: $e");
   }
+}
+
 
   /// **🔹 將當前的 _stepCount、_lastDeviceSteps 存到「當天 doc」中**
   Future<void> _saveStepsForToday() async {
