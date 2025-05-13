@@ -36,14 +36,13 @@ class _DetaWidgetState extends State<DetaWidget> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+       backgroundColor: const Color.fromRGBO(233, 227, 213, 1), 
   body: GestureDetector(
     onTap: () {
       FocusScope.of(context).unfocus(); // 點擊空白處收起鍵盤
     },
     child: SingleChildScrollView(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom, // 避開鍵盤
-      ),
+      physics: const ClampingScrollPhysics(),
       child: Container(
         width: screenWidth,
         height: screenHeight,

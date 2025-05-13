@@ -110,6 +110,7 @@ double getCaloriesBurned() {
 
 
   /// **🔹 從 Firebase 讀取「今天」的步數資料**
+/// **🔹 從 Firebase 讀取「今天」的步數資料**
 Future<void> _loadStepsForToday() async {
   try {
     _currentDay = DateTime.now().toString().substring(0, 10);
@@ -130,15 +131,26 @@ Future<void> _loadStepsForToday() async {
       firebaseLastDeviceSteps = data['lastDeviceSteps'] ?? 0;
     }
 
-    // 🔄 主動去獲取當前裝置的步數
-    StepCount initialStep = await Pedometer.stepCountStream.first;
+    // 🔄 改用 Pedometer 的 stream + 等待事件
+    final completer = Completer<StepCount>();
+    final subscription = Pedometer.stepCountStream.listen((event) {
+      if (!completer.isCompleted) {
+        completer.complete(event);
+      }
+    });
+
+    StepCount initialStep = await completer.future;
+    subscription.cancel(); // 停止監聽
+
     int currentDeviceSteps = initialStep.steps;
 
     int difference = 0;
 
-    // 如果裝置步數大於 Firebase 記錄，就進行補償
+    // 🔎 判斷是否有差異，若有則補償
     if (firebaseLastDeviceSteps != 0 && currentDeviceSteps > firebaseLastDeviceSteps) {
       difference = currentDeviceSteps - firebaseLastDeviceSteps;
+    } else if (firebaseLastDeviceSteps == 0) {
+      difference = currentDeviceSteps;
     }
 
     setState(() {
@@ -155,6 +167,7 @@ Future<void> _loadStepsForToday() async {
     logger.e("❌ 讀取 Firebase 步數錯誤: $e");
   }
 }
+
 
 
   /// **🔹 監聽裝置計步器事件，若跨天就存檔到前一天，再切換到新的一天 doc**(更新過的步數)

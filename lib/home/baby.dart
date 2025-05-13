@@ -40,9 +40,7 @@ class _BabyWidgetState extends State<BabyWidget> {
       FocusScope.of(context).unfocus(); // 點擊空白處收起鍵盤
     },
     child: SingleChildScrollView(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom, // 避開鍵盤
-      ),
+     
       child: Container(
         width: screenWidth,
         height: screenHeight,
