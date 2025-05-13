@@ -7,8 +7,8 @@ final Logger logger = Logger();
 
 class MateWidget extends StatefulWidget {
   final String userId; // 🔹 從上一頁傳來的 userId
-
-  const MateWidget({super.key, required this.userId});
+  final bool isManUser;
+  const MateWidget({super.key, required this.userId ,  required this.isManUser});
 
   @override
   State<MateWidget> createState() => _MateWidgetState();
@@ -25,34 +25,42 @@ class _MateWidgetState extends State<MateWidget> {
   }
 
   // **🔹 從 Firebase 讀取配對碼與使用狀態**
-  Future<void> fetchPairingCode() async {
-    try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .get();
+ Future<void> fetchPairingCode() async {
+  try {
+    // 選擇正確的 Firebase Collection
+    final collectionName = widget.isManUser ? "Man_users" : "users";
+    
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection(collectionName)
+        .doc(widget.userId)
+        .get();
 
-      if (userDoc.exists) {
-        setState(() {
-          pairingCode = userDoc['配對碼'] ?? "未設定";
-
-          // **如果 Firestore 裡沒有 "配對碼已使用"，就預設為 false**
-          isPairingUsed = userDoc.data().toString().contains('配對碼已使用')
-              ? (userDoc['配對碼已使用'] ?? false)
-              : false;
-        });
-      } else {
-        setState(() {
-          pairingCode = "無效的用戶";
-        });
-      }
-    } catch (e) {
+    if (userDoc.exists) {
       setState(() {
-        pairingCode = "已配對";
+        pairingCode = userDoc['配對碼'] ?? "未設定";
+        
+        // 🔍 檢查是否已使用
+        isPairingUsed = userDoc.data().toString().contains('配對碼已使用')
+            ? (userDoc['配對碼已使用'] ?? false)
+            : false;
+
+        // 🔹 顯示的邏輯調整
+        if (!widget.isManUser && isPairingUsed) {
+          pairingCode = "已配對"; // 如果是媽媽且配對碼已使用，顯示「已配對」
+        }
       });
-      logger.e("❌ 讀取配對碼錯誤: $e");
+    } else {
+      setState(() {
+        pairingCode = "無效的用戶";
+      });
     }
+  } catch (e) {
+    setState(() {
+      pairingCode = "讀取錯誤";
+    });
+    logger.e("❌ 讀取配對碼錯誤: $e");
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -114,36 +122,32 @@ class _MateWidgetState extends State<MateWidget> {
               ),
             ),
             // **配對碼顯示區塊**
-            Positioned(
-              top: screenHeight * 0.35,
-              left: screenWidth * 0.42,
-              child: Container(
-                width: screenWidth * 0.4,
-                height: screenHeight * 0.04,
-                decoration: BoxDecoration(
-                  color: isPairingUsed
-                      ? Colors.red[100] // **已使用則背景變紅**
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Center(
-                  child: Text(
-                    isPairingUsed
-                        ? "配對碼已使用"
-                        : pairingCode, // **顯示已使用 or 正常配對碼**
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: isPairingUsed
-                          ? Colors.red // **已使用則文字變紅**
-                          : const Color.fromRGBO(147, 129, 108, 1),
-                      fontFamily: 'Poppins',
-                      fontSize: screenWidth * 0.045,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          Positioned(
+  top: screenHeight * 0.35,
+  left: screenWidth * 0.42,
+  child: Container(
+    width: screenWidth * 0.4,
+    height: screenHeight * 0.04,
+    decoration: BoxDecoration(
+      color: isPairingUsed ? Colors.red[100] : Colors.white,
+      borderRadius: BorderRadius.circular(5),
+    ),
+    child: Center(
+      child: Text(
+        pairingCode, // 🔹 直接顯示修改後的配對碼或狀態
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: isPairingUsed
+              ? Colors.red
+              : const Color.fromRGBO(147, 129, 108, 1),
+          fontFamily: 'Poppins',
+          fontSize: screenWidth * 0.045,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+  ),
+),
             // **返回按鈕**
             Positioned(
               top: screenHeight * 0.75,
