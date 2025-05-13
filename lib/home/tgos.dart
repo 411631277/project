@@ -17,7 +17,7 @@ class _TgosMapPageState extends State<TgosMapPage> {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..loadRequest(
-        Uri.parse('https://www.tgos.tw/MapSites/EmbedMap?themeid=44752&visual=point'),
+        Uri.parse('https://www.tgos.tw/MapSites/EmbedMap?themeid=44752&visual=class'),
       );
   }
 
