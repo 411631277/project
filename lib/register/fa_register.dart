@@ -537,6 +537,7 @@ Future<bool> _validatePairingCode(String inputCode) async {
           ? otherDiseaseController.text
           : null;
     }
+    
 
     await FirebaseFirestore.instance
     .collection('Man_users')
@@ -559,24 +560,7 @@ Future<bool> _validatePairingCode(String inputCode) async {
       '慢性病症狀': selectedChronicDiseases,
     });
 
-    // ✅ 標記配對碼為已使用
-    if (pairingCodeController.text.isNotEmpty) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .where('配對碼', isEqualTo: pairingCodeController.text.trim())
-          .limit(1)
-          .get()
-          .then((query) async {
-            if (query.docs.isNotEmpty) {
-              final docId = query.docs.first.id;
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(docId)
-                  .update({'配對碼已使用': true});
-              logger.i('✅ 配對碼已標記為使用');
-            }
-          });
-    }
+     await _updatePairingStatus();
 
     logger.i("✅ 使用者資料已存入 Firebase，ID：$userId");
     return userId;
@@ -584,6 +568,57 @@ Future<bool> _validatePairingCode(String inputCode) async {
   } catch (e) {
     logger.e("❌ 註冊流程錯誤：$e");
     return null;
+  }
+}
+
+Future<void> _updatePairingStatus() async {
+  final pairingCode = pairingCodeController.text.trim();
+  int retries = 0;
+  bool isUpdated = false;
+
+  while (retries < 3 && !isUpdated) {
+    // 🔍 查找媽媽的文件
+    final query = await FirebaseFirestore.instance
+        .collection('users')
+        .where('配對碼', isEqualTo: pairingCode)
+        .limit(1)
+        .get();
+
+    if (query.docs.isNotEmpty) {
+      final docRef = query.docs.first.reference;
+
+      // 🔄 使用 transaction 確保同步更新
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final docSnapshot = await transaction.get(docRef);
+
+        if (docSnapshot.exists) {
+          // 🔎 如果資料中沒有 '配對碼已使用'，我們假設是 false
+          bool isUsed = docSnapshot.data()?['配對碼已使用'] ?? false;
+
+          if (!isUsed) {
+            transaction.update(docRef, {
+              '配對碼已使用': true,
+            });
+            isUpdated = true;
+            logger.i('✅ 媽媽的配對碼已標記為使用');
+          } else {
+            logger.w('⚠️ 媽媽的配對碼已被使用');
+          }
+        }
+      }).catchError((e) {
+        logger.e('❌ 更新配對碼失敗: $e');
+      });
+    }
+
+    if (!isUpdated) {
+      retries++;
+      logger.w('⚠️ 第 $retries 次查無此配對碼，等待重試...');
+      await Future.delayed(const Duration(seconds: 3)); // 3 秒後再試
+    }
+  }
+
+  if (!isUpdated) {
+    logger.e('❌ 無法找到配對碼，更新失敗');
   }
 }
 
