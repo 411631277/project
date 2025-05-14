@@ -285,26 +285,47 @@ class FaRegisterWidget extends StatefulWidget {
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                onPressed: () async {
-                  final code = pairingCodeController.text.trim();
-                  if (code.isEmpty) {
-                    setState(() => pairingResult = '請輸入配對碼');
-                    return;
-                  }
+              onPressed: () async {
+  final code = pairingCodeController.text.trim();
+  if (code.isEmpty) {
+    setState(() => pairingResult = '請輸入配對碼');
+    return;
+  }
 
-                  final query = await FirebaseFirestore.instance
-                      .collection('users')
-                      .where('配對碼', isEqualTo: code)
-                      .get();
+  try {
+    logger.i("📌 嘗試查找配對碼: $code");
 
-                  if (query.docs.isNotEmpty) {
-                    final doc = query.docs.first;
-                    final name = doc['名字'] ?? '未知';
-                    setState(() => pairingResult = '配對人為 $name');
-                  } else {
-                    setState(() => pairingResult = '無此配對碼');
-                  }
-                },
+    // 🔍 查找 `users` 是否存在該配對碼
+    final query = await FirebaseFirestore.instance
+        .collection('users')
+        .where('配對碼', isEqualTo: code)
+        .get();
+
+    if (query.docs.isNotEmpty) {
+      final doc = query.docs.first;
+      final name = doc['名字'] ?? '未知';
+      final isUsed = doc['配對碼已使用'] ?? false;
+
+      if (isUsed) {
+        setState(() => pairingResult = '此配對碼已被使用');
+        logger.w("⚠️ 配對碼已被使用: $code");
+        return;
+      }
+
+      // 顯示配對人
+      setState(() => pairingResult = '配對人為 $name');
+      logger.i("✅ 配對成功: $name");
+
+    } else {
+      logger.w("❌ 沒有找到對應的配對碼");
+      setState(() => pairingResult = '無此配對碼');
+    }
+  } catch (e) {
+    logger.e("配對檢查錯誤: $e");
+    setState(() => pairingResult = '配對檢查錯誤');
+  }
+},
+
                 child: const Text('檢查'),
               ),
             ],
@@ -335,20 +356,43 @@ class FaRegisterWidget extends StatefulWidget {
                     );
                   }
                   ),
-                  _buildButton('下一步', Colors.blue, () async {
-            setState(() => pairingCodeErrorMessage = null);
-            final code = pairingCodeController.text.trim();
-            if (code.isNotEmpty) {
-              final isValid = await _validatePairingCode(code);
-              if (!isValid) {
-                setState(() => pairingCodeErrorMessage = '配對碼錯誤或已被使用');
-                return;
-              }
-            }
-            final userId = await _saveUserData();
-            if (!context.mounted) return;
-            if (userId != null) {
-              Navigator.pushNamed(context, '/FaSuccessWidget', arguments: userId);
+                 _buildButton('下一步', Colors.blue, () async {
+  setState(() => pairingCodeErrorMessage = null);
+
+  final code = pairingCodeController.text.trim();
+  bool isPaired = false;
+
+  // 如果有填配對碼，先檢查
+  if (code.isNotEmpty) {
+    final isValid = await _validatePairingCode(code);
+    if (!isValid) {
+      setState(() => pairingCodeErrorMessage = '配對碼錯誤或已被使用');
+      return;
+    } else {
+      isPaired = true;  // 配對成功標記為 true
+    }
+  }
+
+  // 🔄 這裡才正式執行儲存
+  final userId = await _saveUserData();
+  if (!context.mounted) return;
+  if (userId != null) {
+    // ✅ 註冊完成後，只有配對成功時，才更新 Firebase
+    if (isPaired) {
+      await FirebaseFirestore.instance
+          .collection('Man_users')
+          .doc(userId)
+          .update({'配對成功': true}).then((_) {
+        logger.i("✅ Man_users 中的配對成功設為 true");
+      }).catchError((e) {
+        logger.e("🔥 Firebase 更新錯誤: $e");
+      });
+    } else {
+      logger.i("⚠️ 未輸入配對碼，不標記配對成功");
+    }
+
+    if (!context.mounted) return;
+    Navigator.pushNamed(context, '/FaSuccessWidget', arguments: userId);
             }
           }),
         ],
@@ -537,7 +581,6 @@ Future<bool> _validatePairingCode(String inputCode) async {
           ? otherDiseaseController.text
           : null;
     }
-    
 
     await FirebaseFirestore.instance
     .collection('Man_users')
@@ -558,11 +601,28 @@ Future<bool> _validatePairingCode(String inputCode) async {
       'answers': answers,
       '是否有慢性病': hasChronicDisease,
       '慢性病症狀': selectedChronicDiseases,
-       '配對碼': pairingCodeController.text.trim(), 
-       '配對成功': false,
+      '配對碼': pairingCodeController.text.trim(), 
+      '配對成功': false,
     });
 
-     await _updatePairingStatus();
+    // ✅ 標記配對碼為已使用
+    if (pairingCodeController.text.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .where('配對碼', isEqualTo: pairingCodeController.text.trim())
+          .limit(1)
+          .get()
+          .then((query) async {
+            if (query.docs.isNotEmpty) {
+              final docId = query.docs.first.id;
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(docId)
+                  .update({'配對碼已使用': true});
+              logger.i('✅ 配對碼已標記為使用');
+            }
+          });
+    }
 
     logger.i("✅ 使用者資料已存入 Firebase，ID：$userId");
     return userId;
@@ -573,120 +633,50 @@ Future<bool> _validatePairingCode(String inputCode) async {
   }
 }
 
-Future<void> _updatePairingStatus() async {
-  final pairingCode = pairingCodeController.text.trim();
-  int retries = 0;
-  bool isUpdated = false;
-
-  while (retries < 3 && !isUpdated) {
-    // 🔍 查找媽媽的文件
-    final query = await FirebaseFirestore.instance
-        .collection('users')
-        .where('配對碼', isEqualTo: pairingCode)
-        .limit(1)
-        .get();
-
-    if (query.docs.isNotEmpty) {
-      final docRef = query.docs.first.reference;
-
-      // 🔄 使用 transaction 確保同步更新
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final docSnapshot = await transaction.get(docRef);
-
-        if (docSnapshot.exists) {
-          // 🔎 如果資料中沒有 '配對碼已使用'，我們假設是 false
-          bool isUsed = docSnapshot.data()?['配對碼已使用'] ?? false;
-
-          if (!isUsed) {
-            transaction.update(docRef, {
-              '配對碼已使用': true,
-            });
-            isUpdated = true;
-            logger.i('✅ 媽媽的配對碼已標記為使用');
-          } else {
-            logger.w('⚠️ 媽媽的配對碼已被使用');
-          }
-        }
-      }).catchError((e) {
-        logger.e('❌ 更新配對碼失敗: $e');
-      });
-
-      if (isUpdated) {
-        // 🔄 同步更新爸爸的資料
-        final userId = await FirebaseFirestore.instance
-            .collection('Man_users')
-            .where('配對碼', isEqualTo: pairingCode)
-            .limit(1)
-            .get();
-
-        if (userId.docs.isNotEmpty) {
-          final dadDocRef = userId.docs.first.reference;
-          await dadDocRef.update({
-            '配對成功': true,  // ✅ 更新配對成功的欄位
-          });
-          logger.i('✅ 爸爸的配對成功欄位已更新');
-        } else {
-          logger.w('⚠️ 找不到對應的爸爸資料，無法更新');
-        }
-      }
-    }
-  }
-}
-
-
 
 Future<bool> sendDataToMySQL(String userId) async {
   final url = Uri.parse('http://163.13.201.85:3000/man_users');
 
-  // 🔎 構建資料時檢查配對碼是否為空
-  final pairingCode = pairingCodeController.text.trim();
-  Map<String, dynamic> payload = {
-    'man_user_name': nameController.text,
-    'user_id': int.parse(userId),
-    'man_user_email': emailController.text,
-    'man_user_gender': "男",
-    'man_user_salutation': isNewMom == true ? "是" : "否",
-    'man_user_birthdate': formatBirthForMySQL(birthController.text),
-    'man_user_phone': phoneController.text,
-    'man_user_id_number': accountController.text,
-    'man_user_height': double.tryParse(heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
-    'man_current_weight': double.tryParse(weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
-    'man_emergency_contact_name': "",
-    'man_emergency_contact_phone': "",
-    'man_betel_nut_habit': answers["是否會嚼食檳榔"] == true ? '有' : '無',
-    'man_smoking_habit': answers["是否會吸菸?"] == true ? '有' : '無',
-    'man_drinking_habit': answers["是否會喝酒?"] == true ? '有' : '無',
-    'man_marital_status': maritalStatus ?? '未婚',
-    'man_contact_preference': [
-      if (isEmailPreferred) 'e-mail',
-      if (isPhonePreferred) '電話',
-    ].join(','),
-    'man_chronic_illness': hasChronicDisease == true
-        ? [
-            ...chronicDiseaseOptions.entries
-                .where((entry) => entry.value && entry.key != "其他")
-                .map((entry) => entry.key),
-            if (chronicDiseaseOptions["其他"] == true) '其他',
-          ].join(',')
-        : '無',
-    'man_chronic_illness_details': otherDiseaseController.text.isNotEmpty
-        ? otherDiseaseController.text
-        : '',
-    'man_user_account': accountController.text,
-    'man_user_password': passwordController.text,
-  };
-
-  // 🔄 如果配對碼不為空，才加入 payload
-  if (pairingCode.isNotEmpty) {
-    payload['man_pairing_code'] = pairingCode;
-  }
-
-  // 🔄 發送到後端
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
-    body: jsonEncode(payload),
-  ); 
+    body: jsonEncode({
+      'man_user_name': nameController.text,
+      'user_id': int.parse(userId),
+      'man_user_email': emailController.text,
+      'man_user_gender': "男",
+      'man_user_salutation': isNewMom == true ? "是" : "否",
+      'man_user_birthdate': formatBirthForMySQL(birthController.text),
+      'man_user_phone': phoneController.text,
+      'man_user_id_number': accountController.text,
+      'man_user_height': double.tryParse(heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
+      'man_current_weight': double.tryParse(weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
+      'man_emergency_contact_name': "",
+      'man_emergency_contact_phone': "",
+      'man_betel_nut_habit': answers["是否會嚼食檳榔"] == true ? '有' : '無',
+      'man_smoking_habit': answers["是否會吸菸?"] == true ? '有' : '無',
+      'man_drinking_habit': answers["是否會喝酒?"] == true ? '有' : '無',
+      'man_marital_status': maritalStatus ?? '未婚',
+      'man_contact_preference': [
+        if (isEmailPreferred) 'e-mail',
+        if (isPhonePreferred) '電話',
+      ].join(','),
+      'man_chronic_illness': hasChronicDisease == true
+          ? [
+              ...chronicDiseaseOptions.entries
+                  .where((entry) => entry.value && entry.key != "其他")
+                  .map((entry) => entry.key),
+              if (chronicDiseaseOptions["其他"] == true) '其他',
+            ].join(',')
+          : '無',
+      'man_chronic_illness_details': otherDiseaseController.text.isNotEmpty
+          ? otherDiseaseController.text
+          : '',
+      'man_user_account': accountController.text,
+      'man_user_password': passwordController.text,
+      'man_pairing_code': pairingCodeController.text.trim(),
+    }),
+  );
 
   if (response.statusCode >= 200 && response.statusCode < 300) {
     logger.i("✅ 爸爸資料同步至 MySQL 成功");
@@ -696,7 +686,6 @@ Future<bool> sendDataToMySQL(String userId) async {
     return false;
   }
 }
-
 
   //輸入框設定
   InputDecoration _inputDecoration() => const InputDecoration(
