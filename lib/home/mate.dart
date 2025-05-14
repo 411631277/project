@@ -45,8 +45,15 @@ class _MateWidgetState extends State<MateWidget> {
             : false;
 
         // 🔹 顯示的邏輯調整
-        if (!widget.isManUser && isPairingUsed) {
-          pairingCode = "已配對"; // 如果是媽媽且配對碼已使用，顯示「已配對」
+        if (widget.isManUser) {
+          isPairingUsed = userDoc['配對成功'] ?? false;
+          pairingCode = isPairingUsed ? "已配對" : "未配對";
+        } else {
+          // 🔍 判斷媽媽是否配對成功
+          isPairingUsed = userDoc['配對碼已使用'] ?? false;
+          if (isPairingUsed) {
+            pairingCode = "已配對";
+          }
         }
       });
     } else {

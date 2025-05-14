@@ -409,6 +409,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
                 : true
       },
       '配對碼': pairingCode,
+      '配對碼已使用': false,
     };
 
     try {

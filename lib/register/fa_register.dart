@@ -558,6 +558,8 @@ Future<bool> _validatePairingCode(String inputCode) async {
       'answers': answers,
       '是否有慢性病': hasChronicDisease,
       '慢性病症狀': selectedChronicDiseases,
+       '配對碼': pairingCodeController.text.trim(), 
+       '配對成功': false,
     });
 
      await _updatePairingStatus();
