@@ -610,64 +610,83 @@ Future<void> _updatePairingStatus() async {
       }).catchError((e) {
         logger.e('❌ 更新配對碼失敗: $e');
       });
-    }
 
-    if (!isUpdated) {
-      retries++;
-      logger.w('⚠️ 第 $retries 次查無此配對碼，等待重試...');
-      await Future.delayed(const Duration(seconds: 3)); // 3 秒後再試
-    }
-  }
+      if (isUpdated) {
+        // 🔄 同步更新爸爸的資料
+        final userId = await FirebaseFirestore.instance
+            .collection('Man_users')
+            .where('配對碼', isEqualTo: pairingCode)
+            .limit(1)
+            .get();
 
-  if (!isUpdated) {
-    logger.e('❌ 無法找到配對碼，更新失敗');
+        if (userId.docs.isNotEmpty) {
+          final dadDocRef = userId.docs.first.reference;
+          await dadDocRef.update({
+            '配對成功': true,  // ✅ 更新配對成功的欄位
+          });
+          logger.i('✅ 爸爸的配對成功欄位已更新');
+        } else {
+          logger.w('⚠️ 找不到對應的爸爸資料，無法更新');
+        }
+      }
+    }
   }
 }
+
 
 
 Future<bool> sendDataToMySQL(String userId) async {
   final url = Uri.parse('http://163.13.201.85:3000/man_users');
 
+  // 🔎 構建資料時檢查配對碼是否為空
+  final pairingCode = pairingCodeController.text.trim();
+  Map<String, dynamic> payload = {
+    'man_user_name': nameController.text,
+    'user_id': int.parse(userId),
+    'man_user_email': emailController.text,
+    'man_user_gender': "男",
+    'man_user_salutation': isNewMom == true ? "是" : "否",
+    'man_user_birthdate': formatBirthForMySQL(birthController.text),
+    'man_user_phone': phoneController.text,
+    'man_user_id_number': accountController.text,
+    'man_user_height': double.tryParse(heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
+    'man_current_weight': double.tryParse(weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
+    'man_emergency_contact_name': "",
+    'man_emergency_contact_phone': "",
+    'man_betel_nut_habit': answers["是否會嚼食檳榔"] == true ? '有' : '無',
+    'man_smoking_habit': answers["是否會吸菸?"] == true ? '有' : '無',
+    'man_drinking_habit': answers["是否會喝酒?"] == true ? '有' : '無',
+    'man_marital_status': maritalStatus ?? '未婚',
+    'man_contact_preference': [
+      if (isEmailPreferred) 'e-mail',
+      if (isPhonePreferred) '電話',
+    ].join(','),
+    'man_chronic_illness': hasChronicDisease == true
+        ? [
+            ...chronicDiseaseOptions.entries
+                .where((entry) => entry.value && entry.key != "其他")
+                .map((entry) => entry.key),
+            if (chronicDiseaseOptions["其他"] == true) '其他',
+          ].join(',')
+        : '無',
+    'man_chronic_illness_details': otherDiseaseController.text.isNotEmpty
+        ? otherDiseaseController.text
+        : '',
+    'man_user_account': accountController.text,
+    'man_user_password': passwordController.text,
+  };
+
+  // 🔄 如果配對碼不為空，才加入 payload
+  if (pairingCode.isNotEmpty) {
+    payload['man_pairing_code'] = pairingCode;
+  }
+
+  // 🔄 發送到後端
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'man_user_name': nameController.text,
-      'user_id': int.parse(userId),
-      'man_user_email': emailController.text,
-      'man_user_gender': "男",
-      'man_user_salutation': isNewMom == true ? "是" : "否",
-      'man_user_birthdate': formatBirthForMySQL(birthController.text),
-      'man_user_phone': phoneController.text,
-      'man_user_id_number': accountController.text,
-      'man_user_height': double.tryParse(heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
-      'man_current_weight': double.tryParse(weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
-      'man_emergency_contact_name': "",
-      'man_emergency_contact_phone': "",
-      'man_betel_nut_habit': answers["是否會嚼食檳榔"] == true ? '有' : '無',
-      'man_smoking_habit': answers["是否會吸菸?"] == true ? '有' : '無',
-      'man_drinking_habit': answers["是否會喝酒?"] == true ? '有' : '無',
-      'man_marital_status': maritalStatus ?? '未婚',
-      'man_contact_preference': [
-        if (isEmailPreferred) 'e-mail',
-        if (isPhonePreferred) '電話',
-      ].join(','),
-      'man_chronic_illness': hasChronicDisease == true
-          ? [
-              ...chronicDiseaseOptions.entries
-                  .where((entry) => entry.value && entry.key != "其他")
-                  .map((entry) => entry.key),
-              if (chronicDiseaseOptions["其他"] == true) '其他',
-            ].join(',')
-          : '無',
-      'man_chronic_illness_details': otherDiseaseController.text.isNotEmpty
-          ? otherDiseaseController.text
-          : '',
-      'man_user_account': accountController.text,
-      'man_user_password': passwordController.text,
-      'man_pairing_code': pairingCodeController.text.trim(),
-    }),
-  );
+    body: jsonEncode(payload),
+  ); 
 
   if (response.statusCode >= 200 && response.statusCode < 300) {
     logger.i("✅ 爸爸資料同步至 MySQL 成功");
@@ -677,6 +696,7 @@ Future<bool> sendDataToMySQL(String userId) async {
     return false;
   }
 }
+
 
   //輸入框設定
   InputDecoration _inputDecoration() => const InputDecoration(
