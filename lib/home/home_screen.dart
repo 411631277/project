@@ -35,7 +35,7 @@ class HomeScreenWidget extends StatefulWidget {
 class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   String userName = "載入中...";
   String babyName = "小寶";
-  
+
   String? _profileImageUrl;
   final ImagePicker _picker = ImagePicker();
 
@@ -51,10 +51,9 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   /// **記錄目前是哪一天 (YYYY-MM-DD)，對應到 Firebase docId**
   String _currentDay = "";
 
-double getCaloriesBurned() {
-  return _stepCount * 0.03;
-}
-
+  double getCaloriesBurned() {
+    return _stepCount * 0.03;
+  }
 
   StreamSubscription<StepCount>? _stepSubscription;
 
@@ -76,135 +75,128 @@ double getCaloriesBurned() {
   }
 
   Future<void> _saveTargetStepsToFirebase(int newTarget) async {
-  try {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userId)
-        .set({'targetSteps': newTarget}, SetOptions(merge: true));
-    logger.i("✅ 已將目標步數更新為 $newTarget");
-  } catch (e) {
-    logger.e("❌ 更新目標步數失敗: $e");
-  }
-}
-
-
- Future<void> _loadTargetStepsFromFirebase() async {
-  try {
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userId)
-        .get();
-
-    if (userDoc.exists && userDoc.data() != null) {
-      Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
-      int firebaseTarget = data['targetSteps'] ?? 5000;
-      setState(() {
-        _targetSteps = firebaseTarget;
-      });
-      logger.i("載入目標步數: $_targetSteps");
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .set({'targetSteps': newTarget}, SetOptions(merge: true));
+      logger.i("✅ 已將目標步數更新為 $newTarget");
+    } catch (e) {
+      logger.e("❌ 更新目標步數失敗: $e");
     }
-  } catch (e) {
-    logger.e("❌ 載入目標步數失敗: $e");
   }
-}
 
+  Future<void> _loadTargetStepsFromFirebase() async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .get();
+
+      if (userDoc.exists && userDoc.data() != null) {
+        Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+        int firebaseTarget = data['targetSteps'] ?? 5000;
+        setState(() {
+          _targetSteps = firebaseTarget;
+        });
+        logger.i("載入目標步數: $_targetSteps");
+      }
+    } catch (e) {
+      logger.e("❌ 載入目標步數失敗: $e");
+    }
+  }
 
   /// **🔹 從 Firebase 讀取「今天」的步數資料**
-/// **🔹 從 Firebase 讀取「今天」的步數資料**
-Future<void> _loadStepsForToday() async {
-  try {
-    _currentDay = DateTime.now().toString().substring(0, 10);
 
-    DocumentSnapshot doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userId)
-        .collection('count')
-        .doc(_currentDay)
-        .get(GetOptions(source: Source.server));
+  Future<void> _loadStepsForToday() async {
+    try {
+      _currentDay = DateTime.now().toString().substring(0, 10);
 
-    int firebaseSteps = 0;
-    int firebaseLastDeviceSteps = 0;
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('count')
+          .doc(_currentDay)
+          .get(GetOptions(source: Source.server));
 
-    if (doc.exists && doc.data() != null) {
-      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-      firebaseSteps = data['步數'] ?? 0;
-      firebaseLastDeviceSteps = data['lastDeviceSteps'] ?? 0;
-    }
+      if (doc.exists && doc.data() != null) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        int firebaseSteps = data['步數'] ?? 0;
+        int firebaseLastDeviceSteps = data['lastDeviceSteps'] ?? 0;
 
-    // 🔄 改用 Pedometer 的 stream + 等待事件
-    final completer = Completer<StepCount>();
-    final subscription = Pedometer.stepCountStream.listen((event) {
-      if (!completer.isCompleted) {
-        completer.complete(event);
+        setState(() {
+          _stepCount = firebaseSteps;
+          _lastDeviceSteps =
+              (firebaseLastDeviceSteps != 0) ? firebaseLastDeviceSteps : null;
+        });
+        logger.i(
+            "載入今天 $_currentDay 的步數: $_stepCount, lastDeviceSteps=$_lastDeviceSteps");
+      } else {
+        // 沒有資料 => 初始化
+        setState(() {
+          _stepCount = 0;
+          _lastDeviceSteps = null;
+        });
+
+        Pedometer.stepCountStream.first.then((event) {
+          if (event.steps > 0) {
+            setState(() {
+              _stepCount = event.steps; // 直接用目前的步數初始化
+              _lastDeviceSteps = event.steps;
+            });
+            _saveStepsForToday();
+            logger.i("今天 $_currentDay 尚無資料，但同步基準: ${event.steps}");
+          }
+        }).catchError((e) {
+          logger.e("無法同步 Pedometer 的絕對步數: $e");
+        });
+
+        await _saveStepsForToday();
+        logger.i("今天 $_currentDay 尚無資料，已初始化: 步數=0, lastDeviceSteps=null");
       }
-    });
-
-    StepCount initialStep = await completer.future;
-    subscription.cancel(); // 停止監聽
-
-    int currentDeviceSteps = initialStep.steps;
-
-    int difference = 0;
-
-    // 🔎 判斷是否有差異，若有則補償
-    if (firebaseLastDeviceSteps != 0 && currentDeviceSteps > firebaseLastDeviceSteps) {
-      difference = currentDeviceSteps - firebaseLastDeviceSteps;
-    } else if (firebaseLastDeviceSteps == 0) {
-      difference = currentDeviceSteps;
+    } catch (e) {
+      logger.e("❌ 讀取 Firebase 步數錯誤: $e");
     }
-
-    setState(() {
-      _stepCount = firebaseSteps + difference;
-      _lastDeviceSteps = currentDeviceSteps;
-    });
-
-    logger.i("🔄 啟動時同步裝置步數，補償差額 +$difference, 總步數：$_stepCount");
-
-    // 最後更新到 Firebase
-    await _saveStepsForToday();
-
-  } catch (e) {
-    logger.e("❌ 讀取 Firebase 步數錯誤: $e");
   }
-}
-
-
 
   /// **🔹 監聽裝置計步器事件，若跨天就存檔到前一天，再切換到新的一天 doc**(更新過的步數)
   void initPedometer() {
-  try {
-    _stepSubscription = Pedometer.stepCountStream.listen((StepCount event) {
-      if (!mounted) return;
+    try {
+      _stepSubscription = Pedometer.stepCountStream.listen((StepCount event) {
+        if (!mounted) return;
 
-      String today = DateTime.now().toString().substring(0, 10);
+        String today = DateTime.now().toString().substring(0, 10);
 
-      // 檢查是否是新的一天
-      if (_currentDay != today) {
-        // 儲存前一天的資料
-        _saveStepsForToday();
-        
-        // 換到新的一天
-        setState(() {
-          _currentDay = today;
-          _stepCount = 0;
-          _lastDeviceSteps = event.steps;
-        });
-        _saveStepsForToday();
-        logger.i("跨天: 由 $_currentDay 切換到 $today, 步數歸0, 基準=${event.steps}");
-        return;
-      }
+        // 若日期變更 => 表示跨天
+        if (_currentDay != today) {
+          // 先把舊日最終步數存檔
+          _saveStepsForToday();
 
-      // 當天的累加
-      int currentDeviceSteps = event.steps;
+          // 切換到新的一天
+          setState(() {
+            _currentDay = today;
+            _stepCount = 0;
+            _lastDeviceSteps = event.steps; // 以當前裝置值作為新基準
+          });
+          _saveStepsForToday();
+          logger.i("跨天: 由 $_currentDay 切換到 $today, 步數歸0, 基準=${event.steps}");
+          return;
+        }
 
-      if (_lastDeviceSteps == null) {
-        setState(() {
-          _lastDeviceSteps = currentDeviceSteps;
-          _stepCount = 0;
-        });
-        _saveStepsForToday();
-        logger.i("🔹 第一次啟動時的基準: $_lastDeviceSteps");
-      } else {
+        // 沒跨天 => 正常累加
+        int currentDeviceSteps = event.steps;
+
+        // 第一次事件 => 設置基準
+        if (_lastDeviceSteps == null) {
+          setState(() {
+            _lastDeviceSteps = currentDeviceSteps;
+          });
+          _saveStepsForToday();
+          logger.i("第一次事件 => 設定基準: _lastDeviceSteps=$currentDeviceSteps");
+          return;
+        }
+
+        // 計算差量
         int difference = currentDeviceSteps - _lastDeviceSteps!;
         if (difference > 0) {
           setState(() {
@@ -214,22 +206,20 @@ Future<void> _loadStepsForToday() async {
           _saveStepsForToday();
           logger.i("步數增加 +$difference => 總步數 $_stepCount");
         } else if (difference < 0) {
-          // 計步器歸零，重啟裝置
+          // 如果計步器被重置或手機重開機 => 重新設定基準
           setState(() {
             _lastDeviceSteps = currentDeviceSteps;
           });
           _saveStepsForToday();
-          logger.w("⚠️ 計步器歸零，重新設定基準：$currentDeviceSteps");
+          logger.w("計步器歸零/重開機，重設基準為 $currentDeviceSteps");
         }
-      }
-    }, onError: (error) {
-      logger.e("計步器錯誤: $error");
-    });
-  } catch (e) {
-    logger.e("初始化計步器失敗: $e");
+      }, onError: (error) {
+        logger.e("計步器錯誤: $error");
+      });
+    } catch (e) {
+      logger.e("初始化計步器失敗: $e");
+    }
   }
-}
-
 
   /// **🔹 將當前的 _stepCount、_lastDeviceSteps 存到「當天 doc」中**
   Future<void> _saveStepsForToday() async {
@@ -243,10 +233,9 @@ Future<void> _loadStepsForToday() async {
         '步數': _stepCount,
         'lastDeviceSteps': _lastDeviceSteps ?? 0,
       }, SetOptions(merge: true));
-      
+
       logger.i(
           "✅ 已更新 ${widget.userId} => $_currentDay, 步數: $_stepCount, 基準: $_lastDeviceSteps");
-          
     } catch (e) {
       logger.e("❌ 步數更新失敗: $e");
     }
@@ -463,366 +452,367 @@ Future<void> _loadStepsForToday() async {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-     final base = math.min(screenWidth, screenHeight);
+    final base = math.min(screenWidth, screenHeight);
 
     // 根據當前步數與目標步數，決定顯示文字
 
-   return PopScope(
-    canPop: false, // ❗這行就是鎖定返回鍵
-    child: Scaffold(
-      body: Container(
-        color: const Color.fromRGBO(233, 227, 213, 1),
-        child: Stack(
-          children: <Widget>[
-            // 頭像
-            Positioned(
-              top: screenHeight * 0.03,
-              left: screenWidth * 0.07,
-              child: GestureDetector(
-                onTap: () => _showProfilePreviewDialog(),
-                child: Container(
-                  width: screenWidth * 0.20,
-                  height: screenHeight * 0.12,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    image: DecorationImage(
-                      image: _profileImageUrl != null
-                          ? NetworkImage(_profileImageUrl!)
-                          : const AssetImage('assets/images/Picture.png')
-                              as ImageProvider,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // 步數區塊
-Positioned(
-  top: screenHeight * 0.5,
-  left: screenWidth * 0.08,
-  right: screenWidth * 0.08,
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      // 第 1 行：當前步數與目標步數
-      Row(
-        children: [
-          Text(
-            "當前步數：$_stepCount",
-            style: TextStyle(
-              fontSize: base * 0.05,
-              color: const Color.fromRGBO(165, 146, 125, 1),
-            ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: _showTargetStepsDialog,
-            child: Text(
-              "目標步數：$_targetSteps",
-              style: TextStyle(
-                fontSize: base * 0.05,
-                color: const Color.fromRGBO(165, 146, 125, 1),
-              ),
-            ),
-          ),
-        ],
-      ),
-
-      SizedBox(height: screenHeight * 0.02),
-
-      // 第 2 行：達標狀態與卡路里
-      Row(
-        children: [
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                (_stepCount >= _targetSteps)
-                    ? "步數已達標"
-                    : "步數未達標",
-                style: TextStyle(
-                  fontSize: base * 0.05,
-                  color: (_stepCount >= _targetSteps)
-                      ? Colors.green
-                      : Colors.red,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                "消耗熱量約${getCaloriesBurned().toStringAsFixed(1)} Cal",
-                style: TextStyle(
-                  fontSize: base * 0.05,
-                  color: const Color.fromRGBO(165, 146, 125, 1),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ],
-  ),
-),
-
-           // 設定按鈕
-Positioned(
-  top: screenHeight * 0.05,
-  left: screenWidth * 0.77,
-  child: GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SettingWidget(
-            userId: widget.userId,
-            isManUser: widget.isManUser,
-            stepCount: _stepCount,
-            updateStepCount: (val) {
-              setState(() {
-                _stepCount = val;
-              });
-              _saveStepsForToday();
-            },
-          ),
-        ),
-      );
-    },
-    child: Container(
-      width: screenWidth * 0.15,
-      height: screenHeight * 0.08,
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/images/Setting.png'),
-          fit: BoxFit.fitWidth,
-        ),
-      ),
-    ),
-  ),
-),
-
-            // 問題按鈕
-            Positioned(
-              top: screenHeight * 0.05,
-              left: screenWidth * 0.6,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => QuestionWidget(
-                        userId: widget.userId, isManUser: false,
+    return PopScope(
+        canPop: false, // ❗這行就是鎖定返回鍵
+        child: Scaffold(
+            body: Container(
+                color: const Color.fromRGBO(233, 227, 213, 1),
+                child: Stack(children: <Widget>[
+                  // 頭像
+                  Positioned(
+                    top: screenHeight * 0.03,
+                    left: screenWidth * 0.07,
+                    child: GestureDetector(
+                      onTap: () => _showProfilePreviewDialog(),
+                      child: Container(
+                        width: screenWidth * 0.20,
+                        height: screenHeight * 0.12,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          image: DecorationImage(
+                            image: _profileImageUrl != null
+                                ? NetworkImage(_profileImageUrl!)
+                                : const AssetImage('assets/images/Picture.png')
+                                    as ImageProvider,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
-                  );
-                },
-                child: Container(
-                  width: screenWidth * 0.12,
-                  height: screenHeight * 0.08,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/Question.png'),
-                      fit: BoxFit.fitWidth,
+                  ),
+
+                  // 步數區塊
+                  Positioned(
+                    top: screenHeight * 0.5,
+                    left: screenWidth * 0.08,
+                    right: screenWidth * 0.08,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 第 1 行：當前步數與目標步數
+                        Row(
+                          children: [
+                            Text(
+                              "當前步數：$_stepCount",
+                              style: TextStyle(
+                                fontSize: base * 0.05,
+                                color: const Color.fromRGBO(165, 146, 125, 1),
+                              ),
+                            ),
+                            const Spacer(),
+                            GestureDetector(
+                              onTap: _showTargetStepsDialog,
+                              child: Text(
+                                "目標步數：$_targetSteps",
+                                style: TextStyle(
+                                  fontSize: base * 0.05,
+                                  color: const Color.fromRGBO(165, 146, 125, 1),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: screenHeight * 0.02),
+
+                        // 第 2 行：達標狀態與卡路里
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  (_stepCount >= _targetSteps)
+                                      ? "步數已達標"
+                                      : "步數未達標",
+                                  style: TextStyle(
+                                    fontSize: base * 0.05,
+                                    color: (_stepCount >= _targetSteps)
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: Text(
+                                  "消耗熱量約${getCaloriesBurned().toStringAsFixed(1)} Cal",
+                                  style: TextStyle(
+                                    fontSize: base * 0.05,
+                                    color:
+                                        const Color.fromRGBO(165, 146, 125, 1),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ),
-            ),
 
-            // 用戶名稱
-            Positioned(
-              top: screenHeight * 0.07,
-              left: screenWidth * 0.32,
-              child: Text(
-                userName,
-                style: TextStyle(
-                  color: const Color.fromRGBO(165, 146, 125, 1),
-                  fontFamily: 'Inter',
-                  fontSize: base * 0.05,
-                ),
-              ),
-            ),
-
-            // 今日心情文字
-            Positioned(
-              top: screenHeight * 0.20,
-              left: screenWidth * 0.08,
-              child: SizedBox(
-                width: screenWidth * 0.84,
-                child: Text(
-                  '今天心情還好嗎?一切都會越來越好喔!\n\n'
-                  '別擔心，你已經做得很好了！每一天都是新的學習與成長，請相信自己，也別忘了好好照顧自己 ',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: const Color.fromRGBO(165, 146, 125, 1),
-                    fontFamily: 'Inter',
-                    fontSize: base * 0.05,
-                  ),
-                ),
-              ),
-            ),
-
-            // Baby 圖片
-            Positioned(
-              top: screenHeight * 0.75,
-              left: screenWidth * 0.08,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          BabyWidget(userId: widget.userId, isManUser: false),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: screenWidth * 0.13,
-                  height: screenHeight * 0.08,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/Baby.png'),
-                      fit: BoxFit.fitWidth,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // 小寶文字
-            Positioned(
-              top: screenHeight * 0.77,
-              left: screenWidth * 0.25,
-              child: Text(
-                babyName,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: const Color.fromRGBO(165, 146, 125, 1),
-                  fontFamily: 'Inter',
-                  fontSize: base * 0.05,
-                ),
-              ),
-            ),
-
-            // Robot 圖片
-            Positioned(
-              top: screenHeight * 0.82,
-              left: screenWidth * 0.8,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RobotWidget(
-                        userId: widget.userId,
-                        isManUser: false,
+                  // 設定按鈕
+                  Positioned(
+                    top: screenHeight * 0.05,
+                    left: screenWidth * 0.77,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SettingWidget(
+                              userId: widget.userId,
+                              isManUser: widget.isManUser,
+                              stepCount: _stepCount,
+                              updateStepCount: (val) {
+                                setState(() {
+                                  _stepCount = val;
+                                });
+                                _saveStepsForToday();
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: screenWidth * 0.15,
+                        height: screenHeight * 0.08,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/Setting.png'),
+                            fit: BoxFit.fitWidth,
+                          ),
+                        ),
                       ),
                     ),
-                  );
-                },
-                child: Container(
-                  width: screenWidth * 0.15,
-                  height: screenHeight * 0.1,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/Robot.png'),
-                      fit: BoxFit.fitWidth,
-                    ),
                   ),
-                ),
-              ),
-            ),
 
-            // 需要協助嗎 區塊
-            Positioned(
-              top: screenHeight * 0.81,
-              left: screenWidth * 0.43,
-              child: Transform.rotate(
-                angle: -5.56 * (math.pi / 180),
-                child: Container(
-                  width: screenWidth * 0.4,
-                  height: screenHeight * 0.06,
-                  decoration: BoxDecoration(
-                    color: const Color.fromRGBO(165, 146, 125, 1),
-                    borderRadius: BorderRadius.all(
-                      Radius.elliptical(screenWidth * 0.4, screenHeight * 0.06),
+                  // 問題按鈕
+                  Positioned(
+                    top: screenHeight * 0.05,
+                    left: screenWidth * 0.6,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => QuestionWidget(
+                              userId: widget.userId,
+                              isManUser: false,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: screenWidth * 0.12,
+                        height: screenHeight * 0.08,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/Question.png'),
+                            fit: BoxFit.fitWidth,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: screenHeight * 0.825,
-              left: screenWidth * 0.5,
-              child: Text(
-                '需要協助嗎?',
-                style: TextStyle(
-                  color: const Color.fromRGBO(255, 255, 255, 1),
-                  fontFamily: 'Inter',
-                  fontSize: base * 0.045,
-                ),
-              ),
-            ),
-            //tgos
-            Positioned(
-              top: screenHeight * 0.83,
-              left: screenWidth * 0.08,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TgosMapPage(),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: screenWidth * 0.35,
-                  height: screenHeight * 0.25,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/tgos.png'),
-                      fit: BoxFit.fitWidth,
+
+                  // 用戶名稱
+                  Positioned(
+                    top: screenHeight * 0.07,
+                    left: screenWidth * 0.32,
+                    child: Text(
+                      userName,
+                      style: TextStyle(
+                        color: const Color.fromRGBO(165, 146, 125, 1),
+                        fontFamily: 'Inter',
+                        fontSize: base * 0.05,
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-  ]
-  )
-  )
-  )
-  );
+
+                  // 今日心情文字
+                  Positioned(
+                    top: screenHeight * 0.20,
+                    left: screenWidth * 0.08,
+                    child: SizedBox(
+                      width: screenWidth * 0.84,
+                      child: Text(
+                        '今天心情還好嗎?一切都會越來越好喔!\n\n'
+                        '別擔心，你已經做得很好了！每一天都是新的學習與成長，請相信自己，也別忘了好好照顧自己 ',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: const Color.fromRGBO(165, 146, 125, 1),
+                          fontFamily: 'Inter',
+                          fontSize: base * 0.05,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Baby 圖片
+                  Positioned(
+                    top: screenHeight * 0.75,
+                    left: screenWidth * 0.08,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BabyWidget(
+                                userId: widget.userId, isManUser: false),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: screenWidth * 0.13,
+                        height: screenHeight * 0.08,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/Baby.png'),
+                            fit: BoxFit.fitWidth,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // 小寶文字
+                  Positioned(
+                    top: screenHeight * 0.77,
+                    left: screenWidth * 0.25,
+                    child: Text(
+                      babyName,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: const Color.fromRGBO(165, 146, 125, 1),
+                        fontFamily: 'Inter',
+                        fontSize: base * 0.05,
+                      ),
+                    ),
+                  ),
+
+                  // Robot 圖片
+                  Positioned(
+                    top: screenHeight * 0.82,
+                    left: screenWidth * 0.8,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RobotWidget(
+                              userId: widget.userId,
+                              isManUser: false,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: screenWidth * 0.15,
+                        height: screenHeight * 0.1,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/Robot.png'),
+                            fit: BoxFit.fitWidth,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // 需要協助嗎 區塊
+                  Positioned(
+                    top: screenHeight * 0.81,
+                    left: screenWidth * 0.43,
+                    child: Transform.rotate(
+                      angle: -5.56 * (math.pi / 180),
+                      child: Container(
+                        width: screenWidth * 0.4,
+                        height: screenHeight * 0.06,
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(165, 146, 125, 1),
+                          borderRadius: BorderRadius.all(
+                            Radius.elliptical(
+                                screenWidth * 0.4, screenHeight * 0.06),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: screenHeight * 0.825,
+                    left: screenWidth * 0.5,
+                    child: Text(
+                      '需要協助嗎?',
+                      style: TextStyle(
+                        color: const Color.fromRGBO(255, 255, 255, 1),
+                        fontFamily: 'Inter',
+                        fontSize: base * 0.045,
+                      ),
+                    ),
+                  ),
+                  //tgos
+                  Positioned(
+                    top: screenHeight * 0.83,
+                    left: screenWidth * 0.08,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TgosMapPage(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: screenWidth * 0.35,
+                        height: screenHeight * 0.25,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/tgos.png'),
+                            fit: BoxFit.fitWidth,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ]))));
   }
+
   Future<void> sendStepDataToMySQL() async {
-    
-  final url = Uri.parse('http://163.13.201.85:3000/steps');
-  final now = DateTime.now();
-  final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-  logger.i("📤 準備傳送 MySQL payload：userId=${widget.userId}, steps=$_stepCount, goal=$_targetSteps, date=$formattedDate");
-  logger.i('user_id: ${widget.userId}, date: $formattedDate, steps: $_stepCount, goal: $_targetSteps');
-  try {
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': int.parse(widget.userId),
-        'step_date': formattedDate,
-        'steps': _stepCount,
-        'goal': _targetSteps,
-      }),
-    );
+    final url = Uri.parse('http://163.13.201.85:3000/steps');
+    final now = DateTime.now();
+    final formattedDate =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    logger.i(
+        "📤 準備傳送 MySQL payload：userId=${widget.userId}, steps=$_stepCount, goal=$_targetSteps, date=$formattedDate");
+    logger.i(
+        'user_id: ${widget.userId}, date: $formattedDate, steps: $_stepCount, goal: $_targetSteps');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'user_id': int.parse(widget.userId),
+          'step_date': formattedDate,
+          'steps': _stepCount,
+          'goal': _targetSteps,
+        }),
+      );
 
-    if (response.statusCode >= 200 && response.statusCode < 300){
-      logger.i("✅ 步數資料已同步至 MySQL");
-    } else {
-      logger.e("❌ 同步步數資料失敗: ${response.body}");
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        logger.i("✅ 步數資料已同步至 MySQL");
+      } else {
+        logger.e("❌ 同步步數資料失敗: ${response.body}");
+      }
+    } catch (e) {
+      logger.e("❌ 發送步數資料時出錯: $e");
     }
-  } catch (e) {
-    logger.e("❌ 發送步數資料時出錯: $e");
   }
-}
 }
