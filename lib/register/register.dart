@@ -34,7 +34,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
   final TextEditingController weightController = TextEditingController();
   final TextEditingController prePregnancyWeightController =
       TextEditingController();
-  final TextEditingController emailController = TextEditingController();
+
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController accountController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -82,7 +82,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
     heightController.dispose();
     weightController.dispose();
     prePregnancyWeightController.dispose();
-    emailController.dispose();
+
     phoneController.dispose();
     accountController.dispose();
     passwordController.dispose();
@@ -433,7 +433,6 @@ class RegisterWidgetState extends State<RegisterWidget> {
       '身高': heightController.text,
       '目前體重': weightController.text,
       '孕前體重': prePregnancyWeightController.text,
-      '電子信箱': emailController.text,
       '手機號碼': phoneController.text,
       '婚姻狀況': maritalStatus,
       '是否為新手媽咪': isNewMom,
@@ -476,7 +475,6 @@ class RegisterWidgetState extends State<RegisterWidget> {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'user_name': nameController.text,
-        'user_email': emailController.text,
         'user_gender': widget.role == '媽媽' ? '女' : '男',
         'user_salutation': isNewMom == true ? '是' : '否',
         'user_birthdate': formatBirthForMySQL(birthController.text),
