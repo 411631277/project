@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:flutter/gestures.dart';
+import 'dart:async';
 
 final Logger logger = Logger();
 
@@ -36,12 +37,7 @@ class _RobotWidgetState extends State<RobotWidget> {
   final String apiUrl = "http://163.13.202.126:8000/query";
 
   /// 第一組快速回覆
-  final List<String> _quickReplies = [
-    "產科住院環境資訊",
-    "母乳哺餵的好處",
-    "產後衛教部分",
-    "其他"
-  ];
+  final List<String> _quickReplies = ["產科住院環境資訊", "母乳哺餵的好處", "產後衛教部分", "其他"];
 
   /// 第二組快速回覆
   final List<String> _secondCardReplies = [
@@ -76,56 +72,90 @@ class _RobotWidgetState extends State<RobotWidget> {
   }
 
   /// 發送訊息給後端或顯示「其他資訊」
-  Future<void> _sendMessage(String userInput, {bool sendToBackend = true}) async {
+  Future<void> _sendMessage(String userInput,
+      {bool sendToBackend = true}) async {
     if (userInput.trim().isEmpty) return;
 
     _messageController.clear();
 
-    // 如果使用者點選「其他」，則不送後端，直接顯示第二組選項
     if (!sendToBackend) {
       setState(() {
         _messages.add({'sender': 'user', 'text': userInput});
         _messages.add({'sender': 'chatgpt', 'text': '以下是其他資訊'});
-        _secondCardAfterIndexes.add(_messages.length); 
-        // 記錄在這個位置之後，顯示第二組快速回覆
+        _secondCardAfterIndexes.add(_messages.length);
       });
       _scrollToBottom();
       return;
     }
 
-    // 正常送給後端
     setState(() {
       _messages.add({'sender': 'user', 'text': userInput});
-      _messages.add({'sender': 'chatgpt', 'text': '🤖 正在思考...'});
+      _messages.add({'sender': 'chatgpt', 'text': '正在思考...'}); // 立即顯示
     });
     _scrollToBottom();
 
     try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'message': userInput,
-          'user_id': widget.userId,
-          'is_man_user': widget.isManUser,
-        }),
-      );
+      final request = http.Request("POST", Uri.parse(apiUrl));
+      request.headers['Content-Type'] = 'application/json';
+      request.body = jsonEncode({
+        'message': userInput,
+        'user_id': widget.userId,
+        'is_man_user': widget.isManUser,
+      });
+
+      final response = await request.send();
 
       if (response.statusCode == 200) {
-        final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
-        setState(() {
-          _messages.last['text'] = decodedResponse["answer"] ?? "🤖 無法取得回應";
+        String buffer = '';
+        final completer = Completer<void>();
+
+        response.stream
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .listen((line) {
+          if (line.startsWith("data: ")) {
+            final jsonPart = line.replaceFirst("data: ", "");
+            if (jsonPart.trim() == "[DONE]") {
+              completer.complete();
+              return;
+            }
+
+            try {
+              final Map<String, dynamic> data = jsonDecode(jsonPart);
+              final chunk = data['data'] ?? '';
+
+              buffer += chunk;
+
+              setState(() {
+                _messages.last['text'] = buffer; // 更新思考中的氣泡
+              });
+              _scrollToBottom();
+            } catch (e) {
+              logger.e("解析失敗: $e");
+            }
+          }
+        }, onDone: () {
+          completer.complete();
+        }, onError: (e) {
+          logger.e("SSE錯誤: $e");
+          setState(() {
+            _messages.last['text'] = '發生錯誤，請稍後再試。';
+          });
         });
+
+        await completer.future;
       } else {
         setState(() {
-          _messages.last['text'] = '⚠️ 伺服器錯誤，請稍後再試。';
+          _messages.last['text'] = '伺服器錯誤，請稍後再試。';
         });
       }
     } catch (e) {
+      logger.e("發送錯誤: $e");
       setState(() {
-        _messages.last['text'] = '⚠️ 無法連接到伺服器，請檢查網路或稍後再試。';
+        _messages.last['text'] = '無法連接到伺服器，請檢查網路或稍後再試。';
       });
     }
+
     _scrollToBottom();
   }
 
@@ -190,7 +220,8 @@ class _RobotWidgetState extends State<RobotWidget> {
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = _messages[index];
