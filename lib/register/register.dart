@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 
 final FirestoreService firestoreService = FirestoreService();
 final Logger logger = Logger();
-
 class RegisterWidget extends StatefulWidget {
   final String role;
   const RegisterWidget({super.key, required this.role});
@@ -32,9 +31,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
   final TextEditingController birthController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
-  final TextEditingController prePregnancyWeightController =
-      TextEditingController();
-
+  final TextEditingController prePregnancyWeightController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController accountController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -46,12 +43,13 @@ class RegisterWidgetState extends State<RegisterWidget> {
   bool isEmailPreferred = false;
   bool isPhonePreferred = false;
   bool? isNewMom;
-  Map<String, String> answers = {
+  bool? hasChronicDisease;
+  Map<String, String> answers =
+  {
     '是否會喝酒?': '',
     '是否會吸菸?': '',
     '是否會嚼食檳榔': '',
   };
-  bool? hasChronicDisease;
   Map<String, bool> chronicDiseaseOptions = {
     '妊娠糖尿病': false,
     '妊娠高血壓': false,
@@ -68,9 +66,9 @@ class RegisterWidgetState extends State<RegisterWidget> {
   void initState() {
     super.initState();
     accountController.addListener(() {
-      setState(() {
-        _accountCheckMessage = null;
-        _accountCheckColor = Colors.transparent;
+    setState(() {
+      _accountCheckMessage = null;
+      _accountCheckColor = Colors.transparent;
       });
     });
   }
@@ -82,7 +80,6 @@ class RegisterWidgetState extends State<RegisterWidget> {
     heightController.dispose();
     weightController.dispose();
     prePregnancyWeightController.dispose();
-
     phoneController.dispose();
     accountController.dispose();
     passwordController.dispose();
@@ -96,10 +93,9 @@ class RegisterWidgetState extends State<RegisterWidget> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return PopScope(
-        canPop: false, // 禁止 Flutter 自動 pop
+        canPop: false, 
         // ignore: deprecated_member_use
         onPopInvoked: (didPop) {
-          // 不管 didPop 是 true 還是 false，一律自己導回去
           Navigator.pushReplacementNamed(
             context,
             '/MainScreenWidget',
@@ -119,46 +115,48 @@ class RegisterWidgetState extends State<RegisterWidget> {
                   Row(
                     children: [
                       Expanded(
-                          child: _buildLabeledTextField('姓名', nameController)),
-                      SizedBox(width: screenWidth * 0.05),
+                        child: _buildLabeledTextField('姓名', nameController)),
+                          SizedBox(width: screenWidth * 0.05),
                       Expanded(
-                          child: _buildDatePickerField('生日', birthController)),
-                      SizedBox(width: screenWidth * 0.05),
+                        child: _buildDatePickerField('生日', birthController)),
+                          SizedBox(width: screenWidth * 0.05),
                       Expanded(
-                          child: _buildheightPickerField(
-                              context, '身高', heightController)),
-                    ],
-                  ),
+                        child: _buildheightPickerField(
+                          context, '身高', heightController)),
+                              ],
+                      ),
                   SizedBox(height: screenHeight * 0.02),
+                  
                   Row(
                     children: [
                       Expanded(
-                          child: _buildWeightPickerField(
-                              context, '目前體重', weightController)),
-                      SizedBox(width: screenWidth * 0.05),
+                        child: _buildWeightPickerField(
+                          context, '目前體重', weightController)),
+                  SizedBox(width: screenWidth * 0.05),
+                  
                       Expanded(
-                          child: _buildWeightPickerField(
-                              context, '孕前體重', prePregnancyWeightController)),
-                    ],
-                  ),
+                        child: _buildWeightPickerField(
+                          context, '孕前體重', prePregnancyWeightController)),
+                              ],
+                      ),
                   SizedBox(height: screenHeight * 0.02),
+                  
                   _buildAccountRow(),
                   _buildPasswordField(),
-
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel('電話(限10個號碼)'),
-                      TextField(
+                      children: [
+                        _buildLabel('電話(限10個號碼)'),
+                        TextField(
                         controller: phoneController,
                         keyboardType: TextInputType.number,
                         maxLength: 10,
                         inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(10),
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
                         ],
                         decoration: _inputDecoration()
-                            .copyWith(counterText: ""), // 去除下方字數顯示
+                        .copyWith(counterText: ""),       // 去除下方字數顯示
                       ),
                     ],
                   ),
@@ -171,17 +169,17 @@ class RegisterWidgetState extends State<RegisterWidget> {
                               'E-Mail',
                               isEmailPreferred,
                               (v) => setState(
-                                  () => isEmailPreferred = v ?? false))),
+                              () => isEmailPreferred = v ?? false))),
                       Expanded(
                           child: _buildCheckbox(
                               '電話',
                               isPhonePreferred,
                               (v) => setState(
-                                  () => isPhonePreferred = v ?? false))),
-                    ],
-                  ),
-
+                              () => isPhonePreferred = v ?? false))),
+                              ],
+                       ),
                   SizedBox(height: screenHeight * 0.02),
+
                   ...answers.keys.map((q) => _buildYesNoRow(q)),
                   SizedBox(height: screenHeight * 0.02),
 
@@ -204,33 +202,35 @@ class RegisterWidgetState extends State<RegisterWidget> {
                                 chronicDiseaseOptions
                                     .updateAll((key, value) => false);
                               }
-                            });
-                          },
+                             }
+                            );
+                           },
                           controlAffinity: ListTileControlAffinity.leading,
-                        ),
-                      ),
-                      Expanded(
-                        child: CheckboxListTile(
+                          ),
+                         ),
+                        Expanded(
+                         child: CheckboxListTile(
                           title: const Text('無'),
-                          value: noChronicDisease ?? false,
-                          onChanged: (bool? value) {
-                            setState(() {
+                           value: noChronicDisease ?? false,
+                            onChanged: (bool? value) {
+                             setState(() {
                               noChronicDisease = value ?? false;
                               if (value == true) {
                                 // 當勾選「沒有特殊疾病」，自動取消「有慢性病」以及所有疾病選項
                                 hasChronicDisease = false;
-                                chronicDiseaseOptions
-                                    .updateAll((key, _) => false);
+                                 chronicDiseaseOptions
+                                  .updateAll((key, _) => false);
+                               }
                               }
-                            });
-                          },
-                          controlAffinity: ListTileControlAffinity.leading,
-                        ),
-                      ),
-                    ],
-                  ),
+                             );
+                            },
+                           controlAffinity: ListTileControlAffinity.leading,
+                           ),
+                         ),
+                        ],
+                       ),
 
-                  if (hasChronicDisease == true) ...[
+                   if (hasChronicDisease == true) ...[
                     const SizedBox(height: 10),
                     _buildLabel('請選擇慢性病種類(可複選)：'),
                     ...chronicDiseaseOptions.entries.map((e) =>
@@ -238,9 +238,11 @@ class RegisterWidgetState extends State<RegisterWidget> {
                           title: Text(e.key),
                           value: e.value,
                           onChanged: (v) =>
-                              setState(() => chronicDiseaseOptions[e.key] = v!),
+                          setState(() => chronicDiseaseOptions[e.key] = v!),
                           controlAffinity: ListTileControlAffinity.leading,
-                        )),
+                        )
+                        ),
+
                     if (chronicDiseaseOptions['其他'] == true)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -254,7 +256,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
                           ),
                         ),
                       ),
-                  ],
+                     ],
                   _buildLabel('目前婚姻狀況'),
                   DropdownButtonFormField<String>(
                     value: maritalStatus,
@@ -265,6 +267,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
                         .toList(),
                     onChanged: (v) => setState(() => maritalStatus = v),
                   ),
+
                   SizedBox(height: screenHeight * 0.02),
                   _buildLabel('是否為新手媽媽'),
                   Row(
@@ -333,9 +336,11 @@ class RegisterWidgetState extends State<RegisterWidget> {
               ),
             ),
           ),
-        ));
-  }
+        )
+       );
+      }
 
+//方法區域
   Widget _buildAccountRow() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,18 +384,6 @@ class RegisterWidgetState extends State<RegisterWidget> {
       return;
     }
     try {
-      final userQuery = await FirebaseFirestore.instance
-          .collection('users')
-          .where('帳號', isEqualTo: acc)
-          .limit(1)
-          .get();
-      if (userQuery.docs.isNotEmpty) {
-        setState(() {
-          _accountCheckMessage = '很抱歉，此帳號已註冊';
-          _accountCheckColor = Colors.red;
-        });
-        return;
-      }
       final manUserQuery = await FirebaseFirestore.instance
           .collection('Man_users')
           .where('帳號', isEqualTo: acc)
@@ -437,7 +430,9 @@ class RegisterWidgetState extends State<RegisterWidget> {
       '婚姻狀況': maritalStatus,
       '是否為新手媽咪': isNewMom,
       '聯絡偏好': {'email': isEmailPreferred, 'phone': isPhonePreferred},
-      'answers': answers,
+      '是否會嚼食檳榔': answers['是否會嚼食檳榔'],
+      '是否會吸菸': answers['是否會吸菸?'],
+      '是否會喝酒': answers['是否會喝酒?'],
       '慢性病症狀': {
         for (var e in chronicDiseaseOptions.entries)
           if (e.value)
@@ -488,9 +483,9 @@ class RegisterWidgetState extends State<RegisterWidget> {
             0.0,
         'emergency_contact_name': '',
         'emergency_contact_phone': '',
-        'betel_nut_habit': answers['是否會嚼食檳榔'] == true ? '有' : '無',
-        'smoking_habit': answers['是否會吸菸?'] == true ? '有' : '無',
-        'drinking_habit': answers['是否會喝酒?'] == true ? '有' : '無',
+        'betel_nut_habit': answers['是否會嚼食檳榔'],
+      'smoking_habit': answers['是否會吸菸?'],
+      'drinking_habit': answers['是否會喝酒?'],
         'pre_pregnancy_weight': double.tryParse(prePregnancyWeightController
                 .text
                 .replaceAll(RegExp(r'[^0-9.]'), '')) ??
