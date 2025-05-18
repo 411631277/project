@@ -25,6 +25,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
   // 🔹 防重複提交旗標
   bool isSubmitting = false;
   bool _obscurePassword = true;
+  bool? noChronicDisease = false;
 
   // 🔹 控制器
   final TextEditingController nameController = TextEditingController();
@@ -38,18 +39,17 @@ class RegisterWidgetState extends State<RegisterWidget> {
   final TextEditingController accountController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController otherDiseaseController = TextEditingController();
-
+//
   String? _accountCheckMessage;
   Color _accountCheckColor = Colors.transparent;
-
   String? maritalStatus;
   bool isEmailPreferred = false;
   bool isPhonePreferred = false;
   bool? isNewMom;
-  Map<String, bool?> answers = {
-    '是否會喝酒?': null,
-    '是否會吸菸?': null,
-    '是否會嚼食檳榔': null,
+  Map<String, String> answers = {
+    '是否會喝酒?': '',
+    '是否會吸菸?': '',
+    '是否會嚼食檳榔': '',
   };
   bool? hasChronicDisease;
   Map<String, bool> chronicDiseaseOptions = {
@@ -144,26 +144,26 @@ class RegisterWidgetState extends State<RegisterWidget> {
                   SizedBox(height: screenHeight * 0.02),
                   _buildAccountRow(),
                   _buildPasswordField(),
-                  _buildLabeledTextField('E-Mail', emailController),
 
-                 Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-    _buildLabel('電話'),
-    TextField(
-      controller: phoneController,
-      keyboardType: TextInputType.number,
-      maxLength: 10,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(10),
-      ],
-      decoration: _inputDecoration().copyWith(counterText: ""), // 去除下方字數顯示
-    ),
-  ],
-),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildLabel('電話(限10個號碼)'),
+                      TextField(
+                        controller: phoneController,
+                        keyboardType: TextInputType.number,
+                        maxLength: 10,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10),
+                        ],
+                        decoration: _inputDecoration()
+                            .copyWith(counterText: ""), // 去除下方字數顯示
+                      ),
+                    ],
+                  ),
 
-                  _buildLabel('聯絡偏好設定'),
+                  _buildLabel('聯絡偏好設定(可複選)'),
                   Row(
                     children: [
                       Expanded(
@@ -180,19 +180,59 @@ class RegisterWidgetState extends State<RegisterWidget> {
                                   () => isPhonePreferred = v ?? false))),
                     ],
                   ),
+
                   SizedBox(height: screenHeight * 0.02),
                   ...answers.keys.map((q) => _buildYesNoRow(q)),
                   SizedBox(height: screenHeight * 0.02),
-                  _buildLabel('有無慢性病'),
-                  CheckboxListTile(
-                    title: const Text('有慢性病'),
-                    value: hasChronicDisease ?? false,
-                    onChanged: (v) => setState(() => hasChronicDisease = v),
-                    controlAffinity: ListTileControlAffinity.leading,
+
+                  _buildLabel('有無特殊疾病'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CheckboxListTile(
+                          title: const Text('有'),
+                          value: hasChronicDisease ?? false,
+                          onChanged: (v) {
+                            setState(() {
+                              hasChronicDisease = v ?? false;
+
+                              if (v == true) {
+                                // 勾選有慢性病時，取消「沒有特殊疾病」
+                                noChronicDisease = false;
+                              } else {
+                                // 取消有慢性病，所有慢性病選項也清空
+                                chronicDiseaseOptions
+                                    .updateAll((key, value) => false);
+                              }
+                            });
+                          },
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+                      ),
+                      Expanded(
+                        child: CheckboxListTile(
+                          title: const Text('無'),
+                          value: noChronicDisease ?? false,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              noChronicDisease = value ?? false;
+                              if (value == true) {
+                                // 當勾選「沒有特殊疾病」，自動取消「有慢性病」以及所有疾病選項
+                                hasChronicDisease = false;
+                                chronicDiseaseOptions
+                                    .updateAll((key, _) => false);
+                              }
+                            });
+                          },
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+                      ),
+                    ],
                   ),
+
                   if (hasChronicDisease == true) ...[
                     const SizedBox(height: 10),
-                    _buildLabel('請選擇慢性病種類：'),
+                    _buildLabel('請選擇慢性病種類(可複選)：'),
                     ...chronicDiseaseOptions.entries.map((e) =>
                         CheckboxListTile(
                           title: Text(e.key),
@@ -300,7 +340,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('帳號'),
+        _buildLabel('帳號或E-Mail'),
         Row(
           children: [
             Expanded(
@@ -435,7 +475,6 @@ class RegisterWidgetState extends State<RegisterWidget> {
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        //'user_id': int.parse(userId),
         'user_name': nameController.text,
         'user_email': emailController.text,
         'user_gender': widget.role == '媽媽' ? '女' : '男',
@@ -534,21 +573,73 @@ class RegisterWidgetState extends State<RegisterWidget> {
         ],
       );
 
-  Widget _buildYesNoRow(String question) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildLabel(question),
-          Row(children: [
-            Expanded(
-                child: _buildCheckbox('是', answers[question] == true,
-                    (v) => setState(() => answers[question] = true))),
-            Expanded(
-                child: _buildCheckbox('否', answers[question] == false,
-                    (v) => setState(() => answers[question] = false))),
-          ]),
-          const Divider(),
-        ],
-      );
+  Widget _buildYesNoRow(String question) {
+    // 建立一個 Map 來對應每個選項的狀態
+
+    Map<String, bool> optionStates = {
+      "true": answers[question] == "true",
+      "false": answers[question] == "false",
+      "none": answers[question] == "none",
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(question),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Checkbox(
+                  value: optionStates["true"],
+                  onChanged: (bool? value) {
+                    if (value == true) {
+                      setState(() {
+                        answers[question] = "true";
+                      });
+                    }
+                  },
+                ),
+                const Text("是"),
+              ],
+            ),
+            Row(
+              children: [
+                Checkbox(
+                  value: optionStates["false"],
+                  onChanged: (bool? value) {
+                    if (value == true) {
+                      setState(() {
+                        answers[question] = "false";
+                      });
+                    }
+                  },
+                ),
+                const Text("從未"),
+              ],
+            ),
+            Row(
+              children: [
+                Checkbox(
+                  value: optionStates["none"],
+                  onChanged: (bool? value) {
+                    if (value == true) {
+                      setState(() {
+                        answers[question] = "none";
+                      });
+                    }
+                  },
+                ),
+                const Text("曾經有，已戒掉"),
+              ],
+            ),
+          ],
+        ),
+        const Divider(),
+      ],
+    );
+  }
 
   Widget _buildDatePickerField(String label, TextEditingController c) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -561,7 +652,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
             onTap: () async {
               final d = await showDatePicker(
                   context: context,
-                  initialDate: DateTime.now(),
+                  initialDate: DateTime(2000, 1, 1),
                   firstDate: DateTime(1950),
                   lastDate: DateTime.now(),
                   locale: const Locale('zh', 'TW'));
@@ -634,7 +725,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
       );
 
   void _showheightPicker(BuildContext ctx, TextEditingController c) {
-    int val = c.text.isNotEmpty ? int.parse(c.text.replaceAll(' cm', '')) : 150;
+    int val = c.text.isNotEmpty ? int.parse(c.text.replaceAll(' cm', '')) : 155;
     showModalBottomSheet(
         context: ctx,
         builder: (_) => StatefulBuilder(
