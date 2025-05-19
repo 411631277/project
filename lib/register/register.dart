@@ -50,6 +50,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
     '是否會吸菸?': '',
     '是否會嚼食檳榔': '',
   };
+  
   Map<String, bool> chronicDiseaseOptions = {
     '妊娠糖尿病': false,
     '妊娠高血壓': false,

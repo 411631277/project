@@ -23,7 +23,7 @@ class FaRegisterWidget extends StatefulWidget {
   }
   
   bool _obscurePassword = true;
-  
+  bool? noChronicDisease = false;
   // 🔹 用戶輸入控制器
   class FaRegisterWidgetState extends State<FaRegisterWidget> {
   final TextEditingController nameController = TextEditingController();
@@ -47,10 +47,11 @@ class FaRegisterWidget extends StatefulWidget {
   bool isEmailPreferred = false;
   bool isPhonePreferred = false;
   bool? isNewMom;
-  Map<String, bool?> answers = {
-    "是否會喝酒?": null,
-    "是否會吸菸?": null,
-    "是否會嚼食檳榔": null,
+  Map<String, String> answers =
+  {
+    '是否會喝酒?': '',
+    '是否會吸菸?': '',
+    '是否會嚼食檳榔': '',
   };
   bool? hasChronicDisease;   // 是否有慢性病 (是/否)
   Map<String, bool> chronicDiseaseOptions = {
@@ -147,11 +148,11 @@ class FaRegisterWidget extends StatefulWidget {
               SizedBox(height: screenHeight * 0.02),
                _buildAccountRow(), //帳號
               _buildPasswordField(),
-              _buildLabeledTextField('E-Mail', emailController),
+             
               Column(
   crossAxisAlignment: CrossAxisAlignment.start,
   children: [
-    _buildLabel('電話'),
+    _buildLabel('電話(限10個號碼)'),
     TextField(
       controller: phoneController,
       keyboardType: TextInputType.number,
@@ -192,19 +193,52 @@ class FaRegisterWidget extends StatefulWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   //「有無慢性病」標籤
-                  _buildLabel("有無慢性病"),
-                  CheckboxListTile(
-                    title: Text("有慢性病"),
-                    value: hasChronicDisease ?? false,
-                    onChanged: (value) {
-                      setState(() {
-                      hasChronicDisease = value;
-                      });
-                    },
-                    controlAffinity: ListTileControlAffinity.leading, // 讓勾選框靠左
-                  ),
+                  _buildLabel('有無特殊疾病'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CheckboxListTile(
+                          title: const Text('有'),
+                          value: hasChronicDisease ?? false,
+                          onChanged: (v) {
+                            setState(() {
+                              hasChronicDisease = v ?? false;
 
-                  //如果選擇「有慢性病」，顯示具體的慢性病選項
+                              if (v == true) {
+                                // 勾選有慢性病時，取消「沒有特殊疾病」
+                                noChronicDisease = false;
+                              } else {
+                                // 取消有慢性病，所有慢性病選項也清空
+                                chronicDiseaseOptions
+                                    .updateAll((key, value) => false);
+                              }
+                             }
+                            );
+                           },
+                          controlAffinity: ListTileControlAffinity.leading,
+                          ),
+                         ),
+                        Expanded(
+                         child: CheckboxListTile(
+                          title: const Text('無'),
+                           value: noChronicDisease ?? false,
+                            onChanged: (bool? value) {
+                             setState(() {
+                              noChronicDisease = value ?? false;
+                              if (value == true) {
+                                // 當勾選「沒有特殊疾病」，自動取消「有慢性病」以及所有疾病選項
+                                hasChronicDisease = false;
+                                 chronicDiseaseOptions
+                                  .updateAll((key, _) => false);
+                               }
+                              }
+                             );
+                            },
+                           controlAffinity: ListTileControlAffinity.leading,
+                           ),
+                         ),
+                        ],
+                       ),
                   if (hasChronicDisease == true) ...[
                     const SizedBox(height: 10),
                     _buildLabel("請選擇慢性病種類："),
@@ -391,10 +425,17 @@ class FaRegisterWidget extends StatefulWidget {
       logger.i("⚠️ 未輸入配對碼，不標記配對成功");
     }
 
-    if (!context.mounted) return;
-    Navigator.pushNamed(context, '/FaSuccessWidget', arguments: userId);
+       if (!context.mounted) return;
+         Navigator.pushNamed(
+           context, '/FaSuccessWidget',
+                   arguments: userId);
+               } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+               const SnackBar(
+               content: Text('儲存失敗，請稍後再試')));
+                                  }
             }
-          }),
+         ) ,
         ],
       ),
    ]
@@ -429,7 +470,7 @@ Future<bool> _validatePairingCode(String inputCode) async {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('帳號'),
+        _buildLabel('帳號或E-Mail'),
         Row(
         children: [
             // 帳號輸入框
@@ -536,7 +577,7 @@ Future<bool> _validatePairingCode(String inputCode) async {
           onTap: () async {
             DateTime? pickedDate = await showDatePicker(
               context: context,
-              initialDate: DateTime.now(), // 預設今天
+              initialDate: DateTime(2000, 1, 1),
               firstDate: DateTime(1950), // 最早 1950 年
               lastDate: DateTime.now(), // 不能選未來
               locale: const Locale("zh", "TW"), //設定為繁體中文
@@ -593,7 +634,6 @@ Future<bool> _validatePairingCode(String inputCode) async {
       '身高': heightController.text,
       '目前體重': weightController.text,
       '孕前體重': prePregnancyWeightController.text,
-      '電子信箱': emailController.text,
       '手機號碼': phoneController.text,
       '婚姻狀況': maritalStatus,
       '是否為新手媽咪': isNewMom,
@@ -643,7 +683,7 @@ Future<bool> sendDataToMySQL(String userId) async {
     body: jsonEncode({
       'man_user_name': nameController.text,
       'user_id': int.parse(userId),
-      'man_user_email': emailController.text,
+      
       'man_user_gender': "男",
       'man_user_salutation': isNewMom == true ? "是" : "否",
       'man_user_birthdate': formatBirthForMySQL(birthController.text),
@@ -653,9 +693,9 @@ Future<bool> sendDataToMySQL(String userId) async {
       'man_current_weight': double.tryParse(weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
       'man_emergency_contact_name': "",
       'man_emergency_contact_phone': "",
-      'man_betel_nut_habit': answers["是否會嚼食檳榔"] == true ? '有' : '無',
-      'man_smoking_habit': answers["是否會吸菸?"] == true ? '有' : '無',
-      'man_drinking_habit': answers["是否會喝酒?"] == true ? '有' : '無',
+      'man_betel_nut_habit': answers['是否會嚼食檳榔'],
+      'man_smoking_habit': answers["是否會吸菸?"] ,
+      'man_drinking_habit': answers["是否會喝酒?"] ,
       'man_marital_status': maritalStatus ?? '未婚',
       'man_contact_preference': [
         if (isEmailPreferred) 'e-mail',
@@ -735,26 +775,73 @@ Widget _buildPasswordField() {
 }
   
 
-  Widget _buildYesNoRow(String question) {
+   Widget _buildYesNoRow(String question) {
+    // 建立一個 Map 來對應每個選項的狀態
+
+    Map<String, bool> optionStates = {
+      "true": answers[question] == "true",
+      "false": answers[question] == "false",
+      "none": answers[question] == "none",
+    };
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildLabel(question),
         Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Expanded(
-                child: _buildCheckbox("是", answers[question] == true,
-                (value) => setState(() => answers[question] = true))),
-            Expanded(
-                child: _buildCheckbox("否", answers[question] == false,
-                (value) => setState(() => answers[question] = false))),
+            Row(
+              children: [
+                Checkbox(
+                  value: optionStates["true"],
+                  onChanged: (bool? value) {
+                    if (value == true) {
+                      setState(() {
+                        answers[question] = "true";
+                      });
+                    }
+                  },
+                ),
+                const Text("是"),
+              ],
+            ),
+            Row(
+              children: [
+                Checkbox(
+                  value: optionStates["false"],
+                  onChanged: (bool? value) {
+                    if (value == true) {
+                      setState(() {
+                        answers[question] = "false";
+                      });
+                    }
+                  },
+                ),
+                const Text("從未"),
+              ],
+            ),
+            Row(
+              children: [
+                Checkbox(
+                  value: optionStates["none"],
+                  onChanged: (bool? value) {
+                    if (value == true) {
+                      setState(() {
+                        answers[question] = "none";
+                      });
+                    }
+                  },
+                ),
+                const Text("曾經有，已戒掉"),
+              ],
+            ),
           ],
         ),
         const Divider(),
       ],
     );
   }
-}
 
 //建立標籤
 Widget _buildLabel(String text) {
@@ -902,7 +989,7 @@ String formatBirthForMySQL(String text) {
 void _showheightPicker(BuildContext context, TextEditingController controller) {
   int selectedHeight = controller.text.isNotEmpty
       ? int.parse(controller.text.replaceAll(' cm', ''))
-      : 150; // 預設身高值
+      : 160; // 預設身高值
 
   showModalBottomSheet(
     context: context,
@@ -945,4 +1032,5 @@ void _showheightPicker(BuildContext context, TextEditingController controller) {
       );
     },
   );
+}
 }
