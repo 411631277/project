@@ -34,7 +34,7 @@ class HomeScreenWidget extends StatefulWidget {
 
 class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   String userName = "載入中...";
-  String babyName = "小寶";
+  String babyName = "寶寶資料填寫";
 
   String? _profileImageUrl;
   final ImagePicker _picker = ImagePicker();
@@ -62,7 +62,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     super.initState();
     _currentDay = DateTime.now().toString().substring(0, 10);
     _loadUserName();
-    _loadBabyName();
+  
     _loadProfilePicture();
     _loadTargetStepsFromFirebase();
     // 載入「今天」的步數資料
@@ -316,28 +316,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     }
   }
 
-  Future<void> _loadBabyName() async {
-    try {
-      QuerySnapshot babySnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .collection('baby')
-          .orderBy('填寫時間', descending: true)
-          .get();
 
-      if (babySnapshot.docs.isNotEmpty) {
-        setState(() {
-          babyName = "小寶";
-        });
-      } else {
-        setState(() {
-          babyName = "小寶";
-        });
-      }
-    } catch (e) {
-      logger.e("❌ 錯誤：讀取寶寶名稱失敗 $e");
-    }
-  }
 
   void _showProfilePreviewDialog() {
     showDialog(

@@ -35,24 +35,27 @@ class _RobotWidgetState extends State<RobotWidget> {
   final List<Map<String, String>> _messages = [];
   final ScrollController _scrollController = ScrollController();
   final String apiUrl = "http://163.13.202.126:8000/query";
-
   /// 第一組快速回覆
-  final List<String> _quickReplies = ["產科住院環境資訊", "母乳哺餵的好處", "產後衛教部分", "其他"];
+  final List<String> _quickReplies = ["媽媽手冊", "產後初期注意事項", "母乳哺育相關問題", "父親衛教資訊","其他"];
 
   /// 第二組快速回覆
   final List<String> _secondCardReplies = [
-    "媽媽手冊-產前篇",
-    "媽媽手冊-產後篇",
     "父親衛教資訊",
     "寶寶母乳需求量&促進乳汁分泌方法",
   ];
 
+  final List<String> _manualReplies = [
+  "媽媽手冊-產前篇",
+  "媽媽手冊-產後篇",
+  ];
+  
   /// 用來記錄「何時顯示第二組快速回覆」的位置
   final List<int> _secondCardAfterIndexes = [];
-
+  final List<int> _manualCardAfterIndexes = [];
   @override
   void initState() {
     super.initState();
+    
     _messages.add({
       'sender': 'chatgpt',
       'text': '你好，請問有需要幫助什麼嗎？',
@@ -73,7 +76,7 @@ class _RobotWidgetState extends State<RobotWidget> {
 
   /// 發送訊息給後端或顯示「其他資訊」
   Future<void> _sendMessage(String userInput,
-      {bool sendToBackend = true}) async {
+      {bool sendToBackend = true, bool manualVisible = true}) async {
     if (userInput.trim().isEmpty) return;
 
     _messageController.clear();
@@ -81,8 +84,18 @@ class _RobotWidgetState extends State<RobotWidget> {
     if (!sendToBackend) {
       setState(() {
         _messages.add({'sender': 'user', 'text': userInput});
-        _messages.add({'sender': 'chatgpt', 'text': '以下是其他資訊'});
+        _messages.add({'sender': 'chatgpt', 'text': '下列是有關其他衛教資訊'});
         _secondCardAfterIndexes.add(_messages.length);
+      });
+      _scrollToBottom();
+      return;
+    }
+
+    if (!manualVisible) {
+      setState(() {
+        _messages.add({'sender': 'user', 'text': userInput});
+        _messages.add({'sender': 'chatgpt', 'text': '下列是有關媽媽手冊的資訊'});
+        _manualCardAfterIndexes.add(_messages.length);
       });
       _scrollToBottom();
       return;
@@ -176,13 +189,16 @@ class _RobotWidgetState extends State<RobotWidget> {
             child: SizedBox(
               width: 200,
               child: ElevatedButton(
-                onPressed: () {
-                  if (text.trim() == "其他") {
-                    _sendMessage(text, sendToBackend: false);
-                  } else {
-                    _sendMessage(text);
-                  }
-                },
+               onPressed: () {
+  if (text.trim() == "其他") {
+    _sendMessage(text, sendToBackend: false);
+  } else if (text.trim() == "媽媽手冊") {
+    _sendMessage(text, manualVisible: false);
+  } else {
+    _sendMessage(text);
+  }
+},
+
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 240, 238, 239),
                   foregroundColor: Colors.black,
@@ -270,6 +286,9 @@ class _RobotWidgetState extends State<RobotWidget> {
                       // **在 _secondCardAfterIndexes 指定位置後顯示 _secondCardReplies**
                       if (_secondCardAfterIndexes.contains(index + 1))
                         _buildQuickReplyCards(_secondCardReplies),
+
+                       if (_manualCardAfterIndexes.contains(index + 1))
+                        _buildQuickReplyCards(_manualReplies),
                     ],
                   );
                 },
