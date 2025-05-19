@@ -1,14 +1,16 @@
 import 'dart:math' as math;
-import 'package:doctor_2/first_question/finish.dart';
+import 'package:doctor_2/questionGroup/knowledgeGroup/knowledge_wrong.dart';
 import 'package:flutter/material.dart';
 
 class KnowledgeScore extends StatelessWidget {
+  final List<Map<String, dynamic>> wrongAnswers;
   final String userId;
   final bool isManUser; 
   final int totalScore;
 
   const KnowledgeScore({
     super.key,
+    required this.wrongAnswers,
     required this.userId,
     required this.totalScore,
     required this.isManUser
@@ -85,15 +87,16 @@ class KnowledgeScore extends StatelessWidget {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => FinishWidget(
+      builder: (context) => WrongAnswersPage(
         userId: userId, // 這邊傳遞 id
         isManUser: isManUser,
+        wrongAnswers: wrongAnswers,
       ),
     ),
   );
 },
 child: Text(
-  '結束問卷',
+  '下一步',
   style: TextStyle(
     fontSize: base * 0.06,
     color: Colors.white,

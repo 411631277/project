@@ -66,7 +66,7 @@ class _AdaptWidgetState extends State<AdaptWidget> {
           children: [
             SizedBox(height: screenHeight * 0.02),
             Text(
-              '2.親職適應',
+              '親職適應',
               style: TextStyle(
                 fontSize: fontSize * 1.2,
                 fontWeight: FontWeight.bold,
@@ -229,9 +229,9 @@ class _AdaptWidgetState extends State<AdaptWidget> {
 /// 1〜6 分對應陣列索引 +1，計算所有題目的總分
 int _calculateTotalScore() {
   return adapt.entries.map((entry) {
-    // 找到該題答案在 options 陣列的索引，再＋1 成為分數
-    final score = questionOptions[entry.key]!
-                    .indexOf(entry.value!) + 1;
+    final index = questionOptions[entry.key]!.indexOf(entry.value!);
+    // 使用 6 - index 來反轉分數
+    final score = 6 - index;
     return score;
   }).fold(0, (acc, element) => acc + element);
 }

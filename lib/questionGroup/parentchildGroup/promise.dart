@@ -66,7 +66,7 @@ class _PromiseWidgetState extends State<PromiseWidget> {
           children: [
             SizedBox(height: screenHeight * 0.02),
             Text(
-              '3.承諾',
+              '承諾',
               style: TextStyle(
                 fontSize: fontSize * 1.2,
                 fontWeight: FontWeight.bold,

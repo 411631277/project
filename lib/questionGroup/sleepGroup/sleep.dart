@@ -44,7 +44,7 @@ class _SleepWidgetState extends State<SleepWidget> {
     },
     {
       "type": "fill",
-      "question": "過去一個月來，您早上通常何時起床？",
+      "question": "過去一個月來，您通常何時起床？",
       "index": 2,
       "hasHour": true,
       "hasMinute": true

@@ -444,6 +444,7 @@ class _MyAppState extends State<MyApp> {
               userId: args['userId'] as String,
               totalScore: args['totalScore'] as int,
               isManUser: args['isManUser'],
+              wrongAnswers: args['wrongAnswers'] as List<Map<String, dynamic>>,
             ),
           );
         }

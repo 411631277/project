@@ -66,7 +66,7 @@ class _RespondWidgetState extends State<RespondWidget> {
           children: [
             SizedBox(height: screenHeight * 0.02),
             Text(
-              '4.回應信心',
+              '回應信心',
               style: TextStyle(
                 fontSize: fontSize * 1.2,
                 fontWeight: FontWeight.bold,

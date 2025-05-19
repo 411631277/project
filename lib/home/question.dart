@@ -163,7 +163,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                     screenWidth,
                     screenHeight,
                     0.48,
-                    '會陰疼痛分數計算',
+                    '產後傷口疼痛分數',
                     '/PainScaleWidget',
                     'painScaleCompleted',
                   ),

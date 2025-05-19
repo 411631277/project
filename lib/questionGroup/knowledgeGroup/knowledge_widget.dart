@@ -1,5 +1,6 @@
 //母乳哺餵知識量表
 import 'dart:convert';
+import 'package:doctor_2/questionGroup/knowledgeGroup/knowledge_score.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
@@ -114,8 +115,8 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
                       TableRow(
                         decoration: BoxDecoration(
                           color: answers[i] != null
-                              ? const Color.fromARGB(255, 241, 215, 237) // 已回答時
-                              : const Color.fromRGBO(233, 227, 213, 1), // 未回答時
+                              ? const Color.fromRGBO(233, 227, 213, 1) // 已回答時
+                              : const Color.fromARGB(255, 226, 249, 254), // 未回答時
                         ),
                         children: [
                           Text(
@@ -159,20 +160,36 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
                       ),
                       backgroundColor: Colors.brown.shade400,
                     ),
-                    onPressed: () async {
+                   onPressed: () async {
   final int totalScore = _calculateTotalScore();
   final success = await _saveAnswersToFirebase(totalScore);
   if (!context.mounted) return;
 
   if (success) {
-    Navigator.pushNamed(
+    // 收集錯誤的題目
+    List<Map<String, dynamic>> wrongAnswers = [];
+
+    for (int i = 0; i < questions.length; i++) {
+      if (answers[i] != correctAnswers[i]) {
+        wrongAnswers.add({
+          'question': questions[i],
+          'userAnswer': answers[i],
+          'correctAnswer': correctAnswers[i],
+        });
+      }
+    }
+
+    // 導向新頁面並傳遞所有參數
+    Navigator.push(
       context,
-      '/KnowledgeScore',
-      arguments: {
-        'userId': widget.userId,
-        'isManUser': widget.isManUser,
-        'totalScore': totalScore,
-      },
+      MaterialPageRoute(
+        builder: (context) => KnowledgeScore(
+          wrongAnswers: wrongAnswers,
+          userId: widget.userId,
+          isManUser: widget.isManUser,
+          totalScore: totalScore,
+        ),
+      ),
     );
   }
 },
@@ -215,23 +232,33 @@ child: const Text(
 
 // 正確答案表
 final Map<int, String> correctAnswers = {
-  0: "正確", // 題號是從0開始
+  0: "正確",
+  1: "錯誤",
   2: "正確",
+  3: "錯誤",
+  4: "正確",
+  5: "錯誤",
   6: "正確",
   7: "正確",
   8: "正確",
   9: "正確",
+  10: "錯誤",
   11: "正確",
+  12: "錯誤",
+  13: "錯誤",
   14: "正確",
   15: "正確",
+  16: "錯誤",
   17: "正確",
   18: "正確",
   19: "正確",
   20: "正確",
   21: "正確",
+  22: "錯誤",
   23: "正確",
   24: "正確",
 };
+
 
   /// 儲存問卷答案，並將 knowledgeCompleted 設為 true
  Future<bool> _saveAnswersToFirebase(int totalScore) async {

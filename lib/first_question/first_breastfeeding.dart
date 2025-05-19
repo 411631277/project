@@ -66,12 +66,17 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
                   ),
                   hint:
                       const Text('選擇月份', style: TextStyle(color: Colors.grey)),
-                  items: List.generate(13, (index) => index.toString())
-                      .map((month) => DropdownMenuItem<String>(
-                            value: month,
-                            child: Text('$month 個月'),
-                          ))
-                      .toList(),
+                  items: [
+  DropdownMenuItem<String>(
+    value: '未考慮',
+    child: Text('目前還未考慮'),
+  ),
+  ...List.generate(25, (index) => index.toString())
+      .map((month) => DropdownMenuItem<String>(
+            value: month,
+            child: Text('$month 個月'),
+          ))  
+],
                   onChanged: (value) {
                     setState(() {
                       selectedDuration = value;

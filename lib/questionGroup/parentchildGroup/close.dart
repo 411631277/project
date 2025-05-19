@@ -68,7 +68,7 @@ class _CloseWidgetState extends State<CloseWidget> {
           children: [
             SizedBox(height: screenHeight * 0.02),
             Text(
-              '1.親近',
+              '親近',
               style: TextStyle(
                 fontSize: fontSize * 1.2,
                 fontWeight: FontWeight.bold,

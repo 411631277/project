@@ -21,7 +21,7 @@ class Closescore extends StatelessWidget {
 
     // 根據分數挑文字
     final message = totalScore < 34
-      ? '媽媽最近和孩子相處有遇到什麼問題嗎？\n\n如果有需求可以使用app的AI問答功能，或是撥打以下電話諮詢喔！'
+      ? '媽媽最近和孩子相處有遇到什麼困難嗎？\n\n如果有需求可以使用app的AI問答功能來尋求幫助喔！'
       : '和寶寶的關係不錯呢，繼續保持溫暖的互動吧！';
 
      return PopScope(

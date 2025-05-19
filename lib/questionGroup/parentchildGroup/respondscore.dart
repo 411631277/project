@@ -22,7 +22,7 @@ class Respondscore extends StatelessWidget {
     // 根據分數挑文字
     final message = totalScore < 22
       ? '媽媽不知道寶寶想跟您表達什麼意思嗎？\n\n可以利用APP的AI問答或是或是撥打以下電話諮詢喔！'
-      : '媽媽對寶寶很了解呢！';
+      : '和寶寶的關係不錯呢，繼續保持溫暖的互動吧！';
 
      return PopScope(
     canPop: false, // ❗這行就是鎖定返回鍵
@@ -66,7 +66,7 @@ class Respondscore extends StatelessWidget {
 
               SizedBox(
                 width: screenW * 0.7,
-                height: screenH * 0.08,
+                height: screenH * 0.1,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFB0A28D),

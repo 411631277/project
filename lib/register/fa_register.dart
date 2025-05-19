@@ -241,7 +241,7 @@ class FaRegisterWidget extends StatefulWidget {
                        ),
                   if (hasChronicDisease == true) ...[
                     const SizedBox(height: 10),
-                    _buildLabel("請選擇慢性病種類："),
+                    _buildLabel("請選擇特殊疾病種類："),
                     ...chronicDiseaseOptions.keys.map((option) {
                       return CheckboxListTile(
                         title: Text(option),
@@ -677,25 +677,49 @@ Future<bool> _validatePairingCode(String inputCode) async {
 Future<bool> sendDataToMySQL(String userId) async {
   final url = Uri.parse('http://163.13.201.85:3000/man_users');
 
+ String betelNutHabitValue;
+  
+    if (answers['是否會嚼食檳榔?'] == 'true') {
+  betelNutHabitValue = "是";
+} else if (answers['是否會嚼食檳榔?'] == 'false') {
+  betelNutHabitValue = "從未";
+} else {
+  betelNutHabitValue = "曾經有，已戒掉";
+}
+ String smokinghabitValue;
+    if (answers['是否會吸菸?'] == 'true') {
+  smokinghabitValue = "是";
+} else if (answers['是否會吸菸?'] == 'false') {
+  smokinghabitValue = "從未";
+} else {
+  smokinghabitValue = "曾經有，已戒掉";
+}
+ String drinkinghabitvalue;
+if (answers['是否會喝酒?'] == 'true') {
+  drinkinghabitvalue = "是";
+} else if (answers['是否會喝酒?'] == 'false') {
+  drinkinghabitvalue = "從未";
+} else {
+  drinkinghabitvalue = "曾經有，已戒掉";
+}
+
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
       'man_user_name': nameController.text,
-      'user_id': int.parse(userId),
-      
+      'man_user_id': int.parse(userId),
       'man_user_gender': "男",
       'man_user_salutation': isNewMom == true ? "是" : "否",
       'man_user_birthdate': formatBirthForMySQL(birthController.text),
       'man_user_phone': phoneController.text,
-      'man_user_id_number': accountController.text,
       'man_user_height': double.tryParse(heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
       'man_current_weight': double.tryParse(weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
       'man_emergency_contact_name': "",
       'man_emergency_contact_phone': "",
-      'man_betel_nut_habit': answers['是否會嚼食檳榔'],
-      'man_smoking_habit': answers["是否會吸菸?"] ,
-      'man_drinking_habit': answers["是否會喝酒?"] ,
+      'man_betel_nut_habit': betelNutHabitValue,
+      'man_smoking_habit': smokinghabitValue ,
+      'man_drinking_habit': drinkinghabitvalue ,
       'man_marital_status': maritalStatus ?? '未婚',
       'man_contact_preference': [
         if (isEmailPreferred) 'e-mail',
