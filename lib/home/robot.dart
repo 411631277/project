@@ -36,12 +36,15 @@ class _RobotWidgetState extends State<RobotWidget> {
   final ScrollController _scrollController = ScrollController();
   final String apiUrl = "http://163.13.202.126:8000/query";
   /// 第一組快速回覆
-  final List<String> _quickReplies = ["媽媽手冊", "產後初期注意事項", "母乳哺育相關問題", "父親衛教資訊","其他"];
+  final List<String> _quickReplies = ["媽媽手冊", "產後初期注意事項", "母乳哺育相關問題", "父親知識資訊","其他"];
 
   /// 第二組快速回覆
   final List<String> _secondCardReplies = [
-    "父親衛教資訊",
-    "寶寶母乳需求量&促進乳汁分泌方法",
+    "寶寶母乳需求量",
+    "促進乳汁分泌方法",
+    "親餵與瓶餵的優缺點",
+    "哺乳期間的飲食禁忌",
+    "母乳餵養的正確姿勢與技巧"
   ];
 
   final List<String> _manualReplies = [
