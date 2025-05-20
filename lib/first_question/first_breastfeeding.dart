@@ -69,7 +69,7 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
                   items: [
   DropdownMenuItem<String>(
     value: '未考慮',
-    child: Text('目前還未考慮'),
+    child: Text('目前還未考慮過'),
   ),
   ...List.generate(25, (index) => index.toString())
       .map((month) => DropdownMenuItem<String>(

@@ -467,48 +467,42 @@ Future<bool> _validatePairingCode(String inputCode) async {
   }
 
  Widget _buildAccountRow() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLabel('帳號或E-Mail'),
-        Row(
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _buildLabel('帳號或E-Mail'),
+      Row(
         children: [
-            // 帳號輸入框
-            Expanded(
+          Expanded(
             child: TextField(
-            controller: accountController,
-            decoration: _inputDecoration(),
+              controller: accountController,
+              decoration: _inputDecoration(),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+              ],
             ),
-            ),
-
+          ),
           const SizedBox(width: 8),
-          
-          //檢查帳號按鈕
           ElevatedButton(
-          style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5.0),
+            style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                backgroundColor: const Color.fromARGB(255, 148, 235, 235)),
+            onPressed: _checkAccountDuplicate,
+            child: const Text('檢查'),
           ),
-          backgroundColor: const Color.fromARGB(255, 148, 235, 235),
-          ),
-          onPressed: _checkAccountDuplicate,
-          child: const Text("檢查"),
-          )
-          ],
-          ),
+        ],
+      ),
+      if (_accountCheckMessage != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(_accountCheckMessage!,
+              style: TextStyle(color: _accountCheckColor)),
+        ),
+    ],
+  );
+}
         
-          // 若有檢查結果，顯示提示文字
-          if (_accountCheckMessage != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0),
-            child: Text(
-            _accountCheckMessage!,
-            style: TextStyle(color: _accountCheckColor),
-            ),
-           ),
-           ],
-           );
-           }
 
   Future<void> _checkAccountDuplicate() async {
   final acc = accountController.text.trim();

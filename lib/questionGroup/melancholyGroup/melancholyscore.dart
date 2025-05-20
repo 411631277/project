@@ -6,26 +6,38 @@ class Melancholyscore extends StatelessWidget {
   final String userId;
   final int totalScore;
   final bool isManUser;
+  final Map<int, String> answers;
   const Melancholyscore({
     super.key,
     required this.userId,
     required this.totalScore,
+    required this.answers,
     required this.isManUser
   });
 
   @override
-  Widget build(BuildContext context) {
+   Widget build(BuildContext context) {
+
     // 取得螢幕尺寸
     final screenW = MediaQuery.of(context).size.width;
     final screenH = MediaQuery.of(context).size.height;
     final base = math.min(screenW, screenH);
 
     // 根據分數挑文字
-    final String message;
-  if (totalScore <= 9) {
-  message = '您的身心狀況不錯，請繼續維持';
+   final String message;
+if (totalScore <= 9) {
+  // ✅ 檢查第 10 題是否是 "沒有這樣"
+  if (answers[9] != "沒有這樣") {
+    message = '您的身心健康狀況可能需要醫療專業的協助，請找專業醫師協助處理';
+  } else {
+    message = '您的身心狀況不錯，請繼續維持';
+  }
 } else if (totalScore >= 10 && totalScore <= 12) {
-  message = '請注意~您目前狀況可能有情緒困擾，讓您與身旁的人多聊聊，給心情一個出口，必要時可尋求專業人員協助';
+  if (answers[9] != "沒有這樣") {
+    message = '您的身心健康狀況可能需要醫療專業的協助，請找專業醫師協助處理';
+  } else {
+    message = '請注意~您目前狀況可能有情緒困擾，讓您與身旁的人多聊聊，給心情一個出口，必要時可尋求專業人員協助';
+  }
 } else {
   message = '您的身心健康狀況可能需要醫療專業的協助，請找專業醫師協助處理';
 }

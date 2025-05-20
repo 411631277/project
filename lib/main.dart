@@ -434,6 +434,10 @@ class _MyAppState extends State<MyApp> {
               userId: args['userId'],
               isManUser: args['isManUser'],
               totalScore: args['totalScore'] as int,
+             answers: Map<int, String>.from(
+  (args['answers'] as Map).map(
+    (key, value) => MapEntry(key as int, value ?? ''),
+  ))
             ),
           );
         }

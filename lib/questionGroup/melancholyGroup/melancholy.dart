@@ -175,6 +175,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     '/Melancholyscore',
     arguments: {
       'userId': widget.userId,
+      'answers': answers,
       'totalScore': totalScore,
       'isManUser': widget.isManUser,
     },
@@ -350,6 +351,7 @@ int _calculateTotalScore() {
       }
     }
   });
+
 
   return totalScore;
 }

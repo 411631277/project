@@ -138,18 +138,16 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
           _lastDeviceSteps = null;
         });
 
-        Pedometer.stepCountStream.first.then((event) {
-          if (event.steps > 0) {
-            setState(() {
-              _stepCount = event.steps; // 直接用目前的步數初始化
-              _lastDeviceSteps = event.steps;
-            });
-            _saveStepsForToday();
-            logger.i("今天 $_currentDay 尚無資料，但同步基準: ${event.steps}");
-          }
-        }).catchError((e) {
-          logger.e("無法同步 Pedometer 的絕對步數: $e");
-        });
+       Pedometer.stepCountStream.first.then((event) {
+  if (event.steps > 0) {
+    setState(() {
+      _lastDeviceSteps = event.steps;
+      _stepCount = 0; // ✅ 步數應為 0，因為今天還沒開始累積
+    });
+    _saveStepsForToday();
+    logger.i("今天 $_currentDay 首次啟動，設定基準為 ${event.steps}，今日步數歸 0");
+  }
+});
 
         await _saveStepsForToday();
         logger.i("今天 $_currentDay 尚無資料，已初始化: 步數=0, lastDeviceSteps=null");
