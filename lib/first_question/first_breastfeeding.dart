@@ -106,16 +106,18 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
                       }
 
                       try {
+                         String saveValue = selectedDuration == '未考慮' ? '未考慮' : "$selectedDuration 個月";
+
                         await FirebaseFirestore.instance
                             .collection('users')
                             .doc(widget.userId)
                             .update({
-                          "預期哺餵時長": "$selectedDuration 個月",
+                          "預期哺餵時長": saveValue,
                         });
                         await sendFirstBreastfeedingToMySQL(
-                            widget.userId, "$selectedDuration 個月");
+                            widget.userId, saveValue);
                         logger.i(
-                            "✅ Firestore 更新成功，userId: ${widget.userId}, breastfeedingDuration: $selectedDuration");
+                            "✅ Firestore 更新成功，userId: ${widget.userId}, breastfeedingDuration: $saveValue");
 
                         if (context.mounted) {
                           Navigator.push(
@@ -150,7 +152,7 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
       body: jsonEncode({
         'user_id': int.parse(userId),
         "expected_breastfeeding_months":
-            int.parse(duration.replaceAll('個月', '')),
+        duration == '未考慮' ? '目前還未考慮過' : int.parse(duration.replaceAll('個月', '')),
       }),
     );
 
