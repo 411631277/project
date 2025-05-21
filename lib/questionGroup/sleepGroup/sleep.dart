@@ -27,24 +27,28 @@ class _SleepWidgetState extends State<SleepWidget> {
   final Map<int, TextEditingController> minuteControllers = {
     for (var i = 0; i < 5; i++) i: TextEditingController()
   };
+
+final Map<int, String> amPmSelections = {0: '上午', 2: '上午'};
+
+
   final List<Map<String, dynamic>> _q1 = [
     {
       "type": "fill",
-      "question": "過去一個月來，您通常何時上床？",
+      "question": "過去一個月來，您通常何時上床？(24小時制)",
       "index": 0,
       "hasHour": true,
       "hasMinute": true
     },
     {
       "type": "fill",
-      "question": "過去一個月來，您通常多久才能入睡？",
+      "question": "過去一個月來，您通常多久才能入睡？(分鐘)",
       "index": 1,
       "hasHour": false,
       "hasMinute": true
     },
     {
       "type": "fill",
-      "question": "過去一個月來，您通常何時起床？",
+      "question": "過去一個月來，您通常何時起床？(24小時制)",
       "index": 2,
       "hasHour": true,
       "hasMinute": true
@@ -273,65 +277,94 @@ class _SleepWidgetState extends State<SleepWidget> {
                             ),
                             onPressed: _handleSubmit,
                             child: Text("提交完成",
+                            
                                 style: TextStyle(
                                     fontSize: base * 0.045,
                                     color: Colors.white)),
+                                    
                           ),
                       ],
                     ),
                   ]),
             ),
           ),
-        ));
+          
+        )
+        );
   }
 
-  Widget _buildFillQuestion(Map<String, dynamic> q, double base) {
-    final idx = q['index'] as int;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(children: [
-        Expanded(
-          flex: 4,
-          child: Text(
-            "${idx + 1}. ${q['question']}",
+Widget _buildFillQuestion(Map<String, dynamic> q, double base) {
+  final idx = q["index"] as int;
+  final hasHour = q["hasHour"] as bool;
+  final hasMinute = q["hasMinute"] as bool;
+
+  final isAmPmRequired = (idx == 0 || idx == 2); // 第1和第3題顯示AM/PM
+
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("${idx + 1}. ${q['question']}",
             style: TextStyle(
-                fontSize: base * 0.045,
-                color: Color.fromRGBO(147, 129, 108, 1)),
-          ),
-        ),
-        if (q['hasHour']) ...[
-          Expanded(
-            flex: 1,
-            child: TextField(
-              controller: hourControllers[idx],
-              textAlign: TextAlign.center,
-              decoration: const InputDecoration(border: UnderlineInputBorder()),
-              onChanged: (_) => setState(() {}),
+              fontSize: base * 0.04,
+              color: const Color.fromRGBO(147, 129, 108, 1),
+            )),
+        const SizedBox(height: 8),
+        Row(children: [
+          if (isAmPmRequired)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: DropdownButton<String>(
+                value: amPmSelections[idx],
+                items: ['上午', '下午']
+                    .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() => amPmSelections[idx] = value!);
+                },
+              ),
             ),
-          ),
-          Text("時",
-              style: TextStyle(
-                  fontSize: base * 0.045,
-                  color: Color.fromRGBO(147, 129, 108, 1))),
-        ],
-        if (q['hasMinute']) ...[
-          Expanded(
-            flex: 1,
-            child: TextField(
-              controller: minuteControllers[idx],
-              textAlign: TextAlign.center,
-              decoration: const InputDecoration(border: UnderlineInputBorder()),
-              onChanged: (_) => setState(() {}),
+          if (hasHour) ...[
+            SizedBox(
+              width: 60,
+              child: TextField(
+                controller: hourControllers[idx],
+                textAlign: TextAlign.center,
+                decoration: const InputDecoration(border: UnderlineInputBorder()),
+                keyboardType: TextInputType.number,
+               onChanged: (value) {
+      if (idx == 0) _a1[0] = value; // 第1題：上床小時
+      if (idx == 2) _a1[2] = value; // 第3題：起床小時
+      setState(() {});
+    },
+              ),
             ),
-          ),
-          Text("分",
-              style: TextStyle(
-                  fontSize: base * 0.045,
-                  color: Color.fromRGBO(147, 129, 108, 1))),
-        ],
-      ]),
-    );
-  }
+            Text("時", style: TextStyle(fontSize: base * 0.045, color: const Color.fromRGBO(147, 129, 108, 1))),
+          ],
+          if (hasMinute) ...[
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 60,
+              child: TextField(
+                controller: minuteControllers[idx],
+                textAlign: TextAlign.center,
+                decoration: const InputDecoration(border: UnderlineInputBorder()),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+  if (idx == 0) _a1[1] = value;
+  if (idx == 2) _a1[3] = value;
+  setState(() {});
+}
+              ),
+            ),
+            Text("分", style: TextStyle(fontSize: base * 0.045, color: const Color.fromRGBO(147, 129, 108, 1))),
+          ],
+        ])
+      ],
+    ),
+  );
+}
 
   Widget _buildChoiceQuestion(
       int uiIndex, Map<String, dynamic> q, double base) {
@@ -470,12 +503,14 @@ class _SleepWidgetState extends State<SleepWidget> {
       idKey: int.parse(widget.userId),
       'sleep_question_content': "睡眠品質量表",
       'sleep_test_date': date,
+      'sleep_answer_1_am_pm': amPmSelections[0],
       'sleep_answer_1_a':
           int.tryParse(hourControllers[0]?.text.trim() ?? '') ?? 0,
       'sleep_answer_1_b':
           int.tryParse(minuteControllers[0]?.text.trim() ?? '') ?? 0,
       'sleep_answer_2':
           int.tryParse(minuteControllers[1]?.text.trim() ?? '') ?? 0,
+      'sleep_answer_3_am_pm': amPmSelections[2],
       'sleep_answer_3_a':
           int.tryParse(hourControllers[2]?.text.trim() ?? '') ?? 0,
       'sleep_answer_3_b':
@@ -623,28 +658,29 @@ class _SleepWidgetState extends State<SleepWidget> {
   }
 
   int _calculateSleepEfficiencyScore() {
-    final sleepHour =
-        int.tryParse(hourControllers[3]!.text.trim()) ?? 0; // 第4題：實際睡眠時間
-    final bedHour = int.tryParse(_a1[0] ?? '') ?? 0; // 第1題：上床時間
-    final wakeHour = int.tryParse(_a1[2] ?? '') ?? 0; // 第3題：起床時間
+  // 先印出所有來源
+ 
 
-    // 計算「躺床時間」
-    int totalTimeInBed;
-    if (wakeHour < bedHour) {
-      totalTimeInBed = (24 - bedHour) + wakeHour;
-    } else {
-      totalTimeInBed = wakeHour - bedHour;
-    }
+  final sleepHour = int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0;
+  final bedHour = int.tryParse(_a1[0] ?? '') ?? 0;
+  final wakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
 
-    if (totalTimeInBed == 0) return 3; // 避免除以 0 的錯誤
-
-    double efficiency = sleepHour / totalTimeInBed * 100;
-
-    if (efficiency >= 85) return 0;
-    if (efficiency >= 75) return 1;
-    if (efficiency >= 65) return 2;
-    return 3;
+  int totalTimeInBed;
+  if (wakeHour < bedHour) {
+    totalTimeInBed = (24 - bedHour) + wakeHour;
+  } else {
+    totalTimeInBed = wakeHour - bedHour;
   }
+
+  if (totalTimeInBed == 0) return 3;
+
+  final efficiency = sleepHour / totalTimeInBed * 100;
+  if (efficiency >= 85) return 0;
+  if (efficiency >= 75) return 1;
+  if (efficiency >= 65) return 2;
+  return 3;
+}
+
 
   int _calculateSleepDisturbanceScore() {
     const scoreMap = {

@@ -23,7 +23,7 @@ class Sleepscore extends StatelessWidget {
     final base = math.min(screenW, screenH);
 
     final message = totalScore < 18
-        ? '媽媽在照顧寶寶上是不是會覺得有些負擔呢？\n\n可以利用APP的AI問答或是或是撥打以下電話諮詢喔！'
+        ? '媽媽在照顧寶寶上是不是會覺得有些負擔呢？\n\n可以利用APP的AI問答或是撥打以下電話諮詢喔！'
         : '看來媽媽在新的身分上有取得平衡點呢！';
 
     return PopScope(
