@@ -407,6 +407,35 @@ Widget _buildFillQuestion(Map<String, dynamic> q, double base) {
         .collection("questions")
         .doc("SleepWidget");
 
+final bedHour = int.tryParse(_a1[0] ?? '') ?? 0;
+final bedMinute = int.tryParse(_a1[1] ?? '') ?? 0;
+final wakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
+final wakeMinute = int.tryParse(_a1[3] ?? '') ?? 0;
+
+final sleepHour = int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0;
+final sleepMinute = int.tryParse(minuteControllers[3]?.text.trim() ?? '') ?? 0;
+
+// 計算時間總分鐘
+final bedTotalMinutes = bedHour * 60 + bedMinute;
+final wakeTotalMinutes = wakeHour * 60 + wakeMinute;
+final sleepTotalMinutes = sleepHour * 60 + sleepMinute;
+
+int totalTimeInBed;
+if (wakeTotalMinutes < bedTotalMinutes) {
+  totalTimeInBed = (24 * 60 - bedTotalMinutes) + wakeTotalMinutes;
+} else {
+  totalTimeInBed = wakeTotalMinutes - bedTotalMinutes;
+}
+
+// 驗證條件：實際睡眠時間 > 躺床時間
+if (sleepTotalMinutes > totalTimeInBed) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("填充4的回答有問題，請再次確認填答內容")),
+  );
+  return;
+}
+
+
     final formatted1 = <String, String>{};
     for (var i = 0; i < 4; i++) {
       final h = hourControllers[i]!.text.trim();
