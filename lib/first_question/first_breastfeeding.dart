@@ -9,7 +9,7 @@ final Logger logger = Logger(); // 🔹 Firestore 更新記錄
 
 class FirstBreastfeedingWidget extends StatefulWidget {
   final String userId;
-  const FirstBreastfeedingWidget({super.key, required this.userId});
+  const FirstBreastfeedingWidget({super.key, required this.userId, });
 
   @override
   State<FirstBreastfeedingWidget> createState() =>
@@ -55,6 +55,7 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
               child: SizedBox(
                 width: screenWidth * 0.5,
                 child: DropdownButtonFormField<String>(
+                   isExpanded: true,
                   value: selectedDuration,
                   decoration: InputDecoration(
                     filled: true,
@@ -68,8 +69,21 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
                       const Text('選擇月份', style: TextStyle(color: Colors.grey)),
                   items: [
   DropdownMenuItem<String>(
+    
     value: '未考慮',
     child: Text('目前還未考慮過'),
+  ),
+  DropdownMenuItem<String>(
+    value: '純母乳',
+    child: Text('前六個月純母乳哺餵'),
+  ),
+  DropdownMenuItem<String>(
+    value: '混合哺餵',
+    child: Text('前六個月配合使用配方奶'),
+  ),
+  DropdownMenuItem<String>(
+    value: '不哺餵',
+    child: Text('目前不打算餵母乳'),
   ),
   ...List.generate(25, (index) => index.toString())
       .map((month) => DropdownMenuItem<String>(
@@ -106,7 +120,18 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
                       }
 
                       try {
-                         String saveValue = selectedDuration == '未考慮' ? '未考慮' : "$selectedDuration 個月";
+                        String saveValue;
+if (selectedDuration == '未考慮') {
+  saveValue = '未考慮';
+} else if (selectedDuration == '純母乳') {
+  saveValue = '前六個月純母乳哺餵';
+} else if (selectedDuration == '混合哺餵') {
+  saveValue = '前六個月配合使用配方奶';
+} else if (selectedDuration == '不哺餵') {
+  saveValue = '目前不打算餵母乳';
+} else {
+  saveValue = "$selectedDuration 個月";
+}
 
                         await FirebaseFirestore.instance
                             .collection('users')
