@@ -15,6 +15,7 @@ class ProfilePage extends StatefulWidget {
     required this.isManUser,
   });
 
+
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
@@ -28,6 +29,13 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     fetchUserData();
   }
+
+String getAnswerText(String? value) {
+  if (value == 'true') return '是';
+  if (value == 'false') return '從未';
+  if (value == 'none') return '曾經有，已戒掉';
+  return '未提供';
+}
 
   Future<void> fetchUserData() async {
   try {
@@ -100,41 +108,42 @@ class _ProfilePageState extends State<ProfilePage> {
                       infoTile('使用者身分', widget.isManUser ? '爸爸' : '媽媽'),
                       infoTile('帳號', userData['帳號'] ?? '未提供'),
                       infoTile('姓名', userData['名字'] ?? '未提供'),
-                      infoTile('Email', userData['電子信箱'] ?? '未提供'),
+                      infoTile('生日', userData['生日'] ?? '未提供'),
                       infoTile('手機號碼', userData['手機號碼'] ?? '未提供'),
                       infoTile('身高', userData['身高'] ?? '未提供'),
                       infoTile('體重', userData['目前體重'] ?? '未提供'),
                       infoTile(
                         '慢性病',
-                        userData['是否有慢性病'] == true
+                        userData['是否有特殊疾病病'] == true
                             ? '有'
                             : (userData['是否有慢性病'] == false ? '否' : '無'),
                       ),
                       infoTile('婚姻狀況', userData['婚姻狀況'] ?? '未提供'),
                       infoTile(
-                        '有抽菸?',
-                        userData['answers']?['是否會吸菸?'] == true
-                            ? '有'
-                            : (userData['answers']?['是否會吸菸?'] == false
-                                ? '否'
-                                : '未提供'),
-                      ),
-                      infoTile(
-                        '會喝酒?',
-                        userData['answers']?['是否會喝酒?'] == true
-                            ? '有'
-                            : (userData['answers']?['是否會喝酒?'] == false
-                                ? '否'
-                                : '未提供'),
-                      ),
-                      infoTile(
-                        '會嚼食檳榔?',
-                        userData['answers']?['是否會嚼食檳榔'] == true
-                            ? '有'
-                            : (userData['answers']?['是否會嚼食檳榔'] == false
-                                ? '否'
-                                : '未提供'),
-                      ),
+  '有抽菸?',
+  userData['是否會吸菸'] == 'true'
+      ? '是'
+      : (userData['是否會吸菸'] == 'false'
+          ? '從未'
+          : (userData['是否會吸菸'] == 'none' ? '曾經有，已戒掉' : '未提供')),
+),
+infoTile(
+  '會喝酒?',
+  userData['是否會喝酒'] == 'true'
+      ? '是'
+      : (userData['是否會喝酒'] == 'false'
+          ? '從未'
+          : (userData['是否會喝酒'] == 'none' ? '曾經有，已戒掉' : '未提供')),
+),
+infoTile(
+  '會嚼食檳榔?',
+  userData['是否會嚼食檳榔'] == 'true'
+      ? '是'
+      : (userData['是否會嚼食檳榔'] == 'false'
+          ? '從未'
+          : (userData['是否會嚼食檳榔'] == 'none' ? '曾經有，已戒掉' : '未提供')),
+),
+
                     ],
                   ),
                 ),

@@ -300,16 +300,16 @@ final Map<int, String> correctAnswers = {
   final url = Uri.parse('http://163.13.201.85:3000/knowledge');
 
   final answerMap = {
-    "正確": "true",
-    "錯誤": "false",
-    "不知道": "none",
+    "正確": 1,
+    "錯誤": 0,
+    "不知道": 2,
   };
 
  final String idKey = widget.isManUser ? 'man_user_id' : 'user_id';
 
   final Map<String, dynamic> payload = {
     idKey: int.parse(userId), 
-    "knowledge_question_content": "哺乳衛教問卷",
+    "knowledge_question_content": "知識量表",
     "knowledge_test_date": DateTime.now().toIso8601String().split('T')[0],
     "knowledge_score": totalScore, // ⭐️ 新增總分
   };

@@ -1,4 +1,4 @@
-//產後憂鬱量表
+//憂鬱量表
 import 'dart:convert';
 import 'dart:math' as math;
 import 'package:doctor_2/home/fa_question.dart';
@@ -96,7 +96,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
           children: [
             SizedBox(height: screenHeight * 0.02),
             Text(
-              '產後憂鬱量表',
+              '憂鬱量表',
               style: TextStyle(
                 fontSize: fontSize * 1.2,
                 fontWeight: FontWeight.bold,
@@ -298,7 +298,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
 
   final Map<String, dynamic> payload = {
     idKey: int.parse(userId),
-    "dour_question_content": "產後憂鬱量表",
+    "dour_question_content": "憂鬱量表",
     'dour_test_date': formattedDate,
     'dour_score': totalScore, // 🔥 新增總分
   };

@@ -146,7 +146,7 @@ class _QuestionWidgetState extends State<FaQuestionWidget> {
                     screenWidth,
                     screenHeight,
                     0.28,
-                    '產後憂鬱量表',
+                    '憂鬱量表',
                     '/DourIntroduce1Page',
                     'melancholyCompleted',
                   ),

@@ -170,6 +170,19 @@ if (selectedDuration == '未考慮') {
   Future<void> sendFirstBreastfeedingToMySQL(
       String userId, String duration) async {
     final url = Uri.parse('http://163.13.201.85:3000/user_question');
+     
+    dynamic convertedValue;
+  if (duration == '未考慮') {
+    convertedValue = '目前還未考慮過';
+  } else if (duration == '前六個月純母乳哺餵') {
+    convertedValue = '前六個月純母乳哺餵';
+  } else if (duration == '前六個月配合使用配方奶') {
+    convertedValue = '前六個月配合使用配方奶';
+  } else if (duration == '目前不打算餵母乳') {
+    convertedValue = '目前不打算餵母乳';
+  } else {
+    convertedValue = int.parse(duration.replaceAll('個月', ''));
+  }
 
     final response = await http.post(
       url,
@@ -177,7 +190,7 @@ if (selectedDuration == '未考慮') {
       body: jsonEncode({
         'user_id': int.parse(userId),
         "expected_breastfeeding_months":
-        duration == '未考慮' ? '目前還未考慮過' : int.parse(duration.replaceAll('個月', '')),
+        convertedValue ,
       }),
     );
 

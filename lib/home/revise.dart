@@ -14,7 +14,9 @@ class ReviseWidget extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
+    return PopScope(
+canPop: false,
+child: Scaffold(
       body: Container(
         width: screenWidth,
         height: screenHeight,
@@ -51,7 +53,6 @@ class ReviseWidget extends StatelessWidget {
                 ),
               ),
             ),
-            // **返回按鈕**
             // **返回按鈕**
             Positioned(
               top: screenHeight * 0.47,
@@ -90,6 +91,6 @@ class ReviseWidget extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }

@@ -1,4 +1,4 @@
-//會陰疼痛量表
+//產後傷口疼痛量表
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -46,7 +46,7 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "會陰疼痛分數計算",
+              "產後傷口疼痛計算",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -346,7 +346,7 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
       'user_id': int.parse(userId),
-      'painscale_question_content': "會陰疼痛量表",
+      'painscale_question_content': "產後傷口疼痛分數",
       'painscale_test_date': formattedDate,
       'childbirth_method': birthType,
       'pain_level': painLevel.toInt(),
