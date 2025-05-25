@@ -311,8 +311,13 @@ class RegisterWidgetState extends State<RegisterWidget> {
                                   if (userId != null) {
                                     if (!context.mounted) return;
                                     Navigator.pushNamed(
-                                        context, '/SuccessWidget',
-                                        arguments: userId);
+  context,
+  '/SuccessWidget',
+  arguments: {
+    'userId': userId,
+    'isNewMom': isNewMom,  // 這個 isNewMom 變數要是你在 register 裡已經抓到的值
+  },
+);
                                   } else {
                                     if (!context.mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -346,7 +351,7 @@ Widget _buildAccountRow() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      _buildLabel('帳號或E-Mail'),
+      _buildLabel('帳號(E-Mail)'),
       Row(
         children: [
           Expanded(

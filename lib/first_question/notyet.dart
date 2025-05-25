@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_2/first_question/nmfrequency.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:doctor_2/first_question/frequency.dart';
@@ -10,7 +11,8 @@ final Logger logger = Logger();
 
 class Notyet1Widget extends StatefulWidget {
   final String userId;
-  const Notyet1Widget({super.key, required this.userId});
+  final bool isNewMom;
+  const Notyet1Widget({super.key, required this.userId, required this.isNewMom});
 
   @override
   State<Notyet1Widget> createState() => _Notyet1WidgetState();
@@ -223,25 +225,32 @@ class _Notyet1WidgetState extends State<Notyet1Widget> {
 
                         if (!mounted) return;
 
-                        setState(() {
-                          if (breastfeedingAnswer == 'yes') {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    FrequencyWidget(userId: widget.userId),
-                              ),
-                            );
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    FirsttimeWidget(userId: widget.userId),
-                              ),
-                            );
-                          }
-                        });
+                       setState(() {
+  if (breastfeedingAnswer == 'yes') {
+    if (widget.isNewMom) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => NmFrequencyWidget(userId: widget.userId),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FrequencyWidget(userId: widget.userId),
+        ),
+      );
+    }
+  } else {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FirsttimeWidget(userId: widget.userId),
+      ),
+    );
+  }
+});
                       } catch (e) {
                         logger.e("❌ Firestore 更新失敗: $e");
                       }

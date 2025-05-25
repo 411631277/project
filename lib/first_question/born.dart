@@ -10,8 +10,9 @@ final Logger logger = Logger();
 
 class BornWidget extends StatelessWidget {
   final String userId;
+  final bool isNewMom;
 
-  const BornWidget({super.key, required this.userId});
+  const BornWidget({super.key, required this.userId, required this.isNewMom});
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +70,7 @@ class BornWidget extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  WeekPregnancy(userId: userId),
+                                  WeekPregnancy(userId: userId ,isNewMom: isNewMom,),
                             ),
                           );
                         } catch (e) {

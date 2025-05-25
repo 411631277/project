@@ -24,16 +24,6 @@ class WrongAnswersPage extends StatelessWidget {
       body: Column(
         children: [
           SizedBox(height: screenHeight * 0.05),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-            child: Text(
-              '使用者ID: $userId\n性別: ${isManUser ? '男' : '女'}',
-              style: TextStyle(
-                fontSize: screenWidth * 0.045,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
           SizedBox(height: screenHeight * 0.02),
           Expanded(
             child: ListView.builder(

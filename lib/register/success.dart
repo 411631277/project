@@ -7,7 +7,8 @@ final Logger logger = Logger();
 
 class SuccessWidget extends StatelessWidget {
   final String userId; //帶入ID
-  const SuccessWidget({super.key, required this.userId});
+  final bool isNewMom;
+  const SuccessWidget({super.key, required this.userId, required this.isNewMom});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +64,10 @@ class SuccessWidget extends StatelessWidget {
                     Navigator.pushNamed(
                       context,
                       '/BornWidget', // ✅ 改用 routes 導航
-                      arguments: userId, // ✅ 傳遞 userId
+                      arguments: {
+    'userId': userId,
+    'isNewMom': isNewMom,
+  }, // ✅ 傳遞 userId
                     );
                   },
                   child: const Text(

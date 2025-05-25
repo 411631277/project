@@ -470,7 +470,7 @@ Future<bool> _validatePairingCode(String inputCode) async {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      _buildLabel('帳號或E-Mail'),
+      _buildLabel('帳號(E-Mail)'),
       Row(
         children: [
           Expanded(

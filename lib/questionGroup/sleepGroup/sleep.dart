@@ -34,7 +34,7 @@ final Map<int, String> amPmSelections = {0: '上午', 2: '上午'};
   final List<Map<String, dynamic>> _q1 = [
     {
       "type": "fill",
-      "question": "過去一個月來，您通常何時上床？(24小時制)",
+      "question": "過去一個月來，您通常何時上床？",
       "index": 0,
       "hasHour": true,
       "hasMinute": true
@@ -48,7 +48,7 @@ final Map<int, String> amPmSelections = {0: '上午', 2: '上午'};
     },
     {
       "type": "fill",
-      "question": "過去一個月來，您通常何時起床？(24小時制)",
+      "question": "過去一個月來，您通常何時起床？",
       "index": 2,
       "hasHour": true,
       "hasMinute": true
@@ -407,9 +407,36 @@ Widget _buildFillQuestion(Map<String, dynamic> q, double base) {
         .collection("questions")
         .doc("SleepWidget");
 
-final bedHour = int.tryParse(_a1[0] ?? '') ?? 0;
+
+
+int bedHour = int.tryParse(_a1[0] ?? '') ?? 0;
+if (amPmSelections[0] == '下午' && bedHour < 12) {
+  bedHour += 12;
+}
+if (amPmSelections[0] == '上午' && bedHour == 12) {
+  bedHour = 0;
+}
+
+int wakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
+if (amPmSelections[2] == '下午' && wakeHour < 12) {
+  wakeHour += 12;
+}
+if (amPmSelections[2] == '上午' && wakeHour == 12) {
+  wakeHour = 0;
+}
+
+
+final rawBedHour = int.tryParse(_a1[0] ?? '') ?? 0;
+final rawWakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
+
+if (rawBedHour >= 13 || rawWakeHour >= 13) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("小時填寫不可超過12，請再次確認填答內容")),
+  );
+  return;
+}
+
 final bedMinute = int.tryParse(_a1[1] ?? '') ?? 0;
-final wakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
 final wakeMinute = int.tryParse(_a1[3] ?? '') ?? 0;
 
 final sleepHour = int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0;
@@ -430,7 +457,7 @@ if (wakeTotalMinutes < bedTotalMinutes) {
 // 驗證條件：實際睡眠時間 > 躺床時間
 if (sleepTotalMinutes > totalTimeInBed) {
   ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("填充4的回答有問題，請再次確認填答內容")),
+    const SnackBar(content: Text("第四題的回答有問題，請再次確認填答內容")),
   );
   return;
 }
@@ -691,8 +718,21 @@ if (sleepTotalMinutes > totalTimeInBed) {
  
 
   final sleepHour = int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0;
-  final bedHour = int.tryParse(_a1[0] ?? '') ?? 0;
-  final wakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
+int bedHour = int.tryParse(_a1[0] ?? '') ?? 0;
+if (amPmSelections[0] == '下午' && bedHour < 12) {
+  bedHour += 12;
+}
+if (amPmSelections[0] == '上午' && bedHour == 12) {
+  bedHour = 0;
+}
+
+int wakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
+if (amPmSelections[2] == '下午' && wakeHour < 12) {
+  wakeHour += 12;
+}
+if (amPmSelections[2] == '上午' && wakeHour == 12) {
+  wakeHour = 0;
+}
 
   int totalTimeInBed;
   if (wakeHour < bedHour) {

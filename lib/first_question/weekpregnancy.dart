@@ -9,7 +9,8 @@ final Logger logger = Logger();
 
 class WeekPregnancy extends StatefulWidget {
   final String userId;
-  const WeekPregnancy({super.key, required this.userId});
+  final bool isNewMom ;
+  const WeekPregnancy({super.key, required this.userId, required this.isNewMom});
 
   @override
   WeekPregnancyState createState() => WeekPregnancyState();
@@ -107,7 +108,10 @@ class WeekPregnancyState extends State<WeekPregnancy> {
                     Navigator.pushNamed(
   context,
   '/Notyet1Widget',
-  arguments: widget.userId, 
+   arguments: {
+    'userId': widget.userId,
+    'isNewMom': widget.isNewMom,
+  },
 );
                   },
                   style: ElevatedButton.styleFrom(

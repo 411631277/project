@@ -113,7 +113,7 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) => HomeScreenWidget(userId: '2', isManUser: false, ), // 主畫面
+        '/': (context) => HomeScreenWidget(userId: '2', isManUser: false,)  , // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
@@ -170,15 +170,19 @@ class _MyAppState extends State<MyApp> {
           );
         }
         if (settings.name == '/SuccessWidget') {
-          final userId = settings.arguments as String;
+          final args = settings.arguments as Map<String, dynamic>;
+          final userId = args['userId'] as String;
+          final isNewMom = args['isNewMom'] as bool;
           return MaterialPageRoute(
-            builder: (context) => SuccessWidget(userId: userId),
+            builder: (context) => SuccessWidget(userId: userId, isNewMom: isNewMom,),
           );
         }
         if (settings.name == '/Notyet1Widget') {
-          final userId = settings.arguments as String;
+          final args = settings.arguments as Map<String, dynamic>;
+final userId = args['userId'] as String;
+final isNewMom = args['isNewMom'] as bool;
           return MaterialPageRoute(
-            builder: (context) => Notyet1Widget(userId: userId),
+            builder: (context) => Notyet1Widget(userId: userId ,isNewMom: isNewMom,),
           );
         }
         if (settings.name == '/MaternalConnectionPage') {
@@ -199,9 +203,11 @@ class _MyAppState extends State<MyApp> {
           );
         }
         if (settings.name == '/BornWidget') {
-          final userId = settings.arguments as String;
+         final args = settings.arguments as Map<String, dynamic>;
+         final userId = args['userId'] as String;
+         final isNewMom = args['isNewMom'] as bool;
           return MaterialPageRoute(
-            builder: (context) => BornWidget(userId: userId),
+            builder: (context) => BornWidget(userId: userId ,isNewMom: isNewMom,),
           );
         }
         if (settings.name == '/QuestionWidget') {
@@ -280,9 +286,11 @@ class _MyAppState extends State<MyApp> {
           );
         }
         if (settings.name == '/WeekPregnancy') {
-          final userId = settings.arguments as String;
+          final args = settings.arguments as Map<String, dynamic>;
+          final userId = args['userId'] as String;
+          final isNewMom = args['isNewMom'] as bool;
           return MaterialPageRoute(
-            builder: (context) => WeekPregnancy(userId: userId),
+            builder: (context) => WeekPregnancy(userId: userId ,isNewMom: isNewMom),
           );
         }
 

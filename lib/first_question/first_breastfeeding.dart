@@ -85,7 +85,7 @@ class _FirstBreastfeedingWidgetState extends State<FirstBreastfeedingWidget> {
     value: '不哺餵',
     child: Text('目前不打算餵母乳'),
   ),
-  ...List.generate(25, (index) => index.toString())
+  ...List.generate(24, (index) => (index+1).toString())
       .map((month) => DropdownMenuItem<String>(
             value: month,
             child: Text('$month 個月'),
