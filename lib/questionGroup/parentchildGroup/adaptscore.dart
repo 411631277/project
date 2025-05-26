@@ -21,8 +21,8 @@ class Adaptscore extends StatelessWidget {
 
     // 根據分數挑文字
     final message = totalScore < 18
-      ? '媽媽在照顧寶寶上是不是會覺得有些負擔呢？\n\n可以利用APP的AI問答或是或是撥打以下電話諮詢喔！'
-      : '看來媽媽在新的身分上有取得平衡點呢！';
+      ? '您的親職適應狀況尚需進一步調整，建議可以利用AI機器人，強化育兒的自信心'
+      : '您的親職適應能力不錯，面對育兒壓力能有效調整並因應挑戰，值得持續維持此狀態';
 
     return PopScope(
     canPop: false, // ❗這行就是鎖定返回鍵

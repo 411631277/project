@@ -21,8 +21,8 @@ class Respondscore extends StatelessWidget {
 
     // 根據分數挑文字
     final message = totalScore < 22
-      ? '媽媽不知道寶寶想跟您表達什麼意思嗎？\n\n可以利用APP的AI問答或是或是撥打以下電話諮詢喔！'
-      : '和寶寶的關係不錯呢，繼續保持溫暖的互動吧！';
+      ? '您對自己在育兒回應上的信心仍有不足，建議可透過經驗分享或AI協助，培養更好的應對技巧'
+      : '您對自己的回應能力頗具信心，能靈活處理育兒中突發的狀況，可以繼續增強自信並加強實踐';
 
      return PopScope(
     canPop: false, // ❗這行就是鎖定返回鍵

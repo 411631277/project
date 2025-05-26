@@ -21,8 +21,8 @@ class Promisescore extends StatelessWidget {
 
     // 根據分數挑文字
     final message = totalScore < 24
-      ? '最近照顧寶寶有遇到什麼挫折嗎？\n\n還是說照顧寶寶帶給您什麼樣的負擔呢？媽媽可以利用APP的AI問答或是或是撥打以下電話諮詢喔！'
-      : '看來您花了很多心思在照顧寶寶呢～';
+      ? '您對親職角色的投入可能略顯不足，建議重新調整心態，並善用相關資源以提升親職投入感'
+      : '您在親職角色上的承諾程度良好，願意積極為孩子的未來付出努力，值得繼續保持這份熱忱';
 
     return PopScope(
     canPop: false, // ❗這行就是鎖定返回鍵

@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:doctor_2/questionGroup/parentchildGroup/parentchild2.dart';
 import 'package:flutter/material.dart';
 
-/// 母嬰連結說明頁面
+/// 親子依附說明頁面
 class MaternalConnectionPage extends StatelessWidget {
   final String userId;
 

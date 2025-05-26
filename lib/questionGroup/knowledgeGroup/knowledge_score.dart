@@ -25,8 +25,8 @@ class KnowledgeScore extends StatelessWidget {
 
     // 根據分數挑文字
     final message = totalScore < 60
-      ? '對於母乳哺餵知識還有些欠缺喔\n\n如果有需求可以使用app的AI問答功能，或是撥打以下電話諮詢喔！'
-      : '你知道得真多呢!!';
+      ? '您的母乳哺餵觀念仍有進步空間，建議可以善用AI機器人尋求幫助，以提升照顧寶寶的技巧。'
+      : '您的母乳哺餵知識豐富且正確，相信寶寶一定能夠健康成長，您真的做得很棒！';
 
     return PopScope(
     canPop: false, // ❗這行就是鎖定返回鍵

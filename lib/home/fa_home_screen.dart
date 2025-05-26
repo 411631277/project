@@ -31,7 +31,7 @@ class FaHomeScreenWidget extends StatefulWidget {
 
 class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
   String userName = "載入中...";
-  String babyName = "小寶";
+  String babyName = "寶寶資料填寫";
   String? _profileImageUrl;
   final ImagePicker _picker = ImagePicker();
 
@@ -39,7 +39,6 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
   void initState() {
     super.initState();
     _loadUserName();
-    _loadBabyName();
     _loadProfilePicture();
   }
 
@@ -166,28 +165,6 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
     }
   }
 
-  Future<void> _loadBabyName() async {
-    try {
-      QuerySnapshot babySnapshot = await FirebaseFirestore.instance
-          .collection('Man_users')
-          .doc(widget.userId)
-          .collection('baby')
-          .orderBy('填寫時間', descending: true)
-          .get();
-
-      if (babySnapshot.docs.isNotEmpty) {
-        setState(() {
-          babyName = babySnapshot.docs.first.id;
-        });
-      } else {
-        setState(() {
-          babyName = "小寶";
-        });
-      }
-    } catch (e) {
-      logger.e("❌ 讀取寶寶名稱失敗: $e");
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -276,10 +253,10 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
               child: SizedBox(
                 width: screenWidth * 0.84,
                 child: Text(
-                  '當爸爸不容易，但你的陪伴與支持，'
-                  '對伴侶來說是無可取代的力量。\n\n'
-                  '每一次的擁抱、每一句溫暖的話語，都是她最堅強的後盾。\n\n'
-                  '你不需要完美，只要願意一起面對，一起學習，一起成長，這就是最好的愛。',
+                  '當爸爸不容易，你的用心陪伴與無私付出，'
+                  '這些溫暖的支持，已成為伴侶最堅定的力量。\n\n'
+                  '你已經做得非常好了，繼續保持初心\n'
+                  '與伴侶一同面對、一同學習，就是最美好的愛。',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: const Color.fromRGBO(165, 146, 125, 1),
