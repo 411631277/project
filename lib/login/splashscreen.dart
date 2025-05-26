@@ -44,19 +44,34 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
+      backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FlutterLogo(size: 100),
-            SizedBox(height: 20),
-            CircularProgressIndicator(),
-            SizedBox(height: 10),
-            Text('載入中，請稍候...', style: TextStyle(fontSize: 16)),
-          ],
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Padding(
+        padding: EdgeInsets.only(bottom: screenHeight * 0.1 , right: screenWidth * 0.05),
+        child: Image.asset(
+          'assets/images/Baby.png',
+          width: screenWidth * 0.4,
+          height: screenHeight * 0.2,
+          fit: BoxFit.contain,
         ),
       ),
-    );
-  }
+      SizedBox(height: screenHeight * 0.03),
+      const CircularProgressIndicator(),
+      SizedBox(height: screenHeight * 0.02),
+      const Text(
+        '載入中，請稍候...',
+        style: TextStyle(fontSize: 16),
+      ),
+    ],
+  ),
+),
+);
+}
 }
