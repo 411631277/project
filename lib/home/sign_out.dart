@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:doctor_2/function/main.screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final Logger logger = Logger();
 
@@ -21,11 +22,10 @@ class SignoutWidget extends StatelessWidget {
     try {
       logger.i("📌 登出: $userId，但不重置 Firebase 步數");
 
-      // 若有需要清理本地資料，可在此進行
-      if (!context.mounted) return;
+      final prefs = await SharedPreferences.getInstance();
+       await prefs.clear();
 
-      // 使用 pushAndRemoveUntil 取代 pushReplacement
-      // 這樣就能清除所有舊路由，確保不會再返回 SettingWidget
+     if (!context.mounted) return; 
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const MainScreenWidget()),

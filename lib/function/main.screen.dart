@@ -19,10 +19,10 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return PopScope(
-      canPop: false, // 允許返回，但是要攔截
+      canPop: false, 
       // ignore: deprecated_member_use
       onPopInvoked: (didPop) async {
-        if (didPop) return; // 如果系統已經處理，就不動
+        if (didPop) return; 
         bool shouldExit = await _showExitDialog(context);
         if (shouldExit && mounted) {
         if (!context.mounted) return;

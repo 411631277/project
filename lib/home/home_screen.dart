@@ -7,6 +7,7 @@ import 'package:doctor_2/home/tgos.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
 import 'dart:async';
@@ -433,8 +434,17 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
     // 根據當前步數與目標步數，決定顯示文字
 
-    return PopScope(
-        canPop: false, // ❗這行就是鎖定返回鍵
+ return PopScope(
+      canPop: false, 
+      // ignore: deprecated_member_use
+      onPopInvoked: (didPop) async {
+        if (didPop) return; 
+        bool shouldExit = await _showExitDialog(context);
+        if (shouldExit && mounted) {
+        if (!context.mounted) return;
+          SystemNavigator.pop();  // 離開 App (在第一層會直接退出)
+        }
+      },
         child: Scaffold(
             body: Container(
                 color: const Color.fromRGBO(233, 227, 213, 1),
@@ -791,5 +801,36 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     } catch (e) {
       logger.e("❌ 發送步數資料時出錯: $e");
     }
+  }
+
+  Future<bool> _showExitDialog(BuildContext context) async {
+    bool shouldExit = false;
+    await showDialog(
+      context: context,
+      barrierDismissible: false, // 不允許點外面關掉
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('提示'),
+          content: const Text('是否要關閉程式？'),
+          actions: [
+             TextButton(
+              onPressed: () {
+                shouldExit = true;
+                Navigator.of(context).pop(); // 關掉對話框
+              },
+              child: const Text('是'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // 關掉對話框
+              },
+              child: const Text('否'),
+            ),
+           
+          ],
+        );
+      },
+    );
+    return shouldExit;
   }
 }

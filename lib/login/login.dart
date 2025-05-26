@@ -4,6 +4,7 @@ import 'package:doctor_2/login/forget.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:doctor_2/home/fa_home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/generated/l10n.dart';
 
 final Logger logger = Logger();
@@ -18,6 +19,7 @@ class LoginWidget extends StatefulWidget {
 class _LoginWidgetState extends State<LoginWidget> {
   final TextEditingController accountController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  
   String errorMessage = ""; // 🔹 錯誤訊息
   bool _obscurePassword = true; // ✅ 密碼是否隱藏
 
@@ -259,13 +261,20 @@ class _LoginWidgetState extends State<LoginWidget> {
 
       if (userQuery.docs.isNotEmpty) {
         String userId = userQuery.docs.first.id;
-        // 這裡注意 isManUser 參數是否為 false
+
+         final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('isLoggedIn', true);
+  await prefs.setString('userId', userId);
+  await prefs.setBool('isManUser', false);
+
+  if (!mounted) return;
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => HomeScreenWidget(
               userId: userId,
-              isManUser: false, // 這裡要確定傳對
+              isManUser: false,
             ),
           ),
         );
@@ -283,6 +292,13 @@ class _LoginWidgetState extends State<LoginWidget> {
 
       if (manUserQuery.docs.isNotEmpty) {
         String userId = manUserQuery.docs.first.id;
+   final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('isLoggedIn', true);
+  await prefs.setString('userId', userId);
+  await prefs.setBool('isManUser', true);
+
+  if (!mounted) return;
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
