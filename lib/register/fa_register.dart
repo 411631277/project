@@ -478,7 +478,7 @@ Future<bool> _validatePairingCode(String inputCode) async {
               controller: accountController,
               decoration: _inputDecoration(),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@&*!.\-]')),
               ],
             ),
           ),
