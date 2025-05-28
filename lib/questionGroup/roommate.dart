@@ -105,10 +105,22 @@ class _RoommateWidgetState extends State<RoommateWidget> {
                       ),
                       backgroundColor: Colors.brown.shade400,
                     ),
-                    onPressed: () async {
-                      final success = await _saveAnswersToFirebase();
-                      if (!context.mounted || !success) return;
-
+                   onPressed: () async {
+   bool success;
+   try {
+     success = await _saveAnswersToFirebase();
+   } catch (e) {
+     logger.e("🔥 _saveAnswersToFirebase 例外: $e");
+     success = false;
+   }
+   if (!success) {
+     if (!context.mounted) return;
+     ScaffoldMessenger.of(context).showSnackBar(
+       const SnackBar(content: Text('伺服器錯誤,請稍後再嘗試')),
+     );
+     return;
+   }
+    if (!context.mounted) return;
                       // 跳轉到 FinishWidget，可自行更改
                      Navigator.pushNamed(
                     context,
@@ -209,6 +221,11 @@ class _RoommateWidgetState extends State<RoommateWidget> {
 
   /// 儲存回答到 Firestore，並更新 roommateCompleted = true
   Future<bool> _saveAnswersToFirebase() async {
+    bool sqlOk = await sendRoommateAnswersToMySQL(widget.userId);
+    if (!sqlOk) {
+      // SQL 失敗，不繼續
+      return false;
+    }
     try {
       // 1. 儲存問卷到子集合
       final CollectionReference userResponses = FirebaseFirestore.instance
@@ -229,22 +246,23 @@ class _RoommateWidgetState extends State<RoommateWidget> {
           .update({"roommateCompleted": true});
 
       logger.i("✅ Roommate 問卷已成功儲存，並更新 roommateCompleted！");
-      await sendRoommateAnswersToMySQL(widget.userId);
-
+    
       return true;
     } catch (e) {
       logger.e("❌ 儲存 Roommate 問卷時發生錯誤：$e");
       return false;
     }
   }
- Future<void> sendRoommateAnswersToMySQL(String userId) async {
+ Future<bool> sendRoommateAnswersToMySQL(String userId) async {
   final url = Uri.parse('http://163.13.201.85:3000/roommate');
 
   final now = DateTime.now();
   final formattedDate =
       "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-  final response = await http.post(
+  http.Response response;
+    try {
+      response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
@@ -254,12 +272,19 @@ class _RoommateWidgetState extends State<RoommateWidget> {
       'roommate_answer_1': isRoomingIn24Hours == true ? '是' : '否',
       'roommate_answer_2': isLivingInPostpartumCenter == true ? '是' : '否',
     }),
-  );
+  
 
-  if (response.statusCode >= 200 && response.statusCode < 300) {
-    logger.i("✅ 親子同室問卷已同步到 MySQL！");
-  } else {
-    logger.e("❌ 同步 MySQL 失敗: ${response.body}");
+  );
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        logger.i("✅ 親子同室問卷已同步到 MySQL！");
+        return true;
+      } else {
+        logger.e("❌ 同步 MySQL 失敗: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      logger.e("🔥 MySQL 同步例外: $e");
+      return false;
+    }
   }
-}
-}
+  }

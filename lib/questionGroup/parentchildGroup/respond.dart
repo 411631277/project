@@ -103,8 +103,14 @@ class _RespondWidgetState extends State<RespondWidget> {
     'userId': widget.userId,
      'totalScore': totalScore,
      };
-      // 2. 儲存到 Firestore
-      await _saverespondAndScore(totalScore);
+     bool ok = await _saverespondAndScore(totalScore);
+   if (!ok) {
+     if (!context.mounted) return;
+     ScaffoldMessenger.of(context).showSnackBar(
+       const SnackBar(content: Text('伺服器錯誤,請稍後再嘗試')),
+     );
+     return;
+   }
 
       // 3. 導頁
       if (!context.mounted) return;
@@ -184,6 +190,8 @@ class _RespondWidgetState extends State<RespondWidget> {
 
   /// 將作答結果儲存到 Firestore，並更新 melancholyCompleted = true
  Future<bool> _saverespondAndScore(int totalScore) async {
+   bool sqlOk = await sendRespondAnswersToMySQL(widget.userId, respond, totalScore);
+  if (!sqlOk) return false;
   try {
     final String documentName = "AttachmentWidget";
 
@@ -236,7 +244,7 @@ int _calculateTotalScore() {
   }).fold(0, (acc, element) => acc + element);
 }
 
-Future<void> sendRespondAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
+Future<bool> sendRespondAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
   final url = Uri.parse('http://163.13.201.85:3000/attachment');
 
   final payload = {
@@ -265,11 +273,14 @@ Future<void> sendRespondAnswersToMySQL(String userId, Map<int, String?> answers,
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final result = jsonDecode(response.body);
       logger.i("✅ Respond 資料同步成功：${result['message']} (insertId: ${result['insertId']})");
+     return true;
     } else {
       logger.e("❌ Respond 資料同步失敗：${response.body}");
+       return false;
     }
   } catch (e) {
     logger.e("🔥 發送 Respond 時發生錯誤: $e");
+     return false;
   }
 }
 

@@ -103,7 +103,15 @@ class _CloseWidgetState extends State<CloseWidget> {
           'userId': widget.userId,
           'totalScore': totalScore,
         };
-        await _savecloseAndScore(totalScore);
+         bool ok = await _savecloseAndScore(totalScore);
+if (!ok) {
+    if (!context.mounted) return;
+     ScaffoldMessenger.of(context).showSnackBar(
+       const SnackBar(content: Text('伺服器錯誤,請稍後再嘗試')),
+     );
+     return;
+   }
+      
         if (!context.mounted) return;
         Navigator.pushNamed(
           context,
@@ -178,6 +186,9 @@ SizedBox(height: screenHeight * 0.02),
 
   /// 將作答結果儲存到 Firestore，並更新 melancholyCompleted = true
  Future<bool> _savecloseAndScore(int totalScore) async {
+  bool sqlOk = await sendCloseAnswersToMySQL(widget.userId, close, totalScore);
+  if (!sqlOk) return false;
+
   try {
     final String documentName = "AttachmentWidget";
 
@@ -213,7 +224,6 @@ SizedBox(height: screenHeight * 0.02),
         .update({"attachmentCompleted": true});
 
     logger.i("✅ close問卷已成功合併並儲存！");
-    await sendCloseAnswersToMySQL(widget.userId, close, totalScore);
     return true;
   } catch (e) {
     logger.e("❌ 儲存close問卷時發生錯誤：$e");
@@ -231,7 +241,7 @@ int _calculateTotalScore() {
   }).fold(0, (acc, element) => acc + element);
 }
 
-Future<void> sendCloseAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
+Future<bool> sendCloseAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
   final url = Uri.parse('http://163.13.201.85:3000/attachment'); // ✅ 同一個表
 
 final Map<String, dynamic> payload = {
@@ -260,11 +270,14 @@ final Map<String, dynamic> payload = {
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       logger.i("✅ Close 同步成功");
+      return true;
     } else {
       logger.e("❌ Close 同步失敗: ${response.body}");
+      return false;
     }
   } catch (e) {
     logger.e("🔥 發送 Close 時錯誤: $e");
+    return false;
   }
 }
 

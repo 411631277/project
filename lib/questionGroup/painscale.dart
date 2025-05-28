@@ -250,6 +250,13 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
                     ),
                     onPressed: () async {
                       final success = await _saveAnswersToFirebase();
+                      if (!success) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('伺服器錯誤,請稍後再嘗試')),
+      );
+      return;
+    }
                       if (!context.mounted || !success) return;
 
                       // 成功儲存後導頁 (或可改成 pop 回到上一頁)
@@ -276,6 +283,8 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
 
   /// 將作答結果儲存到 Firestore，並更新 painScaleCompleted = true
   Future<bool> _saveAnswersToFirebase() async {
+    bool sqlOk = await sendPainScaleToMySQL(widget.userId);
+   if (!sqlOk) return false;
     try {
       final String documentName = "PainScaleWidget";
 
@@ -312,16 +321,15 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
           .update({"painScaleCompleted": true});
 
       logger.i("✅ 疼痛分數問卷已成功儲存，並更新 painScaleCompleted！");
-      await sendPainScaleToMySQL(widget.userId);
-
-      return true;
+  
+    return true;
       
     } catch (e) {
       logger.e("❌ 儲存疼痛分數問卷時發生錯誤：$e");
       return false;
     }
   }
-  Future<void> sendPainScaleToMySQL(String userId) async {
+  Future<bool> sendPainScaleToMySQL(String userId) async {
   final url = Uri.parse('http://163.13.201.85:3000/painscale');
 
   final now = DateTime.now();
@@ -341,7 +349,9 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
               : null)
       : null;
 
-  final response = await http.post(
+ http.Response response;
+    try {
+    response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
@@ -356,11 +366,17 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
 
  if (response.statusCode >= 200 && response.statusCode < 300) {
     logger.i("✅ 疼痛分數已同步到 MySQL！");
+    return true;
   } else {
     logger.e("❌ 疼痛分數同步 MySQL 失敗: ${response.body}");
+    return false;
   }
+  } on Exception catch (e) {
+      
+      logger.e("🔥 MySQL 同步例外: $e");
+      return false;
+    }
+}
 }
 
-
-}
 

@@ -1,11 +1,8 @@
 //2..親職適應
-//import 'dart:convert';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
-//import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 final Logger logger = Logger();
@@ -97,23 +94,33 @@ class _AdaptWidgetState extends State<AdaptWidget> {
       backgroundColor: Colors.brown.shade400,
     ),
     onPressed: () async {
-      // 1. 計算總分
-      int totalScore = _calculateTotalScore();
-     final args = {
-    'userId': widget.userId,
-     'totalScore': totalScore,
-     };
-      // 2. 儲存到 Firestore
-      await _saveadaptAndScore(totalScore);
-
-      // 3. 導頁
-      if (!context.mounted) return;
-      Navigator.pushNamed(
-        context,
-        '/Adaptscore',
-        arguments: args,
-      );
-    },
+  int totalScore = _calculateTotalScore();
+  // 1. 傳 SQL
+  bool sqlOk = await sendAdaptAnswersToMySQL(widget.userId, adapt, totalScore);
+  if (!sqlOk) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('伺服器錯誤,請稍後再嘗試')),
+    );
+    return;
+  }
+  // 2. 傳 Firebase
+  bool fbOk = await _saveadaptAndScore(totalScore);
+  if (!fbOk) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('伺服器錯誤,請稍後再嘗試')),
+    );
+    return;
+  }
+  // 3. 導頁
+  if (!context.mounted) return;
+  Navigator.pushNamed(
+    context,
+    '/Adaptscore',
+    arguments: {'userId': widget.userId, 'totalScore': totalScore},
+  );
+},
     child: Text(
       "填答完成",
       style: TextStyle(
@@ -217,7 +224,6 @@ class _AdaptWidgetState extends State<AdaptWidget> {
         .collection("users")
         .doc(widget.userId)
         .update({"attachmentCompleted": true});
-  await sendAdaptAnswersToMySQL(widget.userId, adapt, totalScore);
     logger.i("✅ 問卷已成功合併並儲存！");
     return true;
   } catch (e) {
@@ -236,7 +242,7 @@ int _calculateTotalScore() {
   }).fold(0, (acc, element) => acc + element);
 }
 
-Future<void> sendAdaptAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
+Future<bool> sendAdaptAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
   final url = Uri.parse('http://163.13.201.85:3000/attachment');
 
   final payload = {
@@ -266,11 +272,14 @@ answers.forEach((index, answerText) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final result = jsonDecode(response.body);
       logger.i("✅ Adapt 資料同步成功：${result['message']} (insertId: ${result['insertId']})");
-    } else {
+      return true; 
+   } else {
       logger.e("❌ Adapt 資料同步失敗: ${response.body}");
+       return false; 
     }
   } catch (e) {
     logger.e("🔥 發送 Adapt 時錯誤: $e");
+    return false; 
   }
 }
 

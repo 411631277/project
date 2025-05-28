@@ -191,6 +191,10 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
         ),
       ),
     );
+  }else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('伺服器發生問題，請稍後再嘗試')),
+    );
   }
 },
 child: const Text(
@@ -263,9 +267,14 @@ final Map<int, String> correctAnswers = {
   /// 儲存問卷答案，並將 knowledgeCompleted 設為 true
  Future<bool> _saveAnswersToFirebase(int totalScore) async {
   final collectionName = widget.isManUser ? "Man_users" : "users";
-  try {
-    final String documentName = "KnowledgeWidget";
+  final String documentName = "KnowledgeWidget";
 
+  try {
+    // ⭐ 先送 MySQL
+    final bool sqlOK = await sendKnowledgeAnswersToMySQL(widget.userId, answers, totalScore);
+    if (!sqlOK) throw Exception('MySQL 同步失敗');
+
+    // ⭐ 再寫 Firebase
     final Map<String, String?> formattedAnswers = answers.map(
       (key, value) => MapEntry(key.toString(), value),
     );
@@ -277,7 +286,7 @@ final Map<int, String> correctAnswers = {
         .doc(documentName)
         .set({
       "answers": formattedAnswers,
-      "totalScore": totalScore, // ⭐新增儲存總分
+      "totalScore": totalScore,
       "timestamp": Timestamp.now(),
     });
 
@@ -287,7 +296,6 @@ final Map<int, String> correctAnswers = {
         .update({"knowledgeCompleted": true});
 
     logger.i("✅ 知識問卷已成功儲存，總分: $totalScore");
-    await sendKnowledgeAnswersToMySQL(widget.userId, answers, totalScore);
     return true;
   } catch (e) {
     logger.e("❌ 儲存問卷時發生錯誤：$e");
@@ -296,7 +304,8 @@ final Map<int, String> correctAnswers = {
 }
 
 
- Future<void> sendKnowledgeAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
+
+ Future<bool> sendKnowledgeAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
   final url = Uri.parse('http://163.13.201.85:3000/knowledge');
 
   final answerMap = {
@@ -305,16 +314,15 @@ final Map<int, String> correctAnswers = {
     "不知道": 2,
   };
 
- final String idKey = widget.isManUser ? 'man_user_id' : 'user_id';
+  final String idKey = widget.isManUser ? 'man_user_id' : 'user_id';
 
   final Map<String, dynamic> payload = {
-    idKey: int.parse(userId), 
+    idKey: int.parse(userId),
     "knowledge_question_content": "知識量表",
     "knowledge_test_date": DateTime.now().toIso8601String().split('T')[0],
-    "knowledge_score": totalScore, // ⭐️ 新增總分
+    "knowledge_score": totalScore,
   };
 
-  // 把回答依序對應到欄位 knowledge_answer_1 ~ knowledge_answer_25
   for (int i = 0; i < 25; i++) {
     final selected = answers[i];
     final mapped = answerMap[selected] ?? "no";
@@ -323,19 +331,27 @@ final Map<int, String> correctAnswers = {
 
   logger.i("📦 知識問卷送出 payload: $payload");
 
-  final response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode(payload),
-  );
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(payload),
+    );
 
-  if (response.statusCode >= 200 && response.statusCode < 300) {
-    final result = jsonDecode(response.body);
-    logger.i("✅ 知識問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
-  } else {
-    throw Exception("❌ 知識問卷同步失敗：${response.body}");
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final result = jsonDecode(response.body);
+      logger.i("✅ 知識問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
+      return true;  // ⭐️ 成功回傳 true
+    } else {
+      logger.e("❌ 知識問卷同步失敗：${response.body}");
+      return false; // ⭐️ 失敗回傳 false
+    }
+  } catch (e) {
+    logger.e("❌ 知識問卷發生例外錯誤：$e");
+    return false; // ⭐️ 發生錯誤也回傳 false
   }
 }
+
 
 
  int _calculateTotalScore() {

@@ -510,6 +510,17 @@ if (sleepTotalMinutes > totalTimeInBed) {
 // ✅ DEBUG log 檢查
     logger.i("📤 最終要上傳的 formatted1 結果：$formatted1");
     // Firestore 合併寫入
+
+    bool sqlOk = await _sendAllToMySQL();
+    if (!sqlOk) {
+      if (!mounted) return; {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('伺服器錯誤,請稍後再嘗試')),
+        );
+      }
+      return;
+    }
+
     await doc.set({
       "answers": {
         "SleepWidget": {"data": formatted1, "timestamp": Timestamp.now()},
@@ -520,9 +531,6 @@ if (sleepTotalMinutes > totalTimeInBed) {
         .collection(collectionName)
         .doc(widget.userId.toString())
         .update({"sleepCompleted": true});
-
-    // 同步到 MySQL
-    await _sendAllToMySQL();
 
     if (context.mounted) {
       if (!mounted) return;
@@ -548,7 +556,7 @@ if (sleepTotalMinutes > totalTimeInBed) {
     }
   }
 
-  Future<void> _sendAllToMySQL() async {
+  Future<bool> _sendAllToMySQL() async {
     final url = Uri.parse('http://163.13.201.85:3000/sleep');
     final now = DateTime.now();
     final date =
@@ -615,11 +623,16 @@ if (sleepTotalMinutes > totalTimeInBed) {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(payload),
       );
-      if (resp.statusCode < 200 || resp.statusCode >= 300) {
-        logger.e("MySQL 同步失敗: ${resp.body}");
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        logger.i("✅ MySQL 同步成功");
+        return true;
+      } else {
+        logger.e("❌ MySQL 同步失敗: ${resp.body}");
+        return false;
       }
     } catch (e) {
-      logger.e("MySQL 同步例外: $e");
+      logger.e("🔥 MySQL 同步例外: $e");
+      return false;
     }
   }
 

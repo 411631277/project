@@ -99,14 +99,19 @@ class _PromiseWidgetState extends State<PromiseWidget> {
     onPressed: () async {
       // 1. 計算總分
       int totalScore = _calculateTotalScore();
+      bool ok = await _savePromiseAndScore(totalScore);
+   if (!ok) {
+     if (!context.mounted) return;
+     ScaffoldMessenger.of(context).showSnackBar(
+       const SnackBar(content: Text('伺服器錯誤,請稍後再嘗試')),
+     );
+     return;
+   }
      final args = {
     'userId': widget.userId,
      'totalScore': totalScore,
      };
-      // 2. 儲存到 Firestore
-      await _savePromiseAndScore(totalScore);
-
-      // 3. 導頁
+    // 3. 導頁
       if (!context.mounted) return;
       Navigator.pushNamed(
         context,
@@ -185,6 +190,8 @@ class _PromiseWidgetState extends State<PromiseWidget> {
 
   /// 將作答結果儲存到 Firestore，並更新 melancholyCompleted = true
  Future<bool> _savePromiseAndScore(int totalScore) async {
+   bool sqlOk = await sendPromiseAnswersToMySQL(widget.userId, promise, totalScore);
+   if (!sqlOk) return false;
   try {
     final String documentName = "AttachmentWidget";
 
@@ -218,7 +225,6 @@ class _PromiseWidgetState extends State<PromiseWidget> {
         .collection("users")
         .doc(widget.userId)
         .update({"attachmentCompleted": true});
-  await sendPromiseAnswersToMySQL(widget.userId, promise, totalScore);
     logger.i("✅ 問卷已成功合併並儲存！");
     return true;
   } catch (e) {
@@ -237,7 +243,7 @@ int _calculateTotalScore() {
   }).fold(0, (acc, element) => acc + element);
 }
 
-Future<void> sendPromiseAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
+Future<bool> sendPromiseAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
   final url = Uri.parse('http://163.13.201.85:3000/attachment');
 
   final payload = {
@@ -267,11 +273,14 @@ Future<void> sendPromiseAnswersToMySQL(String userId, Map<int, String?> answers,
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final result = jsonDecode(response.body);
       logger.i("✅ Promise 資料同步成功：${result['message']} (insertId: ${result['insertId']})");
+      return true;
     } else {
       logger.e("❌ Promise 資料同步失敗：${response.body}");
+      return false;
     }
   } catch (e) {
     logger.e("🔥 發送 Promise 時發生錯誤: $e");
+    return false;
   }
 }
 

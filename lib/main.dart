@@ -33,7 +33,6 @@ import 'package:doctor_2/questionGroup/parentchildGroup/respondscore.dart';
 //import 'package:doctor_2/questionGroup/parentchildGroup/attachment.dart';
 import 'package:doctor_2/questionGroup/knowledgeGroup/knowledge_widget.dart';
 import 'package:doctor_2/questionGroup/melancholyGroup/melancholy.dart';
-import 'package:doctor_2/questionGroup/production.dart';
 import 'package:doctor_2/questionGroup/roommate.dart';
 import 'package:doctor_2/questionGroup/sleepGroup/sleep.dart';
 import 'package:doctor_2/questionGroup/sleepGroup/sleep_introduce.dart';
@@ -341,12 +340,7 @@ final isNewMom = args['isNewMom'] as bool;
             ),
           );
         }
-        if (settings.name == '/ProdutionWidget') {
-          final userId = settings.arguments as String;
-          return MaterialPageRoute(
-            builder: (context) => ProdutionWidget(userId: userId),
-          );
-        }
+        
         /*if (settings.name == '/AttachmentWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(

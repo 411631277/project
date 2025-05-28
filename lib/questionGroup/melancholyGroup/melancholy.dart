@@ -165,23 +165,27 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
                       backgroundColor: Colors.brown.shade400,
                     ),
                     onPressed: () async {
-  await _saveAnswersToFirebase();
+  final success = await _saveAnswersToFirebase();
   if (!context.mounted) return;
 
-  int totalScore = _calculateTotalScore();
-
-  Navigator.pushNamed(
-    context,
-    '/Melancholyscore',
-    arguments: {
-      'userId': widget.userId,
-      'answers': answers,
-      'totalScore': totalScore,
-      'isManUser': widget.isManUser,
-    },
-  );
+  if (success) {
+    int totalScore = _calculateTotalScore();
+    Navigator.pushNamed(
+      context,
+      '/Melancholyscore',
+      arguments: {
+        'userId': widget.userId,
+        'answers': answers,
+        'totalScore': totalScore,
+        'isManUser': widget.isManUser,
+      },
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('伺服器發生問題，請稍後再嘗試')),
+    );
+  }
 },
-
                     child: Text(
                       "填答完成",
                       style: TextStyle(
@@ -249,17 +253,22 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
   }
 
   /// 將作答結果儲存到 Firestore，並更新 melancholyCompleted = true
-  Future<void> _saveAnswersToFirebase() async {
+  Future<bool> _saveAnswersToFirebase() async {
   final collectionName = widget.isManUser ? "Man_users" : "users";
-
   try {
-    // 1. 整理使用者的作答
+   // 1. 整理使用者的作答
     final Map<String, String?> formattedAnswers = answers.map(
       (key, value) => MapEntry(key.toString(), value),
     );
 
     // 2. 計算總分
     final int totalScore = _calculateTotalScore();
+
+    // ⭐ 先送 SQL
+    final bool sqlOK = await sendMelancholyAnswersToMySQL(widget.userId, answers, totalScore);
+    if (!sqlOK) {
+      throw Exception("SQL 同步失敗");
+    }
 
     // 3. 儲存到 Firestore
     final CollectionReference userResponses = FirebaseFirestore.instance
@@ -280,14 +289,14 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
         .update({"melancholyCompleted": true});
 
     logger.i("✅ 憂鬱量表問卷已成功儲存，並更新 melancholyCompleted！");
-    await sendMelancholyAnswersToMySQL(widget.userId, answers , totalScore);
-
+  return true;
   } catch (e) {
     logger.e("❌ 儲存憂鬱量表問卷時發生錯誤：$e");
+    return false;
   }
 }
 
- Future<void> sendMelancholyAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
+ Future<bool> sendMelancholyAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
   final url = Uri.parse('http://163.13.201.85:3000/dour');
 
   // 取得今天日期（格式：2025-04-19）
@@ -322,12 +331,15 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final result = jsonDecode(response.body);
       logger.i("✅ 憂鬱問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
+      return true;
     } else {
       logger.e("❌ 憂鬱問卷同步失敗：${response.body}");
-      throw Exception("憂鬱問卷同步失敗");
+      return false;
+      
     }
   } catch (e) {
     logger.e("❌ 發送憂鬱問卷到MySQL時出錯：$e");
+    return false;
   }
 }
 
