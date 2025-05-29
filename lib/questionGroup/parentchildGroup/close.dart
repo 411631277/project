@@ -253,9 +253,19 @@ final Map<String, dynamic> payload = {
 };
 
   // 🔥 只傳有回答的題目
- answers.forEach((index, answerText) {
+ final Map<String, int> scoreMap = {
+  '非常同意': 6,
+  '同意': 5,
+  '有點同意': 4,
+  '有點不同意': 3,
+  '不同意': 2,
+  '非常不同意': 1,
+};
+
+answers.forEach((index, answerText) {
   if (answerText != null && answerText.isNotEmpty) {
-    payload['attachment_answer_${index + 1}'] = answerText;
+    final score = scoreMap[answerText] ?? 0; // 預設 0 分
+    payload['attachment_answer_${index + 1}'] = score.toString();
   }
 });
 

@@ -584,16 +584,45 @@ if (sleepTotalMinutes > totalTimeInBed) {
       'sleep_score_subjective_quality': _calculateSubjectiveSleepQualityScore(),
     };
 
-    // 2) Q1 的選擇題（6–10）
-    for (var i = 4; i < _q1.length; i++) {
-      payload['sleep_answer_${i + 1}'] = _a1[i] ?? 'none';
-    }
+final Map<String, int> frequencyScoreMap = {
+  '從未發生': 0,
+  '每週少於一次': 1,
+  '每週一或兩次': 2,
+  '每週三次或以上': 3,
+};
 
-    // 3) Q2 的表格題（11–19）
-    for (var i = 0; i < _q2.length; i++) {
-      // 如果沒選，預設 'none'
-      payload['sleep_answer_${9 + i}'] = _a2[i] ?? 'none';
-    }
+final Map<String, int> botherScoreMap = {
+  '完全沒有困擾': 0,
+  '很少困擾': 1,
+  '有些困擾': 2,
+  '有很大的困擾': 3,
+};
+
+final Map<String, int> satisfactionScoreMap = {
+  '非常滿意': 0,
+  '還可以': 1,
+  '不滿意': 2,
+  '非常不滿意': 3,
+};
+
+    // 2) Q1 的選擇題（6–10）
+   for (var i = 4; i < _q1.length; i++) {
+  final answer = _a1[i];
+  int score = frequencyScoreMap[answer] ??
+              botherScoreMap[answer] ??
+              satisfactionScoreMap[answer] ??
+              0; // 預設 0 分
+  payload['sleep_answer_${i + 1}'] = score.toString();
+}
+
+for (var i = 0; i < _q2.length; i++) {
+  final answer = _a2[i];
+  int score = frequencyScoreMap[answer] ??
+              botherScoreMap[answer] ??
+              satisfactionScoreMap[answer] ??
+              0;
+  payload['sleep_answer_${9 + i}'] = score.toString();
+}
 
     payload['sleep_score_subjective_quality'] =
         _calculateSubjectiveSleepQualityScore();
@@ -830,4 +859,6 @@ if (amPmSelections[2] == '上午' && wakeHour == 12) {
         _calculateSleepMedicationScore() +
         _calculateSleepDaytimeFunctionScore();
   }
+
+  
 }

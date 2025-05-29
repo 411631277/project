@@ -256,7 +256,10 @@ Future<bool> sendAdaptAnswersToMySQL(String userId, Map<int, String?> answers, i
 int baseIndex = 7; // Close 用了 1~7，Adapt 從第8題開始
 answers.forEach((index, answerText) {
   if (answerText != null && answerText.isNotEmpty) {
-    payload['attachment_answer_${baseIndex + index + 1}'] = answerText;
+    final options = questionOptions[index] ?? [];
+    int optionIndex = options.indexOf(answerText);
+    int score = optionIndex >= 0 ? (6 - optionIndex) : 0;
+    payload['attachment_answer_${baseIndex + index + 1}'] = score.toString();
   }
 });
 

@@ -269,8 +269,8 @@ class _RoommateWidgetState extends State<RoommateWidget> {
       'user_id': int.parse(userId),
       'roommate_question_content': "親子同室問卷",
       'roommate_test_date': formattedDate,
-      'roommate_answer_1': isRoomingIn24Hours == true ? '是' : '否',
-      'roommate_answer_2': isLivingInPostpartumCenter == true ? '是' : '否',
+      'roommate_answer_1': isRoomingIn24Hours == true ? 1 : 0,
+      'roommate_answer_2': isLivingInPostpartumCenter == true ? 1 : 0,
     }),
   
 

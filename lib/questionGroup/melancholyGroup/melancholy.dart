@@ -312,12 +312,13 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
     'dour_score': totalScore, // 🔥 新增總分
   };
 
-  // 把答案轉成 ENUM 對應的 '0'~'3'
-  for (int i = 0; i < 10; i++) {
-    final selectedText = answers[i];
-    final optionIndex = questionOptions[i]?.indexOf(selectedText ?? '') ?? -1;
-    payload['dour_answer_${i + 1}'] = (optionIndex >= 0) ? optionIndex.toString() : 'none';
-  }
+   for (int i = 0; i < 10; i++) {
+  final selectedText = answers[i];
+  final answerScore = getScore(i, selectedText!);
+  payload['dour_answer_${i + 1}'] = answerScore.toString();
+}
+ 
+  
 
   logger.i("📦 準備送出憂鬱量表資料 payload：$payload");
 
@@ -343,6 +344,29 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
   }
 }
 
+int getScore(int questionIndex, String answerText) {
+  if (questionIndex >= 0 && questionIndex <= 2) {
+    final Map<String, int> scoreMap = {
+      '同以前一樣': 0,
+      '沒有以前那麼多': 1,
+      '肯定比以前少': 2,
+      '完全不能': 3,
+    };
+    return scoreMap[answerText] ?? 0;
+  } else {
+    final Map<String, int> scoreMap = {
+      '沒有這樣': 0,
+      '很少這樣': 1,
+      '有時候這樣': 2,
+      '相當多時候這樣': 3,
+      '大部分時候我都不能應付': 3,
+      '有時候不能像平常時候應付得好': 2,
+      '大部分時候我都能像平常時候應付得好': 1,
+      '我一直都能應付得好': 0,
+    };
+    return scoreMap[answerText] ?? 0;
+  }
+}
 
 int _calculateTotalScore() {
   int totalScore = 0;

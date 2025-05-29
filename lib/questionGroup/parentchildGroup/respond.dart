@@ -256,10 +256,13 @@ Future<bool> sendRespondAnswersToMySQL(String userId, Map<int, String?> answers,
 
   const int baseIndex = 19; // 從 attachment_answer_20 開始
   answers.forEach((index, answerText) {
-    if (answerText != null && answerText.isNotEmpty) {
-      payload['attachment_answer_${baseIndex + index + 1}'] = answerText;
-    }
-  });
+  if (answerText != null && answerText.isNotEmpty) {
+    final options = questionOptions[index] ?? [];
+    int optionIndex = options.indexOf(answerText);
+    int score = optionIndex >= 0 ? (optionIndex+1) : 0;
+    payload['attachment_answer_${baseIndex + index + 1}'] = score.toString();
+  }
+});
 
   logger.i("📦 Respond payload: $payload");
 

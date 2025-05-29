@@ -256,10 +256,13 @@ Future<bool> sendPromiseAnswersToMySQL(String userId, Map<int, String?> answers,
   // 將 Promise 答案寫入 attachment_answer_14~19
   const int baseIndex = 13; // 因為從 answer_14 開始（index 13 + 1）
   answers.forEach((index, answerText) {
-    if (answerText != null && answerText.isNotEmpty) {
-      payload['attachment_answer_${baseIndex + index + 1}'] = answerText;
-    }
-  });
+  if (answerText != null && answerText.isNotEmpty) {
+    final options = questionOptions[index] ?? [];
+    int optionIndex = options.indexOf(answerText);
+    int score = optionIndex >= 0 ? (optionIndex+1 ) : 0;
+    payload['attachment_answer_${baseIndex + index + 1}'] = score.toString();
+  }
+});
 
   logger.i("📦 Promise payload: $payload");
 

@@ -16,6 +16,7 @@ class PainScaleWidget extends StatefulWidget {
   State<PainScaleWidget> createState() => _PainScaleWidgetState();
 }
 
+
 class _PainScaleWidgetState extends State<PainScaleWidget> {
   bool isNaturalBirth = false;         // 是否自然產
   bool isCSection = false;             // 是否剖腹產
@@ -331,37 +332,44 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
   }
   Future<bool> sendPainScaleToMySQL(String userId) async {
   final url = Uri.parse('http://163.13.201.85:3000/painscale');
-
+  var birthTypeValue = isNaturalBirth ? 0 : isCSection ? 1 : -1;
   final now = DateTime.now();
   final formattedDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-  final birthType = isNaturalBirth
-      ? "自然產"
-      : isCSection
-          ? "剖腹產"
-          : null;
+
+  if (isNaturalBirth) {
+    birthTypeValue = 0;
+  } else if (isCSection) {
+    birthTypeValue = 1;
+  } else {
+    logger.e('請選擇分娩方式（自然產或剖腹產）');
+    return false; // 中斷傳送，避免傳入 null
+  }
 
   final painControl = isCSection
       ? (usedSelfPainControl
           ? "是"
           : notUsedSelfPainControl
               ? "否"
-              : null)
-      : null;
+              : '')
+      : '';
 
  http.Response response;
     try {
     response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
+
     body: jsonEncode({
+      
       'user_id': int.parse(userId),
       'painscale_question_content': "產後傷口疼痛分數",
       'painscale_test_date': formattedDate,
-      'childbirth_method': birthType,
+      'childbirth_method': birthTypeValue,
       'pain_level': painLevel.toInt(),
-      'used_self_controlled_pain_relief': painControl,
+      'used_self_controlled_pain_relief': painControl ,
     }),
+    
   );
 
  if (response.statusCode >= 200 && response.statusCode < 300) {
