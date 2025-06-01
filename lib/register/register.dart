@@ -359,7 +359,7 @@ Widget _buildAccountRow() {
               controller: accountController,
               decoration: _inputDecoration(),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@&!*.\-]')),
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@&!*.\-_]')),
               ],
             ),
           ),
