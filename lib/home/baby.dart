@@ -74,7 +74,7 @@ class _BabyWidgetState extends State<BabyWidget> {
 
           // ---------- 寶寶出生是否有特殊狀況 (跟原版一樣) ----------
           Positioned(
-            top: screenHeight * 0.60,
+            top: screenHeight * 0.68,
             left: screenWidth * 0.25,
             child: const Text(
               '寶寶出生是否有特殊狀況',
@@ -86,7 +86,7 @@ class _BabyWidgetState extends State<BabyWidget> {
             ),
           ),
           Positioned(
-            top: screenHeight * 0.65,
+            top: screenHeight * 0.73,
             left: screenWidth * 0.22,
             child: Row(
               children: [
@@ -115,7 +115,7 @@ class _BabyWidgetState extends State<BabyWidget> {
           ),
           if (hasSpecialCondition)
             Positioned(
-              top: screenHeight * 0.70,
+              top: screenHeight * 0.80,
               left: screenWidth * 0.15,
               child: SizedBox(
                 width: screenWidth * 0.7,
@@ -133,7 +133,7 @@ class _BabyWidgetState extends State<BabyWidget> {
 
           // ---------- 填寫完成 & 返回按鈕 (同原版) ----------
           Positioned(
-            top: screenHeight * 0.80,
+            top: screenHeight * 0.9,
             left: screenWidth * 0.3,
             child:
                 _buildButton(context, '填寫完成', Colors.brown.shade400, () async {
@@ -161,7 +161,7 @@ class _BabyWidgetState extends State<BabyWidget> {
             }),
           ),
           Positioned(
-            top: screenHeight * 0.75,
+            top: screenHeight * 0.85,
             left: screenWidth * 0.1,
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
