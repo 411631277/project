@@ -264,7 +264,7 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
               child: SizedBox(
                 width: screenWidth * 0.84,
                 child: Text(
-                  '當爸爸不容易，你的用心陪伴與無私付出，'
+                  '你的用心陪伴與無私付出，'
                   '這些溫暖的支持，已成為伴侶最堅定的力量。\n\n'
                   '你已經做得非常好了，繼續保持初心\n'
                   '與伴侶一同面對、一同學習，就是最美好的愛。',
