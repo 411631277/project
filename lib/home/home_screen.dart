@@ -16,6 +16,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final Logger logger = Logger();
 
@@ -36,7 +37,7 @@ class HomeScreenWidget extends StatefulWidget {
 class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   String userName = "載入中...";
   String babyName = "寶寶資料填寫";
-
+  int? _startOfDaySteps;
   String? _profileImageUrl;
   final ImagePicker _picker = ImagePicker();
 
@@ -63,16 +64,36 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     super.initState();
     _currentDay = DateTime.now().toString().substring(0, 10);
     _loadUserName();
-  
     _loadProfilePicture();
     _loadTargetStepsFromFirebase();
-    // 載入「今天」的步數資料
-    _loadStepsForToday().then((_) {
-      // 完成後再啟動計步器監聽
-      initPedometer();
-    });
 
-    requestPermission(); // 請求計步權限
+
+
+    // 載入「今天」的步數資料
+    _loadStepsForToday()
+    .then((_) => _loadStoredSteps())
+    .then((_) => initPedometer());
+  requestPermission(); // 計步權限
+}
+
+
+
+
+Future<void> _saveStepsToLocal(int steps, int deviceSteps) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('stepCount_$_currentDay', steps);
+    await prefs.setInt('startSteps_$_currentDay', deviceSteps);
+  }
+
+Future<void> _loadStoredSteps() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now().toString().substring(0, 10);
+
+    setState(() {
+      _currentDay = today;
+      _stepCount = prefs.getInt('stepCount_$today') ?? 0;
+      _startOfDaySteps = prefs.getInt('startSteps_$today');
+    });
   }
 
   Future<void> _saveTargetStepsToFirebase(int newTarget) async {
@@ -165,58 +186,45 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
         if (!mounted) return;
 
         String today = DateTime.now().toString().substring(0, 10);
+        int deviceSteps = event.steps;
 
-        // 若日期變更 => 表示跨天
         if (_currentDay != today) {
-          // 先把舊日最終步數存檔
           _saveStepsForToday();
-
-          // 切換到新的一天
           setState(() {
             _currentDay = today;
             _stepCount = 0;
-            _lastDeviceSteps = event.steps; // 以當前裝置值作為新基準
+            _startOfDaySteps = deviceSteps;
           });
-          _saveStepsForToday();
-          logger.i("跨天: 由 $_currentDay 切換到 $today, 步數歸0, 基準=${event.steps}");
+          _saveStepsToLocal(0, deviceSteps);
+          logger.i("跨天：重置步數");
           return;
         }
 
-        // 沒跨天 => 正常累加
-        int currentDeviceSteps = event.steps;
-
-        // 第一次事件 => 設置基準
-        if (_lastDeviceSteps == null) {
+        if (_startOfDaySteps == null) {
           setState(() {
-            _lastDeviceSteps = currentDeviceSteps;
+            _startOfDaySteps = deviceSteps;
           });
-          _saveStepsForToday();
-          logger.i("第一次事件 => 設定基準: _lastDeviceSteps=$currentDeviceSteps");
+          _saveStepsToLocal(0, deviceSteps);
+          logger.i("今日首次設定基準：$deviceSteps");
           return;
         }
 
-        // 計算差量
-        int difference = currentDeviceSteps - _lastDeviceSteps!;
-        if (difference > 0) {
+        int todaySteps = deviceSteps - _startOfDaySteps!;
+        if (todaySteps >= 0) {
           setState(() {
-            _stepCount += difference;
-            _lastDeviceSteps = currentDeviceSteps;
+            _stepCount = todaySteps;
           });
-          _saveStepsForToday();
-          logger.i("步數增加 +$difference => 總步數 $_stepCount");
-        } else if (difference < 0) {
-          // 如果計步器被重置或手機重開機 => 重新設定基準
-          setState(() {
-            _lastDeviceSteps = currentDeviceSteps;
-          });
-          _saveStepsForToday();
-          logger.w("計步器歸零/重開機，重設基準為 $currentDeviceSteps");
+          _saveStepsToLocal(todaySteps, _startOfDaySteps!);
+        } else {
+          logger.w("步數重置偵測到異常，忽略負值");
         }
+
+        _saveStepsForToday();
       }, onError: (error) {
-        logger.e("計步器錯誤: $error");
+        logger.e("計步錯誤：$error");
       });
     } catch (e) {
-      logger.e("初始化計步器失敗: $e");
+      logger.e("初始化計步器失敗：$e");
     }
   }
 
