@@ -21,8 +21,8 @@ class Closescore extends StatelessWidget {
 
     // 根據分數挑文字
     final message = totalScore < 34
-      ? '您與孩子之間的親密感有待加強，建議多投入一些互動時間，主動提升親子間的連結與溝通。親子之間的親近感，是慢慢累積的小時光。每天一點點的陪伴與傾聽，都是為彼此建立安全感的重要時刻。相信在您的陪伴下，親子關係會越來越緊密。'
-      : '您與孩子建立的親近關係十分緊密且正向，能讓孩子在愛與溫暖的環境下穩定成長';
+      ? '您與孩子之間的親密感有待加強，建議多投入一些互動時間，主動提升親子間的連結與溝通。親子之間的親近感，是慢慢累積的小時光。\n\n每天一點點的陪伴與傾聽，都是為彼此建立安全感的重要時刻。相信在您的陪伴下，親子關係會越來越緊密。'
+      : '您與孩子建立的親近關係十分緊密且正向，能讓孩子在愛與溫暖的環境下穩定成長。';
 
      return PopScope(
     canPop: false, // ❗這行就是鎖定返回鍵
@@ -51,7 +51,7 @@ class Closescore extends StatelessWidget {
 
               Text(
                 message,
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
                 style: TextStyle(
                   fontSize: base * 0.06,
                   height: 1.4,

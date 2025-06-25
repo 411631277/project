@@ -21,8 +21,8 @@ class Adaptscore extends StatelessWidget {
 
     // 根據分數挑文字
     final message = totalScore < 18
-      ? '您的親職適應狀況尚需進一步調整，有需要時別忘了尋求幫助，你並不孤單。照顧孩子很不容易，別忘了也要照顧自己。建議可以利用AI機器人，強化育兒的自信心喔！'
-      : '您的親職適應能力不錯，面對育兒壓力能有效調整並因應挑戰，值得持續維持此狀態。你的努力與用心讓孩子感受到愛，保持這樣的步調，你正在成為孩子最好的依靠。';
+      ? '您的親職適應狀況尚需進一步調整，有需要時別忘了尋求幫助，你並不孤單。\n\n照顧孩子很不容易，別忘了也要照顧自己。建議可以利用AI機器人，強化育兒的自信心喔！'
+      : '您的親職適應能力不錯，面對育兒壓力能有效調整並因應挑戰，值得持續維持此狀態。\n\n你的努力與用心讓孩子感受到愛，保持這樣的步調，你正在成為孩子最好的依靠。';
 
     return PopScope(
     canPop: false, // ❗這行就是鎖定返回鍵
@@ -51,7 +51,7 @@ class Adaptscore extends StatelessWidget {
 
               Text(
                 message,
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
                 style: TextStyle(
                   fontSize: base * 0.06,
                   height: 1.4,

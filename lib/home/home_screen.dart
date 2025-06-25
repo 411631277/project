@@ -630,9 +630,9 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     child: SizedBox(
                       width: screenWidth * 0.84,
                       child: Text(
-                        '今天辛苦了，你的努力已經讓寶寶感受到滿滿的愛\n\n'
-                        '每一天你都做得比想像中更棒，請相信自己，也別忘了好好照顧自己 ',
-                        textAlign: TextAlign.center,
+                        '今天辛苦了，你的努力已經讓寶寶感受到滿滿的愛。\n\n'
+                        '每一天你都做得比想像中更棒，請相信自己，也別忘了好好照顧自己。',
+                        textAlign: TextAlign.left,
                         style: TextStyle(
                           color: const Color.fromRGBO(165, 146, 125, 1),
                           fontFamily: 'Inter',
