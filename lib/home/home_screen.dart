@@ -489,28 +489,29 @@ Future<void> _loadStoredSteps() async {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // 第 1 行：當前步數與目標步數
-                        Row(
-                          children: [
-                            Text(
-                              "當前步數：$_stepCount",
-                              style: TextStyle(
-                                fontSize: base * 0.05,
-                                color: const Color.fromRGBO(165, 146, 125, 1),
-                              ),
-                            ),
-                            const Spacer(),
-                            GestureDetector(
-                              onTap: _showTargetStepsDialog,
-                              child: Text(
-                                "目標步數：$_targetSteps",
-                                style: TextStyle(
-                                  fontSize: base * 0.05,
-                                  color: const Color.fromRGBO(165, 146, 125, 1),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        Wrap(
+  spacing: 10,
+  runSpacing: 4,
+  children: [
+    Text(
+      "當前步數：$_stepCount",
+      style: TextStyle(
+        fontSize: base * 0.05,
+        color: const Color.fromRGBO(165, 146, 125, 1),
+      ),
+    ),
+    GestureDetector(
+      onTap: _showTargetStepsDialog,
+      child: Text(
+        "目標步數：$_targetSteps",
+        style: TextStyle(
+          fontSize: base * 0.05,
+          color: const Color.fromRGBO(165, 146, 125, 1),
+        ),
+      ),
+    ),
+  ],
+),
 
                         SizedBox(height: screenHeight * 0.02),
 
