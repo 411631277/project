@@ -37,6 +37,12 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
   flutter_gen_runner: ^5.0.0
+  flutter_launcher_icons: ^0.10.0
+
+flutter_icons:
+  android: true
+  ios: true    
+  image_path: "assets/images/momandbaby.png"  
 
 flutter:
   uses-material-design: true
@@ -62,4 +68,6 @@ flutter:
     - assets/images/bluetooth.png
     - assets/images/tgos.png
     - assets/tgos_map.html
+    - assets/images/momandbaby.png
+    
 
