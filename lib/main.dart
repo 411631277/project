@@ -93,6 +93,13 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(1.0)),
+          child: child!,
+        );
+      },
       debugShowCheckedModeBanner: false,
       title: 'Settings App',
       theme: ThemeData(primarySwatch: Colors.brown),
@@ -113,7 +120,7 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) => SplashScreen()  , // 主畫面
+        '/': (context) => SplashScreen(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
@@ -174,15 +181,21 @@ class _MyAppState extends State<MyApp> {
           final userId = args['userId'] as String;
           final isNewMom = args['isNewMom'] as bool;
           return MaterialPageRoute(
-            builder: (context) => SuccessWidget(userId: userId, isNewMom: isNewMom,),
+            builder: (context) => SuccessWidget(
+              userId: userId,
+              isNewMom: isNewMom,
+            ),
           );
         }
         if (settings.name == '/Notyet1Widget') {
           final args = settings.arguments as Map<String, dynamic>;
-final userId = args['userId'] as String;
-final isNewMom = args['isNewMom'] as bool;
+          final userId = args['userId'] as String;
+          final isNewMom = args['isNewMom'] as bool;
           return MaterialPageRoute(
-            builder: (context) => Notyet1Widget(userId: userId ,isNewMom: isNewMom,),
+            builder: (context) => Notyet1Widget(
+              userId: userId,
+              isNewMom: isNewMom,
+            ),
           );
         }
         if (settings.name == '/MaternalConnectionPage') {
@@ -203,11 +216,14 @@ final isNewMom = args['isNewMom'] as bool;
           );
         }
         if (settings.name == '/BornWidget') {
-         final args = settings.arguments as Map<String, dynamic>;
-         final userId = args['userId'] as String;
-         final isNewMom = args['isNewMom'] as bool;
+          final args = settings.arguments as Map<String, dynamic>;
+          final userId = args['userId'] as String;
+          final isNewMom = args['isNewMom'] as bool;
           return MaterialPageRoute(
-            builder: (context) => BornWidget(userId: userId ,isNewMom: isNewMom,),
+            builder: (context) => BornWidget(
+              userId: userId,
+              isNewMom: isNewMom,
+            ),
           );
         }
         if (settings.name == '/QuestionWidget') {
@@ -290,7 +306,8 @@ final isNewMom = args['isNewMom'] as bool;
           final userId = args['userId'] as String;
           final isNewMom = args['isNewMom'] as bool;
           return MaterialPageRoute(
-            builder: (context) => WeekPregnancy(userId: userId ,isNewMom: isNewMom),
+            builder: (context) =>
+                WeekPregnancy(userId: userId, isNewMom: isNewMom),
           );
         }
 
@@ -340,7 +357,7 @@ final isNewMom = args['isNewMom'] as bool;
             ),
           );
         }
-        
+
         /*if (settings.name == '/AttachmentWidget') {
           final userId = settings.arguments as String;
           return MaterialPageRoute(
@@ -432,14 +449,12 @@ final isNewMom = args['isNewMom'] as bool;
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => Melancholyscore(
-              userId: args['userId'],
-              isManUser: args['isManUser'],
-              totalScore: args['totalScore'] as int,
-             answers: Map<int, String>.from(
-  (args['answers'] as Map).map(
-    (key, value) => MapEntry(key as int, value ?? ''),
-  ))
-            ),
+                userId: args['userId'],
+                isManUser: args['isManUser'],
+                totalScore: args['totalScore'] as int,
+                answers: Map<int, String>.from((args['answers'] as Map).map(
+                  (key, value) => MapEntry(key as int, value ?? ''),
+                ))),
           );
         }
         if (settings.name == '/KnowledgeScore') {

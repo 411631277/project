@@ -67,25 +67,20 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     _loadProfilePicture();
     _loadTargetStepsFromFirebase();
 
-
-
     // 載入「今天」的步數資料
     _loadStepsForToday()
-    .then((_) => _loadStoredSteps())
-    .then((_) => initPedometer());
-  requestPermission(); // 計步權限
-}
+        .then((_) => _loadStoredSteps())
+        .then((_) => initPedometer());
+    requestPermission(); // 計步權限
+  }
 
-
-
-
-Future<void> _saveStepsToLocal(int steps, int deviceSteps) async {
+  Future<void> _saveStepsToLocal(int steps, int deviceSteps) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt('stepCount_$_currentDay', steps);
     await prefs.setInt('startSteps_$_currentDay', deviceSteps);
   }
 
-Future<void> _loadStoredSteps() async {
+  Future<void> _loadStoredSteps() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final today = DateTime.now().toString().substring(0, 10);
 
@@ -160,16 +155,16 @@ Future<void> _loadStoredSteps() async {
           _lastDeviceSteps = null;
         });
 
-       Pedometer.stepCountStream.first.then((event) {
-  if (event.steps > 0) {
-    setState(() {
-      _lastDeviceSteps = event.steps;
-      _stepCount = 0; // ✅ 步數應為 0，因為今天還沒開始累積
-    });
-    _saveStepsForToday();
-    logger.i("今天 $_currentDay 首次啟動，設定基準為 ${event.steps}，今日步數歸 0");
-  }
-});
+        Pedometer.stepCountStream.first.then((event) {
+          if (event.steps > 0) {
+            setState(() {
+              _lastDeviceSteps = event.steps;
+              _stepCount = 0; // ✅ 步數應為 0，因為今天還沒開始累積
+            });
+            _saveStepsForToday();
+            logger.i("今天 $_currentDay 首次啟動，設定基準為 ${event.steps}，今日步數歸 0");
+          }
+        });
 
         await _saveStepsForToday();
         logger.i("今天 $_currentDay 尚無資料，已初始化: 步數=0, lastDeviceSteps=null");
@@ -323,8 +318,6 @@ Future<void> _loadStoredSteps() async {
     }
   }
 
-
-
   void _showProfilePreviewDialog() {
     showDialog(
       context: context,
@@ -442,17 +435,17 @@ Future<void> _loadStoredSteps() async {
 
     // 根據當前步數與目標步數，決定顯示文字
 
- return PopScope(
-      canPop: false, 
-      // ignore: deprecated_member_use
-      onPopInvoked: (didPop) async {
-        if (didPop) return; 
-        bool shouldExit = await _showExitDialog(context);
-        if (shouldExit && mounted) {
-        if (!context.mounted) return;
-          SystemNavigator.pop();  // 離開 App (在第一層會直接退出)
-        }
-      },
+    return PopScope(
+        canPop: false,
+        // ignore: deprecated_member_use
+        onPopInvoked: (didPop) async {
+          if (didPop) return;
+          bool shouldExit = await _showExitDialog(context);
+          if (shouldExit && mounted) {
+            if (!context.mounted) return;
+            SystemNavigator.pop(); // 離開 App (在第一層會直接退出)
+          }
+        },
         child: Scaffold(
             body: Container(
                 color: const Color.fromRGBO(233, 227, 213, 1),
@@ -490,28 +483,29 @@ Future<void> _loadStoredSteps() async {
                       children: [
                         // 第 1 行：當前步數與目標步數
                         Wrap(
-  spacing: 10,
-  runSpacing: 4,
-  children: [
-    Text(
-      "當前步數：$_stepCount",
-      style: TextStyle(
-        fontSize: base * 0.05,
-        color: const Color.fromRGBO(165, 146, 125, 1),
-      ),
-    ),
-    GestureDetector(
-      onTap: _showTargetStepsDialog,
-      child: Text(
-        "目標步數：$_targetSteps",
-        style: TextStyle(
-          fontSize: base * 0.05,
-          color: const Color.fromRGBO(165, 146, 125, 1),
-        ),
-      ),
-    ),
-  ],
-),
+                          spacing: 10,
+                          runSpacing: 4,
+                          children: [
+                            Text(
+                              "當前步數：$_stepCount",
+                              style: TextStyle(
+                                fontSize: base * 0.05,
+                                color: const Color.fromRGBO(165, 146, 125, 1),
+                              ),
+                            ),
+                            SizedBox(width: base * 0.08),
+                            GestureDetector(
+                              onTap: _showTargetStepsDialog,
+                              child: Text(
+                                "目標步數：$_targetSteps",
+                                style: TextStyle(
+                                  fontSize: base * 0.05,
+                                  color: const Color.fromRGBO(165, 146, 125, 1),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
 
                         SizedBox(height: screenHeight * 0.02),
 
@@ -822,7 +816,7 @@ Future<void> _loadStoredSteps() async {
           title: const Text('提示'),
           content: const Text('是否要關閉程式？'),
           actions: [
-             TextButton(
+            TextButton(
               onPressed: () {
                 shouldExit = true;
                 Navigator.of(context).pop(); // 關掉對話框
@@ -835,7 +829,6 @@ Future<void> _loadStoredSteps() async {
               },
               child: const Text('否'),
             ),
-           
           ],
         );
       },
