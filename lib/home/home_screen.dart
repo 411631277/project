@@ -17,6 +17,7 @@ import 'package:http/http.dart' as http;
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:doctor_2/function/step.dart';
 
 final Logger logger = Logger();
 
@@ -42,6 +43,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   final ImagePicker _picker = ImagePicker();
 
   /// **顯示給使用者的「當天累積步數」**
+  static const platform = MethodChannel('com.example.stepcounter/steps');
   int _stepCount = 0;
 
   /// **目標步數 (本地變數)**
@@ -62,6 +64,9 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   @override
   void initState() {
     super.initState();
+
+    StepCounterService.startStepService(); // 🔥 啟動原生服務
+
     _currentDay = DateTime.now().toString().substring(0, 10);
     _loadUserName();
     _loadProfilePicture();
@@ -72,6 +77,14 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
         .then((_) => _loadStoredSteps())
         .then((_) => initPedometer());
     requestPermission(); // 計步權限
+
+    platform.setMethodCallHandler((call) async {
+      if (call.method == 'updateSteps') {
+        setState(() {
+          _stepCount = call.arguments as int;
+        });
+      }
+    });
   }
 
   Future<void> _saveStepsToLocal(int steps, int deviceSteps) async {
