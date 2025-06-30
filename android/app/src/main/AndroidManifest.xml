@@ -20,6 +20,11 @@
         android:label="育兒導航星"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <provider
+    android:name="be.tramckrijte.workmanager.WorkManagerTaskService"
+    android:authorities="${applicationId}.workmanager-init"
+    android:exported="false" />
+
          <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCtQYXAaiNsFncVY-RhQyuVd5IHpECG-NE" />
@@ -46,7 +51,7 @@
             android:name="flutterEmbedding"
             android:value="2" />
         <service
-        android:name=".StepService"
+        android:name=".StepWorker"
         android:enabled="true"
         android:exported="false"/>
     </application>

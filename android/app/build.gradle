@@ -8,6 +8,10 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+dependencies {
+    implementation "androidx.work:work-runtime-ktx:2.7.1"
+}
+
 android {
     namespace = "com.example.doctor_2"
     compileSdk = flutter.compileSdkVersion

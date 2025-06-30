@@ -49,10 +49,18 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/l10n.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter/services.dart';
+import 'package:workmanager/workmanager.dart';
 
 //註解已完成
 
 final Logger logger = Logger();
+
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    Logger().i("WorkManager 任務執行: $task");
+    return Future.value(true);
+  });
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,6 +72,17 @@ Future<void> main() async {
     DeviceOrientation.portraitUp, // 直式向上
     DeviceOrientation.portraitDown, // 直式向下 (可選，通常也一起加)
   ]);
+
+  await Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: true,
+  );
+
+  await Workmanager().registerPeriodicTask(
+    "pedometerTask",
+    "pedometerTask",
+    frequency: Duration(minutes: 30),
+  );
 
   runApp(const MyApp());
 }
