@@ -17,7 +17,7 @@ import 'package:http/http.dart' as http;
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:doctor_2/function/step.dart';
+//import 'package:doctor_2/function/step.dart';
 
 final Logger logger = Logger();
 
@@ -65,7 +65,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   void initState() {
     super.initState();
 
-    StepCounterService.startStepService(); // 🔥 啟動原生服務
+    //StepCounterService.startStepService(); // 🔥 啟動原生服務
 
     _currentDay = DateTime.now().toString().substring(0, 10);
     _loadUserName();

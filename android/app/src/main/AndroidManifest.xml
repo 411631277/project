@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     
     <uses-feature android:name="android.hardware.camera" />
 
@@ -54,6 +55,20 @@
         android:name=".StepWorker"
         android:enabled="true"
         android:exported="false"/>
+         <!-- 換日鬧鐘觸發 Receiver -->
+    <receiver
+        android:name=".StepResetReceiver"
+        android:exported="true"/>
+
+    <!-- 開機後重排程 Receiver -->
+    <receiver
+        android:name=".BootReceiver"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.BOOT_COMPLETED"/>
+        </intent-filter>
+    </receiver>
+    
     </application>
 
     <queries>

@@ -48,5 +48,6 @@ class MainActivity : FlutterActivity() {
                 .getInstance()
                 .put("my_engine_id", engine)
         }
+        AlarmHelper.scheduleNextReset(this)
     }
 }

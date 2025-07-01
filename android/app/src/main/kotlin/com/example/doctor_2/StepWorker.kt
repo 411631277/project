@@ -1,4 +1,4 @@
-package com.example.doctor_2
+package com.example.doctor_2  // <- 換成你的 package
 
 import android.content.Context
 import android.hardware.Sensor
@@ -6,37 +6,63 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Handler
-import android.os.Looper
+import android.os.HandlerThread
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import android.util.Log
-import androidx.work.Result
+import androidx.work.ListenableWorker.Result
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
-class StepWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams), SensorEventListener {
-
-    private var sensorManager: SensorManager? = null
-    private var stepSensor: Sensor? = null
+class StepWorker(
+    appContext: Context,
+    workerParams: WorkerParameters
+) : Worker(appContext, workerParams) {
 
     override fun doWork(): Result {
-        sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        stepSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        stepSensor?.let {
-            sensorManager?.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        // 1. 取得 SensorManager 與 STEP_COUNTER
+        val sensorManager = applicationContext
+            .getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+            ?: return Result.failure()
+
+        // 2. 用 HandlerThread 建立有 Looper 的執行緒
+        val thread = HandlerThread("StepWorkerThread").apply { start() }
+        val handler = Handler(thread.looper)
+
+        // 3. CountDownLatch 等一次回調
+        val latch = CountDownLatch(1)
+        var steps = 0
+
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                steps = event.values[0].toInt()
+                latch.countDown()
+            }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
 
-        // 使用 Handler 延遲 5 秒後解除註冊，避免阻塞 Worker 執行緒
-        Handler(Looper.getMainLooper()).postDelayed({
-            sensorManager?.unregisterListener(this)
-            Log.d("StepWorker", "停止監聽步數")
-        }, 5000)
+        // 4. 註冊 Listener（注意這裡是 4 個參數，最後一個是 android.os.Handler）
+        sensorManager.registerListener(
+            listener,
+            sensor,
+            SensorManager.SENSOR_DELAY_NORMAL,
+            handler
+        )
+
+        // 5. 最多等 3 秒
+        latch.await(3, TimeUnit.SECONDS)
+
+        // 6. 清除 Listener & 結束執行緒
+        sensorManager.unregisterListener(listener)
+        thread.quitSafely()
+
+        // 7. 存步數到 SharedPreferences
+        applicationContext
+            .getSharedPreferences("step_prefs", Context.MODE_PRIVATE)
+            .edit()
+            .putInt("last_steps", steps)
+            .apply()
 
         return Result.success()
     }
-
-    override fun onSensorChanged(event: android.hardware.SensorEvent?) {
-        val stepCount = event?.values?.get(0)?.toInt() ?: 0
-        Log.d("StepWorker", "取得步數: $stepCount")
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }
