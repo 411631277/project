@@ -6,7 +6,7 @@ import 'package:logger/logger.dart';
 final Logger logger = Logger();
 
 class Delete2Widget extends StatelessWidget {
-  final String userId; 
+  final String userId;
   final bool isManUser;
   final Function(int) updateStepCount;
 
@@ -22,70 +22,70 @@ class Delete2Widget extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-     return PopScope(
- canPop: false,
- child: Scaffold(
-      body: Container(
-        width: screenWidth,
-        height: screenHeight,
-        decoration: const BoxDecoration(
-          color: Color.fromRGBO(233, 227, 213, 1),
-        ),
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              top: screenHeight * 0.3,
-              left: screenWidth * 0.1,
-              child: Container(
-                width: screenWidth * 0.8,
-                height: screenHeight * 0.3,
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(147, 129, 108, 1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      '確認要刪除帳號嗎?',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Inter',
-                        fontSize: 20,
-                        fontWeight: FontWeight.normal,
-                      ),
+    return PopScope(
+        canPop: false,
+        child: Scaffold(
+          body: Container(
+            width: screenWidth,
+            height: screenHeight,
+            decoration: const BoxDecoration(
+              color: Color.fromRGBO(233, 227, 213, 1),
+            ),
+            child: Stack(
+              children: <Widget>[
+                Positioned(
+                  top: screenHeight * 0.3,
+                  left: screenWidth * 0.1,
+                  child: Container(
+                    width: screenWidth * 0.8,
+                    height: screenHeight * 0.3,
+                    decoration: BoxDecoration(
+                      color: const Color.fromRGBO(147, 129, 108, 1),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    const SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildButton(context, '是', Colors.red.shade400, () async {
-                          await _freezeUserData(context, userId);
-                        }),
-                        _buildButton(context, '否', Colors.grey.shade400, () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SettingWidget(
-                                userId: userId,
-                                isManUser: isManUser,
-                                stepCount: 0,
-                                updateStepCount: updateStepCount,
-                              ),
-                            ),
-                          );
-                        }),
+                        const Text(
+                          '確認要刪除帳號嗎?',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Inter',
+                            fontSize: 20,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildButton(context, '是', Colors.red.shade400,
+                                () async {
+                              await _freezeUserData(context, userId);
+                            }),
+                            _buildButton(context, '否', Colors.grey.shade400,
+                                () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SettingWidget(
+                                    userId: userId,
+                                    isManUser: isManUser,
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-    ));
+          ),
+        ));
   }
 
   /// 將使用者資料「搬移」到 freeze 下的 man_user 或 user，再刪除原本資料
@@ -97,7 +97,8 @@ class Delete2Widget extends StatelessWidget {
       final String freezeSubCollection = isManUser ? 'man_user' : 'user';
 
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      DocumentReference fromDocRef = firestore.collection(fromCollection).doc(userId);
+      DocumentReference fromDocRef =
+          firestore.collection(fromCollection).doc(userId);
       DocumentSnapshot fromDocSnapshot = await fromDocRef.get();
 
       if (!fromDocSnapshot.exists) {
@@ -106,7 +107,8 @@ class Delete2Widget extends StatelessWidget {
       }
 
       // 取得原本的資料
-      Map<String, dynamic> userData = fromDocSnapshot.data() as Map<String, dynamic>;
+      Map<String, dynamic> userData =
+          fromDocSnapshot.data() as Map<String, dynamic>;
 
       // 在 freeze/{freezeSubCollection}/(userId) 建立同樣的 doc
       // => e.g. freeze/man_user/userId or freeze/user/userId
@@ -118,7 +120,8 @@ class Delete2Widget extends StatelessWidget {
 
       // 先寫入主文件
       await toDocRef.set(userData);
-      logger.i("✅ 已將 $fromCollection/$userId 移動到 freeze/$freezeSubCollection/$userId");
+      logger.i(
+          "✅ 已將 $fromCollection/$userId 移動到 freeze/$freezeSubCollection/$userId");
 
       // 搬移子集合 (例如 baby)
       await _copySubcollectionsToFreeze(fromDocRef, toDocRef);
@@ -153,7 +156,7 @@ class Delete2Widget extends StatelessWidget {
       logger.e("❌ 搬移子集合 baby 時發生錯誤: $e");
     }
 
-     try {
+    try {
       final count = await fromDoc.collection('count').get();
       for (var doc in count.docs) {
         // 取得子文件資料
@@ -190,7 +193,7 @@ class Delete2Widget extends StatelessWidget {
     for (var doc in count.docs) {
       await fromDoc.collection('count').doc(doc.id).delete();
     }
-      final questions = await fromDoc.collection('questions').get();
+    final questions = await fromDoc.collection('questions').get();
     for (var doc in questions.docs) {
       await fromDoc.collection('questions').doc(doc.id).delete();
     }
@@ -198,8 +201,6 @@ class Delete2Widget extends StatelessWidget {
     // 再刪主文件
     await fromDoc.delete();
   }
-
-
 
   /// 按鈕樣式
   Widget _buildButton(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-
+import 'package:intl/intl.dart';
 // 🔹 專案內頁面
 import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/question.dart';
@@ -49,36 +50,99 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   final ImagePicker _picker = ImagePicker();
 
   // 🔹 計步資料
-  int? _startOfDaySteps;
-  int _stepCount = 0;
+  late Stream<StepCount> stepCountStream;
   int _targetSteps = 5000;
-  int? _lastDeviceSteps;
-  String _currentDay = "";
+  int _currentSteps = 0;
+  int _dailyOffset = 0;
+  String _lastDate = "";
 
-  StreamSubscription<StepCount>? _stepSubscription;
-
-  double getCaloriesBurned() => _stepCount * 0.03;
+  double getCaloriesBurned() {
+    return _todaySteps * 0.03;
+  }
 
   @override
   void initState() {
     super.initState();
-    _currentDay = DateTime.now().toString().substring(0, 10);
 
     // 🔸 初始化資料流程
+    requestPermission();
     _loadUserName();
     _loadProfilePicture();
-    _loadTargetStepsFromFirebase();
-    _loadStepsForToday()
-        .then((_) => _loadStoredSteps())
-        .then((_) => initPedometer());
-
-    requestPermission(); // 請求計步權限
+    _loadTargetSteps().then((_) {
+      _initPreferences(); // 等待步數目標載入後再初始化計步器
+    });
   }
 
   @override
   void dispose() {
-    _stepSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> _saveTargetStepsToPrefs(int newTarget) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('targetSteps', newTarget);
+  }
+
+  Future<void> _loadTargetSteps() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _targetSteps = prefs.getInt('targetSteps') ?? 5000;
+    });
+  }
+
+  Future<void> _initPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    _lastDate = prefs.getString('lastDate') ?? today;
+    int savedOffset = prefs.getInt('dailyOffset') ?? 0;
+    int savedSteps = prefs.getInt('lastRawSteps') ?? 0;
+
+    // 如果已換日，記錄前一天資料
+    if (_lastDate != today && savedSteps > 0) {
+      int yesterdaySteps = savedSteps - savedOffset;
+      if (yesterdaySteps >= 0) {
+        Map<String, int> history = await _loadStepHistory();
+        history[_lastDate] = yesterdaySteps;
+        await prefs.setString('stepHistory', jsonEncode(history));
+      }
+      _dailyOffset = savedSteps;
+      _lastDate = today;
+      await prefs.setString('lastDate', today);
+      await prefs.setInt('dailyOffset', _dailyOffset);
+    } else {
+      _dailyOffset = savedOffset;
+    }
+
+    stepCountStream = Pedometer.stepCountStream;
+    stepCountStream.listen(
+      (event) => _onStepCount(event.steps),
+      onError: (error) => setState(() => _currentSteps = 0),
+    );
+  }
+
+  Future<Map<String, int>> _loadStepHistory() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('targetSteps', _targetSteps);
+    String? jsonString = prefs.getString('stepHistory');
+    if (jsonString == null) return {};
+    Map<String, dynamic> map = jsonDecode(jsonString);
+    return map.map((key, value) => MapEntry(key, value as int));
+  }
+
+  int get _todaySteps => max(0, _currentSteps - _dailyOffset);
+
+  void _onStepCount(int steps) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('targetSteps', _targetSteps);
+
+    // 防止步數重置錯誤（可能是手機重啟導致步數歸零）
+    if (steps >= _dailyOffset) {
+      await prefs.setInt('lastRawSteps', steps);
+      setState(() {
+        _currentSteps = steps;
+      });
+    }
   }
 
   /// 📌 取得使用者名稱
@@ -214,6 +278,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
               if (newTarget != null && newTarget > 0) {
                 setState(() => _targetSteps = newTarget);
                 _saveTargetStepsToFirebase(newTarget);
+                _saveTargetStepsToPrefs(newTarget);
               }
               Navigator.pop(context);
             },
@@ -237,116 +302,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     }
   }
 
-  /// 📌 從 Firebase 載入目標步數
-  Future<void> _loadTargetStepsFromFirebase() async {
-    try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .get();
-
-      if (userDoc.exists && userDoc.data() != null) {
-        final data = userDoc.data() as Map<String, dynamic>;
-        int firebaseTarget = data['targetSteps'] ?? 5000;
-        setState(() => _targetSteps = firebaseTarget);
-        logger.i("載入目標步數: $_targetSteps");
-      }
-    } catch (e) {
-      logger.e("❌ 載入目標步數失敗: $e");
-    }
-  }
-
-  /// 📌 從 Firebase 載入「今天」的步數紀錄
-  Future<void> _loadStepsForToday() async {
-    try {
-      _currentDay = DateTime.now().toString().substring(0, 10);
-
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .collection('count')
-          .doc(_currentDay)
-          .get(GetOptions(source: Source.server));
-
-      if (doc.exists && doc.data() != null) {
-        final data = doc.data() as Map<String, dynamic>;
-        setState(() {
-          _stepCount = data['步數'] ?? 0;
-          _lastDeviceSteps = data['lastDeviceSteps'] ?? 0;
-        });
-        logger.i("今天 $_currentDay：步數 $_stepCount, 基準 $_lastDeviceSteps");
-      } else {
-        setState(() {
-          _stepCount = 0;
-          _lastDeviceSteps = null;
-        });
-
-        Pedometer.stepCountStream.first.then((event) {
-          if (event.steps > 0) {
-            setState(() {
-              _lastDeviceSteps = event.steps;
-              _stepCount = 0;
-            });
-            _saveStepsForToday();
-            logger.i("初始化基準：$event.steps");
-          }
-        });
-
-        await _saveStepsForToday();
-        logger.i("初始化 Firebase：今日步數=0, 基準=null");
-      }
-    } catch (e) {
-      logger.e("❌ Firebase 步數讀取失敗: $e");
-    }
-  }
-
-  /// 📌 初始化 pedometer 監聽器，處理跨天與步數增量計算
-  void initPedometer() {
-    try {
-      _stepSubscription = Pedometer.stepCountStream.listen((event) {
-        if (!mounted) return;
-
-        final today = DateTime.now().toString().substring(0, 10);
-        final deviceSteps = event.steps;
-
-        if (_currentDay != today) {
-          _saveStepsForToday();
-          setState(() {
-            _currentDay = today;
-            _stepCount = 0;
-            _startOfDaySteps = deviceSteps;
-          });
-          _saveStepsToLocal(0, deviceSteps);
-          logger.i("跨天：重置基準與步數");
-          return;
-        }
-
-        if (_startOfDaySteps == null) {
-          setState(() => _startOfDaySteps = deviceSteps);
-          _saveStepsToLocal(0, deviceSteps);
-          logger.i("設定初始基準步數：$deviceSteps");
-          return;
-        }
-
-        int todaySteps = deviceSteps - _startOfDaySteps!;
-        if (todaySteps >= 0) {
-          setState(() => _stepCount = todaySteps);
-          _saveStepsToLocal(todaySteps, _startOfDaySteps!);
-        } else {
-          logger.w("異常負步數，忽略");
-        }
-
-        _saveStepsForToday();
-      }, onError: (error) {
-        logger.e("計步器錯誤：$error");
-      });
-    } catch (e) {
-      logger.e("初始化 pedometer 失敗：$e");
-    }
-  }
-
   /// 📌 儲存當天的步數到 Firebase
-  Future<void> _saveStepsForToday() async {
+  /*Future<void> _saveStepsForToday() async {
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -365,26 +322,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
     await sendStepDataToMySQL(); // 同步到 MySQL
   }
-
-  /// 📌 儲存步數到 local storage
-  Future<void> _saveStepsToLocal(int steps, int deviceSteps) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('stepCount_$_currentDay', steps);
-    await prefs.setInt('startSteps_$_currentDay', deviceSteps);
-  }
-
-  /// 📌 載入 local 儲存的步數
-  Future<void> _loadStoredSteps() async {
-    final prefs = await SharedPreferences.getInstance();
-    final today = DateTime.now().toString().substring(0, 10);
-
-    setState(() {
-      _currentDay = today;
-      _stepCount = prefs.getInt('stepCount_$today') ?? 0;
-      _startOfDaySteps = prefs.getInt('startSteps_$today');
-    });
-  }
-
+*/
   /// 📌 請求計步權限
   Future<void> requestPermission() async {
     try {
@@ -416,7 +354,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
         body: jsonEncode({
           'user_id': int.parse(widget.userId),
           'step_date': formattedDate,
-          'steps': _stepCount,
+          //'steps': _stepCount,
           'goal': _targetSteps,
         }),
       );
@@ -515,11 +453,6 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                         builder: (_) => SettingWidget(
                           userId: widget.userId,
                           isManUser: widget.isManUser,
-                          stepCount: _stepCount,
-                          updateStepCount: (val) {
-                            setState(() => _stepCount = val);
-                            _saveStepsForToday();
-                          },
                         ),
                       ),
                     );
@@ -589,24 +522,23 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 當前步數 / 目標步數
-                    Wrap(
+                    Row(
                       spacing: 10,
-                      runSpacing: 4,
                       children: [
                         Text(
-                          "當前步數：$_stepCount",
+                          "當前步數： $_todaySteps",
                           style: TextStyle(
-                            fontSize: base * 0.05,
+                            fontSize: base * 0.045,
                             color: const Color.fromRGBO(165, 146, 125, 1),
                           ),
                         ),
-                        SizedBox(width: base * 0.08),
+                        SizedBox(width: base * 0.02),
                         GestureDetector(
                           onTap: _showTargetStepsDialog,
                           child: Text(
                             "目標步數：$_targetSteps",
                             style: TextStyle(
-                              fontSize: base * 0.05,
+                              fontSize: base * 0.045,
                               color: const Color.fromRGBO(165, 146, 125, 1),
                             ),
                           ),
@@ -621,10 +553,10 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                       children: [
                         Expanded(
                           child: Text(
-                            (_stepCount >= _targetSteps) ? "步數已達標" : "步數未達標",
+                            (_todaySteps >= _targetSteps) ? "步數已達標" : "步數未達標",
                             style: TextStyle(
-                              fontSize: base * 0.05,
-                              color: (_stepCount >= _targetSteps)
+                              fontSize: base * 0.045,
+                              color: (_todaySteps >= _targetSteps)
                                   ? Colors.green
                                   : Colors.red,
                             ),
@@ -636,7 +568,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                             child: Text(
                               "消耗熱量約${getCaloriesBurned().toStringAsFixed(1)} Cal",
                               style: TextStyle(
-                                fontSize: base * 0.05,
+                                fontSize: base * 0.045,
                                 color: const Color.fromRGBO(165, 146, 125, 1),
                               ),
                             ),

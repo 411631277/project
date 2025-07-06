@@ -7,14 +7,10 @@ final Logger logger = Logger();
 
 class SignoutWidget extends StatelessWidget {
   final String userId;
-  final int stepCount;
-  final Function(int) updateStepCount;
 
   const SignoutWidget({
     super.key,
     required this.userId,
-    required this.stepCount,
-    required this.updateStepCount,
   });
 
   // 登出處理邏輯
@@ -23,9 +19,9 @@ class SignoutWidget extends StatelessWidget {
       logger.i("📌 登出: $userId，但不重置 Firebase 步數");
 
       final prefs = await SharedPreferences.getInstance();
-       await prefs.clear();
+      await prefs.clear();
 
-     if (!context.mounted) return; 
+      if (!context.mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const MainScreenWidget()),

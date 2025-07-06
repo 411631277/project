@@ -149,7 +149,6 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
     );
   }
 
-
   Future<void> _loadUserName() async {
     try {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
@@ -167,273 +166,273 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return PopScope(
-      canPop: false, 
-      // ignore: deprecated_member_use
-      onPopInvoked: (didPop) async {
-        if (didPop) return; 
-        bool shouldExit = await _showExitDialog(context);
-        if (shouldExit && mounted) {
-        if (!context.mounted) return;
-          SystemNavigator.pop();  // 離開 App (在第一層會直接退出)
-        }
-      },
- child: Scaffold(
-      body: Container(
-        color: const Color.fromRGBO(233, 227, 213, 1),
-        child: Stack(
-          children: <Widget>[
-            // 🔹 頭像：改為點擊預覽，而非直接更換
-            Positioned(
-              top: screenHeight * 0.03,
-              left: screenWidth * 0.07,
-              child: GestureDetector(
-                onTap: () => _showProfilePreviewDialog(),
-                child: Container(
-                  width: screenWidth * 0.20,
-                  height: screenHeight * 0.12,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    image: DecorationImage(
-                      image: _profileImageUrl != null
-                          ? NetworkImage(_profileImageUrl!)
-                          : const AssetImage('assets/images/man.png')
-                              as ImageProvider,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // 設定按鈕
-            Positioned(
-              top: screenHeight * 0.05,
-              left: screenWidth * 0.77,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingWidget(
-                        userId: widget.userId,
-                        isManUser: true,
-                        stepCount: 0,
-                        updateStepCount: (steps) {},
+        canPop: false,
+        // ignore: deprecated_member_use
+        onPopInvoked: (didPop) async {
+          if (didPop) return;
+          bool shouldExit = await _showExitDialog(context);
+          if (shouldExit && mounted) {
+            if (!context.mounted) return;
+            SystemNavigator.pop(); // 離開 App (在第一層會直接退出)
+          }
+        },
+        child: Scaffold(
+          body: Container(
+            color: const Color.fromRGBO(233, 227, 213, 1),
+            child: Stack(
+              children: <Widget>[
+                // 🔹 頭像：改為點擊預覽，而非直接更換
+                Positioned(
+                  top: screenHeight * 0.03,
+                  left: screenWidth * 0.07,
+                  child: GestureDetector(
+                    onTap: () => _showProfilePreviewDialog(),
+                    child: Container(
+                      width: screenWidth * 0.20,
+                      height: screenHeight * 0.12,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        image: DecorationImage(
+                          image: _profileImageUrl != null
+                              ? NetworkImage(_profileImageUrl!)
+                              : const AssetImage('assets/images/man.png')
+                                  as ImageProvider,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  );
-                },
-                child: Container(
-                  width: screenWidth * 0.15,
-                  height: screenHeight * 0.08,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/Setting.png'),
-                      fit: BoxFit.fitWidth,
-                    ),
                   ),
                 ),
-              ),
-            ),
 
-            // 用戶名稱
-            Positioned(
-              top: screenHeight * 0.07,
-              left: screenWidth * 0.32,
-              child: Text(
-                userName,
-                style: TextStyle(
-                  color: const Color.fromRGBO(165, 146, 125, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.05,
-                ),
-              ),
-            ),
-
-            // 今日心情文字
-            Positioned(
-              top: screenHeight * 0.25,
-              left: screenWidth * 0.08,
-              child: SizedBox(
-                width: screenWidth * 0.84,
-                child: Text(
-                  '你的用心陪伴與無私付出，'
-                  '這些溫暖的支持，已成為伴侶最堅定的力量。\n\n'
-                  '你已經做得非常好了，繼續保持初心\n'
-                  '與伴侶一同面對、一同學習，就是最美好的愛。',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    color: const Color.fromRGBO(165, 146, 125, 1),
-                    fontFamily: 'Inter',
-                    fontSize: screenWidth * 0.05,
-                  ),
-                ),
-              ),
-            ),
-
-            // Baby 圖片
-            Positioned(
-              top: screenHeight * 0.70,
-              left: screenWidth * 0.08,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          BabyWidget(userId: widget.userId, isManUser: true),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: screenWidth * 0.13,
-                  height: screenHeight * 0.08,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/Baby.png'),
-                      fit: BoxFit.fitWidth,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // 小寶文字
-            Positioned(
-              top: screenHeight * 0.72,
-              left: screenWidth * 0.25,
-              child: Text(
-                babyName,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: const Color.fromRGBO(165, 146, 125, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.05,
-                ),
-              ),
-            ),
-
-            // Robot 圖片
-            Positioned(
-              top: screenHeight * 0.82,
-              left: screenWidth * 0.8,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RobotWidget(
-                        userId: widget.userId,
-                        isManUser: true,
+                // 設定按鈕
+                Positioned(
+                  top: screenHeight * 0.05,
+                  left: screenWidth * 0.77,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SettingWidget(
+                            userId: widget.userId,
+                            isManUser: true,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: screenWidth * 0.15,
+                      height: screenHeight * 0.08,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/Setting.png'),
+                          fit: BoxFit.fitWidth,
+                        ),
                       ),
                     ),
-                  );
-                },
-                child: Container(
-                  width: screenWidth * 0.15,
-                  height: screenHeight * 0.1,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/Robot.png'),
-                      fit: BoxFit.fitWidth,
+                  ),
+                ),
+
+                // 用戶名稱
+                Positioned(
+                  top: screenHeight * 0.07,
+                  left: screenWidth * 0.32,
+                  child: Text(
+                    userName,
+                    style: TextStyle(
+                      color: const Color.fromRGBO(165, 146, 125, 1),
+                      fontFamily: 'Inter',
+                      fontSize: screenWidth * 0.05,
                     ),
                   ),
                 ),
-              ),
-            ),
-              Positioned(
-              top: screenHeight * 0.05,
-              left: screenWidth * 0.6,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FaQuestionWidget(
-                        userId: widget.userId, isManUser: true,
+
+                // 今日心情文字
+                Positioned(
+                  top: screenHeight * 0.25,
+                  left: screenWidth * 0.08,
+                  child: SizedBox(
+                    width: screenWidth * 0.84,
+                    child: Text(
+                      '你的用心陪伴與無私付出，'
+                      '這些溫暖的支持，已成為伴侶最堅定的力量。\n\n'
+                      '你已經做得非常好了，繼續保持初心\n'
+                      '與伴侶一同面對、一同學習，就是最美好的愛。',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        color: const Color.fromRGBO(165, 146, 125, 1),
+                        fontFamily: 'Inter',
+                        fontSize: screenWidth * 0.05,
                       ),
                     ),
-                  );
-                },
-                child: Container(
-                  width: screenWidth * 0.12,
-                  height: screenHeight * 0.08,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/Question.png'),
-                      fit: BoxFit.fitWidth,
+                  ),
+                ),
+
+                // Baby 圖片
+                Positioned(
+                  top: screenHeight * 0.70,
+                  left: screenWidth * 0.08,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BabyWidget(
+                              userId: widget.userId, isManUser: true),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: screenWidth * 0.13,
+                      height: screenHeight * 0.08,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/Baby.png'),
+                          fit: BoxFit.fitWidth,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            // 需要協助嗎 區塊
-            Positioned(
-              top: screenHeight * 0.8,
-              left: screenWidth * 0.43,
-              child: Transform.rotate(
-                angle: -5.56 * (math.pi / 180),
-                child: Container(
-                  width: screenWidth * 0.4,
-                  height: screenHeight * 0.06,
-                  decoration: BoxDecoration(
-                    color: const Color.fromRGBO(165, 146, 125, 1),
-                    borderRadius: BorderRadius.all(
-                      Radius.elliptical(screenWidth * 0.4, screenHeight * 0.06),
+
+                // 小寶文字
+                Positioned(
+                  top: screenHeight * 0.72,
+                  left: screenWidth * 0.25,
+                  child: Text(
+                    babyName,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: const Color.fromRGBO(165, 146, 125, 1),
+                      fontFamily: 'Inter',
+                      fontSize: screenWidth * 0.05,
                     ),
                   ),
                 ),
-              ),
-            ),
-            Positioned(
-              top: screenHeight * 0.82,
-              left: screenWidth * 0.48,
-              child: Text(
-                '需要協助嗎?',
-                style: TextStyle(
-                  color: const Color.fromRGBO(255, 255, 255, 1),
-                  fontFamily: 'Inter',
-                  fontSize: screenWidth * 0.045,
-                ),
-              ),
-            ),
-             //tgos
-            Positioned(
-              top: screenHeight * 0.83,
-              left: screenWidth * 0.08,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TgosMapPage(),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: screenWidth * 0.35,
-                  height: screenHeight * 0.25,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/tgos.png'),
-                      fit: BoxFit.fitWidth,
+
+                // Robot 圖片
+                Positioned(
+                  top: screenHeight * 0.82,
+                  left: screenWidth * 0.8,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RobotWidget(
+                            userId: widget.userId,
+                            isManUser: true,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: screenWidth * 0.15,
+                      height: screenHeight * 0.1,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/Robot.png'),
+                          fit: BoxFit.fitWidth,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+                Positioned(
+                  top: screenHeight * 0.05,
+                  left: screenWidth * 0.6,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FaQuestionWidget(
+                            userId: widget.userId,
+                            isManUser: true,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: screenWidth * 0.12,
+                      height: screenHeight * 0.08,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/Question.png'),
+                          fit: BoxFit.fitWidth,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // 需要協助嗎 區塊
+                Positioned(
+                  top: screenHeight * 0.8,
+                  left: screenWidth * 0.43,
+                  child: Transform.rotate(
+                    angle: -5.56 * (math.pi / 180),
+                    child: Container(
+                      width: screenWidth * 0.4,
+                      height: screenHeight * 0.06,
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(165, 146, 125, 1),
+                        borderRadius: BorderRadius.all(
+                          Radius.elliptical(
+                              screenWidth * 0.4, screenHeight * 0.06),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: screenHeight * 0.82,
+                  left: screenWidth * 0.48,
+                  child: Text(
+                    '需要協助嗎?',
+                    style: TextStyle(
+                      color: const Color.fromRGBO(255, 255, 255, 1),
+                      fontFamily: 'Inter',
+                      fontSize: screenWidth * 0.045,
+                    ),
+                  ),
+                ),
+                //tgos
+                Positioned(
+                  top: screenHeight * 0.83,
+                  left: screenWidth * 0.08,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TgosMapPage(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: screenWidth * 0.35,
+                      height: screenHeight * 0.25,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/tgos.png'),
+                          fit: BoxFit.fitWidth,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    ));
+          ),
+        ));
   }
+
   Future<bool> _showExitDialog(BuildContext context) async {
     bool shouldExit = false;
     await showDialog(
@@ -444,7 +443,7 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
           title: const Text('提示'),
           content: const Text('是否要關閉程式？'),
           actions: [
-             TextButton(
+            TextButton(
               onPressed: () {
                 shouldExit = true;
                 Navigator.of(context).pop(); // 關掉對話框
@@ -457,7 +456,6 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
               },
               child: const Text('否'),
             ),
-           
           ],
         );
       },
