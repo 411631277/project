@@ -134,15 +134,25 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
   void _onStepCount(int steps) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('targetSteps', _targetSteps);
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    // 防止步數重置錯誤（可能是手機重啟導致步數歸零）
-    if (steps >= _dailyOffset) {
-      await prefs.setInt('lastRawSteps', steps);
-      setState(() {
-        _currentSteps = steps;
-      });
+    // 第一次啟動，或新的一天，自動初始化 offset
+    if (_lastDate != today || !prefs.containsKey('dailyOffset')) {
+      _dailyOffset = steps;
+      _lastDate = today;
+      await prefs.setInt('dailyOffset', _dailyOffset);
+      await prefs.setString('lastDate', _lastDate);
+    } else {
+      _dailyOffset = prefs.getInt('dailyOffset') ?? 0;
+      _lastDate = prefs.getString('lastDate') ?? today;
     }
+
+    setState(() {
+      _currentSteps = steps;
+    });
+
+    logger.e("📌 原始步數：$steps");
+    logger.e("📌 儲存的 dailyOffset：$_dailyOffset");
   }
 
   /// 📌 取得使用者名稱
@@ -532,7 +542,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                             color: const Color.fromRGBO(165, 146, 125, 1),
                           ),
                         ),
-                        SizedBox(width: base * 0.02),
+                        SizedBox(width: base * 0.17),
                         GestureDetector(
                           onTap: _showTargetStepsDialog,
                           child: Text(
