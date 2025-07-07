@@ -532,25 +532,54 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 當前步數 / 目標步數
+                    // 🔹 步數與目標狀態區塊
+// 🔹 步數與目標狀態區塊
                     Row(
-                      spacing: 10,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "當前步數： $_todaySteps",
-                          style: TextStyle(
-                            fontSize: base * 0.045,
-                            color: const Color.fromRGBO(165, 146, 125, 1),
-                          ),
-                        ),
-                        SizedBox(width: base * 0.17),
-                        GestureDetector(
-                          onTap: _showTargetStepsDialog,
-                          child: Text(
-                            "目標步數：$_targetSteps",
-                            style: TextStyle(
-                              fontSize: base * 0.045,
-                              color: const Color.fromRGBO(165, 146, 125, 1),
+                        // 今日步數
+                        Row(
+                          children: [
+                            const Text(
+                              '今日步數:',
+                              style: TextStyle(
+                                color: Color.fromRGBO(165, 146, 125, 1),
+                              ),
                             ),
+                            SizedBox(width: base * 0.08),
+                            SizedBox(
+                              child: Text(
+                                '$_todaySteps',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  color: Color.fromRGBO(165, 146, 125, 1),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        // 目標步數（可點擊）
+                        InkWell(
+                          onTap: _showTargetStepsDialog,
+                          child: Row(
+                            children: [
+                              const Text(
+                                '目標步數:',
+                                style: TextStyle(
+                                  color: Color.fromRGBO(165, 146, 125, 1),
+                                ),
+                              ),
+                              SizedBox(width: base * 0.12),
+                              SizedBox(
+                                child: Text(
+                                  '$_targetSteps',
+                                  textAlign: TextAlign.right,
+                                  style: TextStyle(
+                                    color: Color.fromRGBO(165, 146, 125, 1),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
