@@ -312,27 +312,6 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     }
   }
 
-  /// 📌 儲存當天的步數到 Firebase
-  /*Future<void> _saveStepsForToday() async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .collection('count')
-          .doc(_currentDay)
-          .set({
-        '步數': _stepCount,
-        'lastDeviceSteps': _lastDeviceSteps ?? 0,
-      }, SetOptions(merge: true));
-
-      logger.i("✅ Firebase 更新步數成功 $_currentDay");
-    } catch (e) {
-      logger.e("❌ Firebase 更新步數失敗: $e");
-    }
-
-    await sendStepDataToMySQL(); // 同步到 MySQL
-  }
-*/
   /// 📌 請求計步權限
   Future<void> requestPermission() async {
     try {
@@ -364,7 +343,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
         body: jsonEncode({
           'user_id': int.parse(widget.userId),
           'step_date': formattedDate,
-          //'steps': _stepCount,
+          'steps': _todaySteps,
           'goal': _targetSteps,
         }),
       );
@@ -531,9 +510,6 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 當前步數 / 目標步數
-                    // 🔹 步數與目標狀態區塊
-// 🔹 步數與目標狀態區塊
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
