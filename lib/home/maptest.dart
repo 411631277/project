@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 class MapTestPage extends StatefulWidget {
@@ -15,6 +16,7 @@ class MapTestPage extends StatefulWidget {
 class _MapTestPageState extends State<MapTestPage> {
   final MapController _mapController = MapController();
   List<Marker> _markers = [];
+  List<LatLng> _routePoints = [];
 
   @override
   void initState() {
@@ -23,6 +25,69 @@ class _MapTestPageState extends State<MapTestPage> {
     _checkLocationPermission();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Flutter Map v6.2.1"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.navigation),
+            tooltip: '導航最近點',
+            onPressed: _getRouteToClosestMarker,
+          ),
+        ],
+      ),
+      body: FlutterMap(
+        mapController: _mapController,
+        options: MapOptions(
+          initialCenter: LatLng(25.033968, 121.564468),
+          initialZoom: 17,
+          interactionOptions: InteractionOptions(
+            flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+          ),
+        ),
+        children: [
+          TileLayer(
+            urlTemplate:
+                'https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=10ea779d8db34eb081697a85212a133a',
+            subdomains: ['a', 'b', 'c', 'd'],
+            userAgentPackageName: 'com.example.app',
+            retinaMode: true,
+          ),
+          MarkerLayer(markers: _markers),
+          CurrentLocationLayer(),
+          if (_routePoints.isNotEmpty)
+            PolylineLayer(
+              polylines: [
+                Polyline(
+                  points: _routePoints,
+                  strokeWidth: 6,
+                  color: Colors.blue,
+                ),
+              ],
+            ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          try {
+            final pos = await Geolocator.getCurrentPosition();
+            final latLng = LatLng(pos.latitude, pos.longitude);
+            _mapController.move(latLng, 18);
+          } catch (e) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('無法取得目前位置: $e')),
+            );
+          }
+        },
+        child: const Icon(Icons.my_location),
+      ),
+    );
+  }
+
+  //方法區
   Future<void> _loadGeoJson() async {
     final geojsonStr = await rootBundle.loadString('assets/map.json');
     final geojson = jsonDecode(geojsonStr);
@@ -96,53 +161,71 @@ class _MapTestPageState extends State<MapTestPage> {
         return;
       }
     }
-
-    // ✅ 取得目前位置並移動地圖
+    //  取得目前位置並移動地圖
     final pos = await Geolocator.getCurrentPosition();
     final userLatLng = LatLng(pos.latitude, pos.longitude);
-    _mapController.move(userLatLng, 17); // 放大街區級別
+    _mapController.move(userLatLng, 18); // 放大街區級別
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Flutter Map v6.2.1")),
-      body: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(
-          initialCenter: LatLng(25.033968, 121.564468),
-          initialZoom: 17,
-          interactionOptions: InteractionOptions(
-            flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-          ),
-        ),
-        children: [
-          TileLayer(
-            urlTemplate:
-                'https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=10ea779d8db34eb081697a85212a133a',
-            subdomains: ['a', 'b', 'c', 'd'],
-            userAgentPackageName: 'com.example.app',
-            retinaMode: true,
-          ),
-          MarkerLayer(markers: _markers),
-          CurrentLocationLayer(),
+  Future<Marker?> _findClosestMarker() async {
+    final userPos = await Geolocator.getCurrentPosition();
+    final userLatLng = LatLng(userPos.latitude, userPos.longitude);
+    final distance = Distance();
+
+    Marker? closest;
+    double minDist = double.infinity;
+
+    for (final marker in _markers) {
+      final d = distance(userLatLng, marker.point);
+      if (d < minDist) {
+        minDist = d;
+        closest = marker;
+      }
+    }
+
+    return closest;
+  }
+
+  Future<void> _getRouteToClosestMarker() async {
+    final userPos = await Geolocator.getCurrentPosition();
+    final userLatLng = LatLng(userPos.latitude, userPos.longitude);
+    final closest = await _findClosestMarker();
+    if (closest == null) return;
+
+    const orsApiKey =
+        'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjAzYjk3NDdkYjBlMDQ4MzNiMzVmMjdiMTNiNGQ4YTYwIiwiaCI6Im11cm11cjY0In0=';
+    final url = Uri.parse(
+        'https://api.openrouteservice.org/v2/directions/foot-walking/geojson');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': orsApiKey,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'coordinates': [
+          [userLatLng.longitude, userLatLng.latitude],
+          [closest.point.longitude, closest.point.latitude]
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          try {
-            final pos = await Geolocator.getCurrentPosition();
-            final latLng = LatLng(pos.latitude, pos.longitude);
-            _mapController.move(latLng, 17);
-          } catch (e) {
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('無法取得目前位置: $e')),
-            );
-          }
-        },
-        child: const Icon(Icons.my_location),
-      ),
+      }),
     );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final coords = data['features'][0]['geometry']['coordinates'] as List;
+      final points = coords.map((c) => LatLng(c[1], c[0])).toList();
+
+      setState(() {
+        _routePoints = points;
+      });
+
+      // 自動將地圖移動到中間點
+      final centerLat = (userLatLng.latitude + closest.point.latitude) / 2;
+      final centerLng = (userLatLng.longitude + closest.point.longitude) / 2;
+      _mapController.move(LatLng(centerLat, centerLng), 17);
+    } else {
+      print('導航 API 錯誤: ${response.body}');
+    }
   }
 }
