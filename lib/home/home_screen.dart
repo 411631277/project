@@ -60,6 +60,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     return _todaySteps * 0.03;
   }
 
+
   @override
   void initState() {
     super.initState();
@@ -78,6 +79,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     super.dispose();
   }
 
+  
   Future<void> _saveTargetStepsToPrefs(int newTarget) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt('targetSteps', newTarget);
@@ -153,6 +155,33 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
     logger.e("📌 原始步數：$steps");
     logger.e("📌 儲存的 dailyOffset：$_dailyOffset");
+  }
+
+  void _showHistoryDialog() async {
+    Map<String, int> history = await _loadStepHistory();
+    if (!mounted) return;
+
+    var sortedKeys = history.keys.toList()..sort();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("歷史步數"),
+        content: history.isEmpty
+            ? const Text("目前沒有紀錄")
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: sortedKeys
+                    .map((k) => Text("\$k：\${history[k]} 步"))
+                    .toList(),
+              ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("關閉"),
+          ),
+        ],
+      ),
+    );
   }
 
   /// 📌 取得使用者名稱
@@ -502,98 +531,117 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                 ),
               ),
 
-              // 🔹 步數與目標狀態區塊
-              Positioned(
-                top: screenHeight * 0.5,
-                left: screenWidth * 0.08,
-                right: screenWidth * 0.08,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // 今日步數
-                        Row(
-                          children: [
-                            const Text(
-                              '今日步數:',
-                              style: TextStyle(
-                                color: Color.fromRGBO(165, 146, 125, 1),
-                              ),
-                            ),
-                            SizedBox(width: base * 0.08),
-                            SizedBox(
-                              child: Text(
-                                '$_todaySteps',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  color: Color.fromRGBO(165, 146, 125, 1),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        // 目標步數（可點擊）
-                        InkWell(
-                          onTap: _showTargetStepsDialog,
-                          child: Row(
-                            children: [
-                              const Text(
-                                '目標步數:',
-                                style: TextStyle(
-                                  color: Color.fromRGBO(165, 146, 125, 1),
-                                ),
-                              ),
-                              SizedBox(width: base * 0.12),
-                              SizedBox(
-                                child: Text(
-                                  '$_targetSteps',
-                                  textAlign: TextAlign.right,
-                                  style: TextStyle(
-                                    color: Color.fromRGBO(165, 146, 125, 1),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: screenHeight * 0.02),
-
-                    // 達標狀態與熱量
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            (_todaySteps >= _targetSteps) ? "步數已達標" : "步數未達標",
-                            style: TextStyle(
-                              fontSize: base * 0.045,
-                              color: (_todaySteps >= _targetSteps)
-                                  ? Colors.green
-                                  : Colors.red,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              "消耗熱量約${getCaloriesBurned().toStringAsFixed(1)} Cal",
-                              style: TextStyle(
-                                fontSize: base * 0.045,
-                                color: const Color.fromRGBO(165, 146, 125, 1),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+             // 🔹 步數與目標狀態區塊
+Positioned(
+  top: screenHeight * 0.45,
+  left: screenWidth * 0.08,
+  right: screenWidth * 0.08,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // 步數達標狀態
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                (_todaySteps >= _targetSteps) ? "步數已達標" : "步數未達標",
+                style: TextStyle(
+                  fontSize: base * 0.05,
+                  color: (_todaySteps >= _targetSteps) ? Colors.green : Colors.red,
                 ),
               ),
+             Padding(
+             padding: EdgeInsets.only(right: base * 0.05),
+             child: GestureDetector(
+             onTap: _showHistoryDialog,
+             child: Text.rich(
+              TextSpan(
+              text: '查看步數紀錄',
+             style: TextStyle(
+             fontSize: base * 0.05,
+           color: Color.fromRGBO(165, 146, 125, 1), // 文字顏色
+           decoration: TextDecoration.underline,
+           decorationColor:  Color.fromRGBO(165, 146, 125, 1), // 🔶 底線顏色可自訂
+         ),
+        ),
+      ),
+    ),
+  ),
+            ],
+          ),
+
+      SizedBox(height: screenHeight * 0.03),
+
+      // 今日步數
+      Row(
+        children: [
+           Text(
+            '今日步數:',
+            style: TextStyle(
+              fontSize: base * 0.05,
+              color: Color.fromRGBO(165, 146, 125, 1),
+            ),
+          ),
+          SizedBox(width: base * 0.3),
+          Text(
+            '$_todaySteps',
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontSize: base * 0.05,
+              color: Color.fromRGBO(165, 146, 125, 1),
+            ),
+          ),
+        ],
+      ),
+
+      SizedBox(height: screenHeight * 0.03),
+
+      // 目標步數
+     InkWell(
+  onTap: _showTargetStepsDialog,
+  child: Row(
+    children: [
+      Text(
+        '目標步數:',
+        style: TextStyle(
+          fontSize: base * 0.05,
+          color: Color.fromRGBO(165, 146, 125, 1),
+          decoration: TextDecoration.underline, // 加底線
+          decorationColor: Color.fromRGBO(165, 146, 125, 1), // 底線同色
+        ),
+      ),
+      SizedBox(width: base * 0.3),
+      Text(
+        '$_targetSteps',
+        textAlign: TextAlign.right,
+        style: TextStyle(
+          fontSize: base * 0.05,
+          color: Color.fromRGBO(165, 146, 125, 1),
+        ),
+      ),
+    ],
+  ),
+),
+
+      SizedBox(height: screenHeight * 0.03),
+
+      // 消耗熱量
+      Align(
+        
+        alignment: Alignment.centerLeft,
+        child: 
+        Text(
+          "消耗熱量約${getCaloriesBurned().toStringAsFixed(1)} Cal",
+          style: TextStyle(
+            fontSize: base * 0.05,
+            color: const Color.fromRGBO(165, 146, 125, 1),
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+
 
               // 🔹 小寶圖片按鈕
               Positioned(
