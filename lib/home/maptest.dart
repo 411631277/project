@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,8 +14,57 @@ class MapTestPage extends StatefulWidget {
   State<MapTestPage> createState() => _MapTestPageState();
 }
 
+class NamedMarker {
+  final LatLng point;
+  final String name;
+
+  NamedMarker({required this.point, required this.name});
+}
+
+class _LoadingDialog extends StatefulWidget {
+  const _LoadingDialog();
+
+  @override
+  State<_LoadingDialog> createState() => _LoadingDialogState();
+}
+
+class _LoadingDialogState extends State<_LoadingDialog> {
+  String _dots = '.';
+  late final Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      setState(() {
+        _dots = _dots.length == 3 ? '.' : '$_dots.';
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: Row(
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(width: 16),
+          Text('正在為您導航最近的地點$_dots'),
+        ],
+      ),
+    );
+  }
+}
+
 class _MapTestPageState extends State<MapTestPage> {
   final MapController _mapController = MapController();
+  final List<NamedMarker> _namedMarkers = [];
   List<Marker> _markers = [];
   List<LatLng> _routePoints = [];
 
@@ -29,7 +79,7 @@ class _MapTestPageState extends State<MapTestPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Flutter Map v6.2.1"),
+        title: const Text("親子館&哺乳室地圖"),
         actions: [
           IconButton(
             icon: const Icon(Icons.navigation),
@@ -98,20 +148,24 @@ class _MapTestPageState extends State<MapTestPage> {
       final coords = feature['geometry']['coordinates'];
       final props = feature['properties'];
       final lat = coords[1], lng = coords[0];
+      final latLng = LatLng(lat, lng); // ✅ 先建立 LatLng
+      final name = props['地點'] ?? '未知地點'; // ✅ 從 properties 取得地點名稱
+
+      _namedMarkers.add(NamedMarker(point: latLng, name: name)); // ✅ 使用定義後的變數
 
       markers.add(
         Marker(
           width: 40,
           height: 40,
-          point: LatLng(lat, lng),
+          point: latLng,
           child: GestureDetector(
             onTap: () {
               showDialog(
                 context: context,
                 builder: (_) => AlertDialog(
                   title: Text(
-                    props['地點'] ?? '未知地點',
-                    style: const TextStyle(fontSize: 16), // 🔹 地點字體縮小
+                    name, // 使用 name 變數
+                    style: const TextStyle(fontSize: 16),
                   ),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -167,31 +221,27 @@ class _MapTestPageState extends State<MapTestPage> {
     _mapController.move(userLatLng, 18); // 放大街區級別
   }
 
-  Future<Marker?> _findClosestMarker() async {
+  Future<void> _getRouteToClosestMarker() async {
+    _showLoadingDialog();
     final userPos = await Geolocator.getCurrentPosition();
     final userLatLng = LatLng(userPos.latitude, userPos.longitude);
-    final distance = Distance();
 
-    Marker? closest;
-    double minDist = double.infinity;
+    // 🔍 從 _namedMarkers 找出最近的地點
+    NamedMarker? closest;
+    double shortestDistance = double.infinity;
 
-    for (final marker in _markers) {
-      final d = distance(userLatLng, marker.point);
-      if (d < minDist) {
-        minDist = d;
+    for (var marker in _namedMarkers) {
+      final distance =
+          Distance().as(LengthUnit.Meter, userLatLng, marker.point);
+      if (distance < shortestDistance) {
+        shortestDistance = distance;
         closest = marker;
       }
     }
 
-    return closest;
-  }
-
-  Future<void> _getRouteToClosestMarker() async {
-    final userPos = await Geolocator.getCurrentPosition();
-    final userLatLng = LatLng(userPos.latitude, userPos.longitude);
-    final closest = await _findClosestMarker();
     if (closest == null) return;
 
+    // 🧭 發送路線請求
     const orsApiKey =
         'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjAzYjk3NDdkYjBlMDQ4MzNiMzVmMjdiMTNiNGQ4YTYwIiwiaCI6Im11cm11cjY0In0=';
     final url = Uri.parse(
@@ -212,6 +262,8 @@ class _MapTestPageState extends State<MapTestPage> {
     );
 
     if (response.statusCode == 200) {
+      if (!mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
       final data = jsonDecode(response.body);
       final coords = data['features'][0]['geometry']['coordinates'] as List;
       final points = coords.map((c) => LatLng(c[1], c[0])).toList();
@@ -220,12 +272,37 @@ class _MapTestPageState extends State<MapTestPage> {
         _routePoints = points;
       });
 
-      // 自動將地圖移動到中間點
       final centerLat = (userLatLng.latitude + closest.point.latitude) / 2;
       final centerLng = (userLatLng.longitude + closest.point.longitude) / 2;
       _mapController.move(LatLng(centerLat, centerLng), 17);
+
+      // ✅ 顯示地點名稱（來自 GeoJSON）
+      _showBottomSheetWithPlaceName(closest.name);
     } else {
+      if (!mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
       print('導航 API 錯誤: ${response.body}');
     }
+  }
+
+  void _showBottomSheetWithPlaceName(String placeName) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          '導航至地點：\n$placeName',
+          style: const TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const _LoadingDialog(),
+    );
   }
 }
