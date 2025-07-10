@@ -18,10 +18,10 @@ import 'package:doctor_2/home/delete_acc.dart';
 import 'package:doctor_2/home/deta.dart';
 import 'package:doctor_2/home/fa_home_screen.dart';
 import 'package:doctor_2/home/home_screen.dart';
-import 'package:doctor_2/home/maptest.dart';
+//import 'package:doctor_2/home/maptest.dart';
 import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/revise.dart';
-//import 'package:doctor_2/login/splashscreen.dart';
+import 'package:doctor_2/login/splashscreen.dart';
 import 'package:doctor_2/questionGroup/knowledgeGroup/knowledge_score.dart';
 import 'package:doctor_2/questionGroup/melancholyGroup/dour_introduce1.dart';
 import 'package:doctor_2/questionGroup/melancholyGroup/melancholyscore.dart';
@@ -121,7 +121,7 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) => MapTestPage(), // 主畫面
+        '/': (context) => SplashScreen(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),

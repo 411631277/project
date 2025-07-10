@@ -88,35 +88,44 @@ class _MapTestPageState extends State<MapTestPage> {
           ),
         ],
       ),
-      body: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(
-          initialCenter: LatLng(25.033968, 121.564468),
-          initialZoom: 17,
-          interactionOptions: InteractionOptions(
-            flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-          ),
-        ),
+      body: Stack(
         children: [
-          TileLayer(
-            urlTemplate:
-                'https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=10ea779d8db34eb081697a85212a133a',
-            subdomains: ['a', 'b', 'c', 'd'],
-            userAgentPackageName: 'com.example.app',
-            retinaMode: true,
-          ),
-          MarkerLayer(markers: _markers),
-          CurrentLocationLayer(),
-          if (_routePoints.isNotEmpty)
-            PolylineLayer(
-              polylines: [
-                Polyline(
-                  points: _routePoints,
-                  strokeWidth: 6,
-                  color: Colors.blue,
-                ),
-              ],
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: LatLng(25.033968, 121.564468),
+              initialZoom: 17,
+              interactionOptions: InteractionOptions(
+                flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+              ),
             ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    'https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=10ea779d8db34eb081697a85212a133a',
+                subdomains: ['a', 'b', 'c', 'd'],
+                userAgentPackageName: 'com.example.app',
+                retinaMode: true,
+              ),
+              MarkerLayer(markers: _markers),
+              CurrentLocationLayer(),
+              if (_routePoints.isNotEmpty)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: _routePoints,
+                      strokeWidth: 6,
+                      color: Colors.blue,
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          Positioned(
+            top: 16,
+            left: 16,
+            child: _buildLegend(),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -281,7 +290,6 @@ class _MapTestPageState extends State<MapTestPage> {
     } else {
       if (!mounted) return;
       Navigator.of(context, rootNavigator: true).pop();
-      print('導航 API 錯誤: ${response.body}');
     }
   }
 
@@ -303,6 +311,42 @@ class _MapTestPageState extends State<MapTestPage> {
       context: context,
       barrierDismissible: false,
       builder: (_) => const _LoadingDialog(),
+    );
+  }
+
+  Widget _buildLegend() {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha((0.9 * 255).toInt()),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [BoxShadow(blurRadius: 4, color: Colors.black26)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '圖例',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Image.asset('assets/icons/icon1.jpg', width: 24, height: 24),
+              const SizedBox(width: 8),
+              const Text('親子館'),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Image.asset('assets/icons/icon2.png', width: 24, height: 24),
+              const SizedBox(width: 8),
+              const Text('哺乳室'),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
