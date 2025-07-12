@@ -135,19 +135,13 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
   void _onStepCount(int steps) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    // 第一次啟動，或新的一天，自動初始化 offset
-    if (_lastDate != today || !prefs.containsKey('dailyOffset')) {
-      _dailyOffset = steps;
-      _lastDate = today;
-      await prefs.setInt('dailyOffset', _dailyOffset);
-      await prefs.setString('lastDate', _lastDate);
-    } else {
-      _dailyOffset = prefs.getInt('dailyOffset') ?? 0;
-      _lastDate = prefs.getString('lastDate') ?? today;
-    }
+    // 只取得已儲存的 offset，不重設
+    _dailyOffset = prefs.getInt('dailyOffset') ?? 0;
+    _lastDate = prefs.getString('lastDate') ??
+        DateFormat('yyyy-MM-dd').format(DateTime.now());
 
+    // 更新目前步數
     setState(() {
       _currentSteps = steps;
     });
@@ -169,9 +163,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
             ? const Text("目前沒有紀錄")
             : Column(
                 mainAxisSize: MainAxisSize.min,
-                children: sortedKeys
-                    .map((k) => Text("\$k：\${history[k]} 步"))
-                    .toList(),
+                children:
+                    sortedKeys.map((k) => Text("$k：${history[k]} 步")).toList(),
               ),
         actions: [
           TextButton(
