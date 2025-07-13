@@ -95,26 +95,44 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
+    // 🔹 讀取上次紀錄資料
     _lastDate = prefs.getString('lastDate') ?? today;
     int savedOffset = prefs.getInt('dailyOffset') ?? 0;
     int savedSteps = prefs.getInt('lastRawSteps') ?? 0;
 
-    // 如果已換日，記錄前一天資料
+    // 🔹 載入歷史紀錄
+    Map<String, int> history = await _loadStepHistory();
+
+    // 🔹 補齊中間遺漏的日期（步數 0）
+    DateTime lastDateTime = DateFormat('yyyy-MM-dd').parse(_lastDate);
+    DateTime todayDateTime = DateFormat('yyyy-MM-dd').parse(today);
+
+    for (var d = lastDateTime.add(const Duration(days: 1));
+        d.isBefore(todayDateTime);
+        d = d.add(const Duration(days: 1))) {
+      final missingDate = DateFormat('yyyy-MM-dd').format(d);
+      history.putIfAbsent(missingDate, () => 0);
+    }
+
+    // 🔹 若跨日，補昨天的步數
     if (_lastDate != today && savedSteps > 0) {
       int yesterdaySteps = savedSteps - savedOffset;
       if (yesterdaySteps >= 0) {
-        Map<String, int> history = await _loadStepHistory();
         history[_lastDate] = yesterdaySteps;
-        await prefs.setString('stepHistory', jsonEncode(history));
       }
+
       _dailyOffset = savedSteps;
       _lastDate = today;
-      await prefs.setString('lastDate', today);
       await prefs.setInt('dailyOffset', _dailyOffset);
+      await prefs.setString('lastDate', _lastDate);
     } else {
       _dailyOffset = savedOffset;
     }
 
+    // 🔹 儲存更新後的歷史紀錄
+    await prefs.setString('stepHistory', jsonEncode(history));
+
+    // 🔹 最後才啟用步數監聽
     stepCountStream = Pedometer.stepCountStream;
     stepCountStream.listen(
       (event) => _onStepCount(event.steps),
@@ -135,19 +153,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
   void _onStepCount(int steps) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    // 只取得已儲存的 offset，不重設
-    _dailyOffset = prefs.getInt('dailyOffset') ?? 0;
-    _lastDate = prefs.getString('lastDate') ??
-        DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-    // 更新目前步數
-    setState(() {
-      _currentSteps = steps;
-    });
-
-    logger.e("📌 原始步數：$steps");
-    logger.e("📌 儲存的 dailyOffset：$_dailyOffset");
+    await prefs.setInt('lastRawSteps', steps); // 很重要
+    setState(() => _currentSteps = steps);
   }
 
   void _showHistoryDialog() async {
