@@ -767,6 +767,15 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
       if (yesterdaySteps >= 0) {
         Map<String, int> history = await _loadStepHistory();
         history[_lastDate] = yesterdaySteps;
+
+        if (history.length > 5) {
+          var sortedKeys = history.keys.toList()..sort();
+          int removeCount = history.length - 5;
+          for (int i = 0; i < removeCount; i++) {
+            history.remove(sortedKeys[i]);
+          }
+        }
+
         await prefs.setString('stepHistory', jsonEncode(history));
       }
 
@@ -803,6 +812,14 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
       if (yesterdaySteps >= 0) {
         Map<String, int> history = await _loadStepHistory();
         history[_lastDate] = yesterdaySteps;
+
+        if (history.length > 5) {
+          var sortedKeys = history.keys.toList()..sort();
+          int removeCount = history.length - 5;
+          for (int i = 0; i < removeCount; i++) {
+            history.remove(sortedKeys[i]);
+          }
+        }
         await prefs.setString('stepHistory', jsonEncode(history));
       }
 
