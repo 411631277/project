@@ -3,7 +3,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:math';
 
 import 'package:doctor_2/home/maptest.dart';
 import 'package:flutter/material.dart';
@@ -66,9 +65,11 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     super.initState();
 
     // 🔸 初始化資料流程
-    requestPermission();
+    _requestPermission();
+
     _loadUserName();
     _loadProfilePicture();
+
     _loadTargetSteps().then((_) {
       _initPreferences(); // 等待步數目標載入後再初始化計步器
     });
@@ -89,72 +90,6 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     setState(() {
       _targetSteps = prefs.getInt('targetSteps') ?? 5000;
     });
-  }
-
-  Future<void> _initPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-    // 🔹 讀取上次紀錄資料
-    _lastDate = prefs.getString('lastDate') ?? today;
-    int savedOffset = prefs.getInt('dailyOffset') ?? 0;
-    int savedSteps = prefs.getInt('lastRawSteps') ?? 0;
-
-    // 🔹 載入歷史紀錄
-    Map<String, int> history = await _loadStepHistory();
-
-    // 🔹 補齊中間遺漏的日期（步數 0）
-    DateTime lastDateTime = DateFormat('yyyy-MM-dd').parse(_lastDate);
-    DateTime todayDateTime = DateFormat('yyyy-MM-dd').parse(today);
-
-    for (var d = lastDateTime.add(const Duration(days: 1));
-        d.isBefore(todayDateTime);
-        d = d.add(const Duration(days: 1))) {
-      final missingDate = DateFormat('yyyy-MM-dd').format(d);
-      history.putIfAbsent(missingDate, () => 0);
-    }
-
-    // 🔹 若跨日，補昨天的步數
-    if (_lastDate != today && savedSteps > 0) {
-      int yesterdaySteps = savedSteps - savedOffset;
-      if (yesterdaySteps >= 0) {
-        history[_lastDate] = yesterdaySteps;
-      }
-
-      _dailyOffset = savedSteps;
-      _lastDate = today;
-      await prefs.setInt('dailyOffset', _dailyOffset);
-      await prefs.setString('lastDate', _lastDate);
-    } else {
-      _dailyOffset = savedOffset;
-    }
-
-    // 🔹 儲存更新後的歷史紀錄
-    await prefs.setString('stepHistory', jsonEncode(history));
-
-    // 🔹 最後才啟用步數監聽
-    stepCountStream = Pedometer.stepCountStream;
-    stepCountStream.listen(
-      (event) => _onStepCount(event.steps),
-      onError: (error) => setState(() => _currentSteps = 0),
-    );
-  }
-
-  Future<Map<String, int>> _loadStepHistory() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('targetSteps', _targetSteps);
-    String? jsonString = prefs.getString('stepHistory');
-    if (jsonString == null) return {};
-    Map<String, dynamic> map = jsonDecode(jsonString);
-    return map.map((key, value) => MapEntry(key, value as int));
-  }
-
-  int get _todaySteps => max(0, _currentSteps - _dailyOffset);
-
-  void _onStepCount(int steps) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('lastRawSteps', steps); // 很重要
-    setState(() => _currentSteps = steps);
   }
 
   void _showHistoryDialog() async {
@@ -798,4 +733,104 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
       ),
     );
   }
+
+  Future<void> _initPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    _lastDate = prefs.getString('lastDate') ?? today;
+    int? savedOffset = prefs.getInt('dailyOffset');
+    int? savedSteps = prefs.getInt('lastRawSteps');
+
+    // 第一次啟動 App：初始化 offset 與步數
+    if (savedSteps == null) {
+      stepCountStream = Pedometer.stepCountStream;
+      final subscription = stepCountStream.listen(null);
+      subscription.onData((event) async {
+        int initialSteps = event.steps;
+        _dailyOffset = initialSteps;
+        _currentSteps = initialSteps;
+
+        await prefs.setInt('lastRawSteps', initialSteps);
+        await prefs.setInt('dailyOffset', _dailyOffset);
+        await prefs.setString('lastDate', today);
+
+        setState(() {});
+        await subscription.cancel();
+        _startStepMonitoring();
+      });
+      return;
+    }
+
+    if (_lastDate != today && savedSteps > 0 && savedOffset != null) {
+      int yesterdaySteps = savedSteps - savedOffset;
+      if (yesterdaySteps >= 0) {
+        Map<String, int> history = await _loadStepHistory();
+        history[_lastDate] = yesterdaySteps;
+        await prefs.setString('stepHistory', jsonEncode(history));
+      }
+
+      _lastDate = today;
+      _dailyOffset = savedSteps;
+      await prefs.setString('lastDate', today);
+      await prefs.setInt('dailyOffset', _dailyOffset);
+      _currentSteps = _dailyOffset;
+    } else {
+      _dailyOffset = savedOffset ?? 0;
+      _currentSteps = savedSteps;
+    }
+
+    setState(() {});
+    _startStepMonitoring();
+  }
+
+  void _startStepMonitoring() {
+    stepCountStream = Pedometer.stepCountStream;
+    stepCountStream.listen((event) async {
+      int steps = event.steps;
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('lastRawSteps', steps);
+      _onStepCount(steps);
+    }, onError: (error) => setState(() => _currentSteps = 0));
+  }
+
+  void _onStepCount(int steps) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    if (_lastDate != today) {
+      int yesterdaySteps = steps - _dailyOffset;
+      if (yesterdaySteps >= 0) {
+        Map<String, int> history = await _loadStepHistory();
+        history[_lastDate] = yesterdaySteps;
+        await prefs.setString('stepHistory', jsonEncode(history));
+      }
+
+      _lastDate = today;
+      _dailyOffset = steps;
+      await prefs.setString('lastDate', _lastDate);
+      await prefs.setInt('dailyOffset', _dailyOffset);
+    }
+
+    setState(() {
+      _currentSteps = steps;
+    });
+  }
+
+  Future<Map<String, int>> _loadStepHistory() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? jsonString = prefs.getString('stepHistory');
+    if (jsonString == null) return {};
+    Map<String, dynamic> map = jsonDecode(jsonString);
+    return map.map((key, value) => MapEntry(key, value as int));
+  }
+
+  Future<void> _requestPermission() async {
+    var status = await Permission.activityRecognition.status;
+    if (!status.isGranted) {
+      await Permission.activityRecognition.request();
+    }
+  }
+
+  int get _todaySteps => _currentSteps - _dailyOffset;
 }
