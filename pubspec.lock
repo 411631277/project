@@ -438,6 +438,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.0"
+  flutter_linkify:
+    dependency: "direct main"
+    description:
+      name: flutter_linkify
+      sha256: "74669e06a8f358fee4512b4320c0b80e51cffc496607931de68d28f099254073"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -749,6 +757,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  linkify:
+    dependency: transitive
+    description:
+      name: linkify
+      sha256: "4139ea77f4651ab9c315b577da2dd108d9aa0bd84b5d03d33323f1970c645832"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.0"
   lints:
     dependency: transitive
     description:
@@ -1147,7 +1163,7 @@ packages:
     source: hosted
     version: "6.3.1"
   url_launcher_android:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: url_launcher_android
       sha256: "1d0eae19bd7606ef60fe69ef3b312a437a16549476c42321d5dc1506c9ca3bf4"
@@ -1155,7 +1171,7 @@ packages:
     source: hosted
     version: "6.3.15"
   url_launcher_ios:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: url_launcher_ios
       sha256: "16a513b6c12bb419304e72ea0ae2ab4fed569920d1c7cb850263fe3acc824626"
@@ -1187,7 +1203,7 @@ packages:
     source: hosted
     version: "2.3.2"
   url_launcher_web:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: url_launcher_web
       sha256: "3ba963161bd0fe395917ba881d320b9c4f6dd3c4a233da62ab18a5025c85f1e9"

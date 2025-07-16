@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'package:doctor_2/home/webview.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'dart:async';
 
 final Logger logger = Logger();
@@ -35,8 +37,15 @@ class _RobotWidgetState extends State<RobotWidget> {
   final List<Map<String, String>> _messages = [];
   final ScrollController _scrollController = ScrollController();
   final String apiUrl = "http://163.13.202.126:8000/query";
+
   /// 第一組快速回覆
-  final List<String> _quickReplies = ["媽媽手冊", "產後初期注意事項", "母乳哺育相關問題", "父親知識資訊","其他"];
+  final List<String> _quickReplies = [
+    "媽媽手冊",
+    "產後初期注意事項",
+    "母乳哺育相關問題",
+    "父親知識資訊",
+    "其他"
+  ];
 
   /// 第二組快速回覆
   final List<String> _secondCardReplies = [
@@ -48,17 +57,17 @@ class _RobotWidgetState extends State<RobotWidget> {
   ];
 
   final List<String> _manualReplies = [
-  "媽媽手冊-產前篇",
-  "媽媽手冊-產後篇",
+    "媽媽手冊-產前篇",
+    "媽媽手冊-產後篇",
   ];
-  
+
   /// 用來記錄「何時顯示第二組快速回覆」的位置
   final List<int> _secondCardAfterIndexes = [];
   final List<int> _manualCardAfterIndexes = [];
   @override
   void initState() {
     super.initState();
-    
+
     _messages.add({
       'sender': 'chatgpt',
       'text': '你好，請問有需要幫助什麼嗎？',
@@ -192,16 +201,15 @@ class _RobotWidgetState extends State<RobotWidget> {
             child: SizedBox(
               width: 200,
               child: ElevatedButton(
-               onPressed: () {
-  if (text.trim() == "其他") {
-    _sendMessage(text, sendToBackend: false);
-  } else if (text.trim() == "媽媽手冊") {
-    _sendMessage(text, manualVisible: false);
-  } else {
-    _sendMessage(text);
-  }
-},
-
+                onPressed: () {
+                  if (text.trim() == "其他") {
+                    _sendMessage(text, sendToBackend: false);
+                  } else if (text.trim() == "媽媽手冊") {
+                    _sendMessage(text, manualVisible: false);
+                  } else {
+                    _sendMessage(text);
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 240, 238, 239),
                   foregroundColor: Colors.black,
@@ -274,9 +282,8 @@ class _RobotWidgetState extends State<RobotWidget> {
                                     : Colors.brown.shade100,
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Text(
+                              child: _buildMessageText(
                                 message['text'] ?? '',
-                                style: const TextStyle(fontSize: 14),
                               ),
                             ),
                           ),
@@ -290,7 +297,7 @@ class _RobotWidgetState extends State<RobotWidget> {
                       if (_secondCardAfterIndexes.contains(index + 1))
                         _buildQuickReplyCards(_secondCardReplies),
 
-                       if (_manualCardAfterIndexes.contains(index + 1))
+                      if (_manualCardAfterIndexes.contains(index + 1))
                         _buildQuickReplyCards(_manualReplies),
                     ],
                   );
@@ -324,6 +331,29 @@ class _RobotWidgetState extends State<RobotWidget> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMessageText(String rawText) {
+    String cleanedText = cleanTextForLinkify(rawText);
+
+    return Linkify(
+      text: cleanedText,
+      onOpen: (link) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WebViewPage(url: link.url),
+          ),
+        );
+      },
+    );
+  }
+
+  String cleanTextForLinkify(String rawText) {
+    return rawText.replaceAllMapped(
+      RegExp(r'\((https?:\/\/[^\s()]+)\)'),
+      (match) => match.group(1) ?? '',
     );
   }
 }
