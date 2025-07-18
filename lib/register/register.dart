@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 
 final FirestoreService firestoreService = FirestoreService();
 final Logger logger = Logger();
+
 class RegisterWidget extends StatefulWidget {
   final String role;
   const RegisterWidget({super.key, required this.role});
@@ -31,7 +32,8 @@ class RegisterWidgetState extends State<RegisterWidget> {
   final TextEditingController birthController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
-  final TextEditingController prePregnancyWeightController = TextEditingController();
+  final TextEditingController prePregnancyWeightController =
+      TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController accountController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -44,13 +46,12 @@ class RegisterWidgetState extends State<RegisterWidget> {
   bool isPhonePreferred = false;
   bool? isNewMom;
   bool? hasChronicDisease;
-  Map<String, String> answers =
-  {
+  Map<String, String> answers = {
     '是否會喝酒?': '',
     '是否會吸菸?': '',
     '是否會嚼食檳榔': '',
   };
-  
+
   Map<String, bool> chronicDiseaseOptions = {
     '妊娠糖尿病': false,
     '妊娠高血壓': false,
@@ -67,9 +68,9 @@ class RegisterWidgetState extends State<RegisterWidget> {
   void initState() {
     super.initState();
     accountController.addListener(() {
-    setState(() {
-      _accountCheckMessage = null;
-      _accountCheckColor = Colors.transparent;
+      setState(() {
+        _accountCheckMessage = null;
+        _accountCheckColor = Colors.transparent;
       });
     });
   }
@@ -94,7 +95,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return PopScope(
-        canPop: false, 
+        canPop: false,
         // ignore: deprecated_member_use
         onPopInvoked: (didPop) {
           Navigator.pushReplacementNamed(
@@ -116,48 +117,47 @@ class RegisterWidgetState extends State<RegisterWidget> {
                   Row(
                     children: [
                       Expanded(
-                        child: _buildLabeledTextField('姓名', nameController)),
-                          SizedBox(width: screenWidth * 0.05),
+                          child: _buildLabeledTextField('姓名', nameController)),
+                      SizedBox(width: screenWidth * 0.05),
                       Expanded(
-                        child: _buildDatePickerField('生日', birthController)),
-                          SizedBox(width: screenWidth * 0.05),
+                          child: _buildDatePickerField('生日', birthController)),
+                      SizedBox(width: screenWidth * 0.05),
                       Expanded(
-                        child: _buildheightPickerField(
-                          context, '身高', heightController)),
-                              ],
-                      ),
+                          child: _buildheightPickerField(
+                              context, '身高', heightController)),
+                    ],
+                  ),
                   SizedBox(height: screenHeight * 0.02),
-                  
+
                   Row(
                     children: [
                       Expanded(
-                        child: _buildWeightPickerField(
-                          context, '目前體重', weightController)),
-                  SizedBox(width: screenWidth * 0.05),
-                  
+                          child: _buildWeightPickerField(
+                              context, '目前體重', weightController)),
+                      SizedBox(width: screenWidth * 0.05),
                       Expanded(
-                        child: _buildWeightPickerField(
-                          context, '孕前體重', prePregnancyWeightController)),
-                              ],
-                      ),
+                          child: _buildWeightPickerField(
+                              context, '孕前體重', prePregnancyWeightController)),
+                    ],
+                  ),
                   SizedBox(height: screenHeight * 0.02),
-                  
+
                   _buildAccountRow(),
                   _buildPasswordField(),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLabel('電話(限10個號碼)'),
-                        TextField(
+                    children: [
+                      _buildLabel('電話(限10個號碼)'),
+                      TextField(
                         controller: phoneController,
                         keyboardType: TextInputType.number,
                         maxLength: 10,
                         inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(10),
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10),
                         ],
                         decoration: _inputDecoration()
-                        .copyWith(counterText: ""),       // 去除下方字數顯示
+                            .copyWith(counterText: ""), // 去除下方字數顯示
                       ),
                     ],
                   ),
@@ -170,15 +170,15 @@ class RegisterWidgetState extends State<RegisterWidget> {
                               'E-Mail',
                               isEmailPreferred,
                               (v) => setState(
-                              () => isEmailPreferred = v ?? false))),
+                                  () => isEmailPreferred = v ?? false))),
                       Expanded(
                           child: _buildCheckbox(
                               '電話',
                               isPhonePreferred,
                               (v) => setState(
-                              () => isPhonePreferred = v ?? false))),
-                              ],
-                       ),
+                                  () => isPhonePreferred = v ?? false))),
+                    ],
+                  ),
                   SizedBox(height: screenHeight * 0.02),
 
                   ...answers.keys.map((q) => _buildYesNoRow(q)),
@@ -203,35 +203,33 @@ class RegisterWidgetState extends State<RegisterWidget> {
                                 chronicDiseaseOptions
                                     .updateAll((key, value) => false);
                               }
-                             }
-                            );
-                           },
+                            });
+                          },
                           controlAffinity: ListTileControlAffinity.leading,
-                          ),
-                         ),
-                        Expanded(
-                         child: CheckboxListTile(
+                        ),
+                      ),
+                      Expanded(
+                        child: CheckboxListTile(
                           title: const Text('無'),
-                           value: noChronicDisease ?? false,
-                            onChanged: (bool? value) {
-                             setState(() {
+                          value: noChronicDisease ?? false,
+                          onChanged: (bool? value) {
+                            setState(() {
                               noChronicDisease = value ?? false;
                               if (value == true) {
                                 // 當勾選「沒有特殊疾病」，自動取消「有慢性病」以及所有疾病選項
                                 hasChronicDisease = false;
-                                 chronicDiseaseOptions
-                                  .updateAll((key, _) => false);
-                               }
+                                chronicDiseaseOptions
+                                    .updateAll((key, _) => false);
                               }
-                             );
-                            },
-                           controlAffinity: ListTileControlAffinity.leading,
-                           ),
-                         ),
-                        ],
-                       ),
+                            });
+                          },
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+                      ),
+                    ],
+                  ),
 
-                   if (hasChronicDisease == true) ...[
+                  if (hasChronicDisease == true) ...[
                     const SizedBox(height: 10),
                     _buildLabel('請選擇特殊疾病種類(可複選)：'),
                     ...chronicDiseaseOptions.entries.map((e) =>
@@ -239,11 +237,9 @@ class RegisterWidgetState extends State<RegisterWidget> {
                           title: Text(e.key),
                           value: e.value,
                           onChanged: (v) =>
-                          setState(() => chronicDiseaseOptions[e.key] = v!),
+                              setState(() => chronicDiseaseOptions[e.key] = v!),
                           controlAffinity: ListTileControlAffinity.leading,
-                        )
-                        ),
-
+                        )),
                     if (chronicDiseaseOptions['其他'] == true)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -257,7 +253,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
                           ),
                         ),
                       ),
-                     ],
+                  ],
                   _buildLabel('目前婚姻狀況'),
                   DropdownButtonFormField<String>(
                     value: maritalStatus,
@@ -311,13 +307,14 @@ class RegisterWidgetState extends State<RegisterWidget> {
                                   if (userId != null) {
                                     if (!context.mounted) return;
                                     Navigator.pushNamed(
-  context,
-  '/SuccessWidget',
-  arguments: {
-    'userId': userId,
-    'isNewMom': isNewMom,  // 這個 isNewMom 變數要是你在 register 裡已經抓到的值
-  },
-);
+                                      context,
+                                      '/SuccessWidget',
+                                      arguments: {
+                                        'userId': userId,
+                                        'isNewMom':
+                                            isNewMom, // 這個 isNewMom 變數要是你在 register 裡已經抓到的值
+                                      },
+                                    );
                                   } else {
                                     if (!context.mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -342,48 +339,47 @@ class RegisterWidgetState extends State<RegisterWidget> {
               ),
             ),
           ),
-        )
-       );
-      }
+        ));
+  }
 
 //方法區域
-Widget _buildAccountRow() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildLabel('帳號(E-Mail)'),
-      Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: accountController,
-              decoration: _inputDecoration(),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@&!*.\-_]')),
-              ],
+  Widget _buildAccountRow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel('帳號(E-Mail)'),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: accountController,
+                decoration: _inputDecoration(),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(
+                      RegExp(r'[a-zA-Z0-9@&!*.\-_]')),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5)),
-                backgroundColor: const Color.fromARGB(255, 148, 235, 235)),
-            onPressed: _checkAccountDuplicate,
-            child: const Text('檢查'),
-          ),
-        ],
-      ),
-      if (_accountCheckMessage != null)
-        Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(_accountCheckMessage!,
-              style: TextStyle(color: _accountCheckColor)),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)),
+                  backgroundColor: const Color.fromARGB(255, 148, 235, 235)),
+              onPressed: _checkAccountDuplicate,
+              child: const Text('檢查'),
+            ),
+          ],
         ),
-    ],
-  );
-}
-
+        if (_accountCheckMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(_accountCheckMessage!,
+                style: TextStyle(color: _accountCheckColor)),
+          ),
+      ],
+    );
+  }
 
   Future<void> _checkAccountDuplicate() async {
     final acc = accountController.text.trim();
@@ -394,19 +390,35 @@ Widget _buildAccountRow() {
       });
       return;
     }
+
     try {
-      final manUserQuery = await FirebaseFirestore.instance
+      // 查詢 Man_users 集合
+      final manUserQuery = FirebaseFirestore.instance
           .collection('Man_users')
           .where('帳號', isEqualTo: acc)
           .limit(1)
           .get();
-      if (manUserQuery.docs.isNotEmpty) {
+
+      // 查詢 users 集合
+      final userQuery = FirebaseFirestore.instance
+          .collection('users')
+          .where('帳號', isEqualTo: acc)
+          .limit(1)
+          .get();
+
+      final results = await Future.wait([manUserQuery, userQuery]);
+
+      final existsInManUsers = results[0].docs.isNotEmpty;
+      final existsInUsers = results[1].docs.isNotEmpty;
+
+      if (existsInManUsers || existsInUsers) {
         setState(() {
           _accountCheckMessage = '很抱歉，此帳號已註冊';
           _accountCheckColor = Colors.red;
         });
         return;
       }
+
       setState(() {
         _accountCheckMessage = '此帳號可以使用';
         _accountCheckColor = Colors.green;
@@ -421,34 +433,35 @@ Widget _buildAccountRow() {
   }
 
   Future<String> generateIncrementalUserId() async {
-  final usersCollection = FirebaseFirestore.instance.collection('users');
-  final snapshot = await usersCollection.orderBy(FieldPath.documentId, descending: true).limit(1).get();
+    final usersCollection = FirebaseFirestore.instance.collection('users');
+    final snapshot = await usersCollection
+        .orderBy(FieldPath.documentId, descending: true)
+        .limit(1)
+        .get();
 
-  if (snapshot.docs.isNotEmpty) {
-    final lastId = int.tryParse(snapshot.docs.first.id) ?? 0;
-    final nextId = lastId + 1;
-    return nextId.toString();
-  } else {
-    return '1';
+    if (snapshot.docs.isNotEmpty) {
+      final lastId = int.tryParse(snapshot.docs.first.id) ?? 0;
+      final nextId = lastId + 1;
+      return nextId.toString();
+    } else {
+      return '1';
+    }
   }
-}
-
 
   /// 儲存使用者資料：原子性處理 Firestore + MySQL
   Future<String?> _saveUserData() async {
     // 1. 計算新 userId
     final snapshot = await FirebaseFirestore.instance
-    .collection('users')
-    .orderBy('userId', descending: true)
-    .limit(1)
-    .get();
+        .collection('users')
+        .orderBy('userId', descending: true)
+        .limit(1)
+        .get();
 
+    final lastId = snapshot.docs.isNotEmpty
+        ? int.tryParse(snapshot.docs.first.id) ?? 0
+        : 0;
 
-final lastId = snapshot.docs.isNotEmpty
-    ? int.tryParse(snapshot.docs.first.id) ?? 0
-    : 0;
-
-final userId = (lastId + 1).toString();
+    final userId = (lastId + 1).toString();
     final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
     final pairingCode = generatePairingCode();
     // 2. 準備資料
@@ -500,30 +513,30 @@ final userId = (lastId + 1).toString();
   /// 同步到 MySQL，回傳是否成功
   Future<bool> sendDataToMySQL(String userId, String pairingCode) async {
     String betelNutHabitValue;
-  
+
     if (answers['是否會嚼食檳榔?'] == 'true') {
-  betelNutHabitValue = "是";
-} else if (answers['是否會嚼食檳榔?'] == 'false') {
-  betelNutHabitValue = "從未";
-} else {
-  betelNutHabitValue = "曾經有，已戒掉";
-}
- String smokinghabitValue;
+      betelNutHabitValue = "是";
+    } else if (answers['是否會嚼食檳榔?'] == 'false') {
+      betelNutHabitValue = "從未";
+    } else {
+      betelNutHabitValue = "曾經有，已戒掉";
+    }
+    String smokinghabitValue;
     if (answers['是否會吸菸?'] == 'true') {
-  smokinghabitValue = "是";
-} else if (answers['是否會吸菸?'] == 'false') {
-  smokinghabitValue = "從未";
-} else {
-  smokinghabitValue = "曾經有，已戒掉";
-}
- String drinkinghabitvalue;
-if (answers['是否會喝酒?'] == 'true') {
-  drinkinghabitvalue = "是";
-} else if (answers['是否會喝酒?'] == 'false') {
-  drinkinghabitvalue = "從未";
-} else {
-  drinkinghabitvalue = "曾經有，已戒掉";
-}
+      smokinghabitValue = "是";
+    } else if (answers['是否會吸菸?'] == 'false') {
+      smokinghabitValue = "從未";
+    } else {
+      smokinghabitValue = "曾經有，已戒掉";
+    }
+    String drinkinghabitvalue;
+    if (answers['是否會喝酒?'] == 'true') {
+      drinkinghabitvalue = "是";
+    } else if (answers['是否會喝酒?'] == 'false') {
+      drinkinghabitvalue = "從未";
+    } else {
+      drinkinghabitvalue = "曾經有，已戒掉";
+    }
     final url = Uri.parse('http://163.13.201.85:3000/users');
     final response = await http.post(
       url,
@@ -545,8 +558,8 @@ if (answers['是否會喝酒?'] == 'true') {
         'emergency_contact_name': '',
         'emergency_contact_phone': '',
         'betel_nut_habit': betelNutHabitValue,
-      'smoking_habit': smokinghabitValue,
-      'drinking_habit': drinkinghabitvalue,
+        'smoking_habit': smokinghabitValue,
+        'drinking_habit': drinkinghabitvalue,
         'pre_pregnancy_weight': double.tryParse(prePregnancyWeightController
                 .text
                 .replaceAll(RegExp(r'[^0-9.]'), '')) ??
