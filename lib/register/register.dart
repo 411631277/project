@@ -420,16 +420,40 @@ Widget _buildAccountRow() {
     }
   }
 
+  Future<String> generateIncrementalUserId() async {
+  final usersCollection = FirebaseFirestore.instance.collection('users');
+  final snapshot = await usersCollection.orderBy(FieldPath.documentId, descending: true).limit(1).get();
+
+  if (snapshot.docs.isNotEmpty) {
+    final lastId = int.tryParse(snapshot.docs.first.id) ?? 0;
+    final nextId = lastId + 1;
+    return nextId.toString();
+  } else {
+    return '1';
+  }
+}
+
+
   /// 儲存使用者資料：原子性處理 Firestore + MySQL
   Future<String?> _saveUserData() async {
     // 1. 計算新 userId
-    final countSnapshot =
-        await FirebaseFirestore.instance.collection('users').count().get();
-    final userId = ((countSnapshot.count ?? 0) + 1).toString();
+    final snapshot = await FirebaseFirestore.instance
+    .collection('users')
+    .orderBy('userId', descending: true)
+    .limit(1)
+    .get();
+
+
+final lastId = snapshot.docs.isNotEmpty
+    ? int.tryParse(snapshot.docs.first.id) ?? 0
+    : 0;
+
+final userId = (lastId + 1).toString();
     final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
     final pairingCode = generatePairingCode();
     // 2. 準備資料
     final Map<String, dynamic> data = {
+      'userId': userId,
       '帳號': accountController.text,
       '密碼': passwordController.text,
       '名字': nameController.text,
