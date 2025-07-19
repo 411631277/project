@@ -21,7 +21,7 @@ import 'package:doctor_2/home/home_screen.dart';
 //import 'package:doctor_2/home/maptest.dart';
 import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/revise.dart';
-import 'package:doctor_2/login/splashscreen.dart';
+//import 'package:doctor_2/login/splashscreen.dart';
 import 'package:doctor_2/questionGroup/knowledgeGroup/knowledge_score.dart';
 import 'package:doctor_2/questionGroup/melancholyGroup/dour_introduce1.dart';
 import 'package:doctor_2/questionGroup/melancholyGroup/melancholyscore.dart';
@@ -39,6 +39,7 @@ import 'package:doctor_2/questionGroup/sleepGroup/sleep.dart';
 import 'package:doctor_2/questionGroup/sleepGroup/sleep_introduce.dart';
 import 'package:doctor_2/questionGroup/sleepGroup/sleepscore.dart';
 import 'package:doctor_2/register/fa_success.dart';
+import 'package:doctor_2/register/forget.dart';
 import 'package:doctor_2/register/iam.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/function/main.screen.dart';
@@ -121,7 +122,7 @@ class _MyAppState extends State<MyApp> {
 
       //路由
       routes: {
-        '/': (context) => SplashScreen(), // 主畫面
+        '/': (context) => ForgotPasswordPage(), // 主畫面
         '/IamWidget': (context) => const IamWidget(),
         '/DeleteAccWidget': (context) => const DeleteAccWidget(),
         '/MainScreenWidget': (context) => const MainScreenWidget(),
