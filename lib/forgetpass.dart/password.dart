@@ -1,7 +1,18 @@
+import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_2/forgetpass.dart/suc_repass.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class ResetPasswordPage extends StatefulWidget {
-  const ResetPasswordPage({super.key});
+  final String userId;
+  final bool isManUser; // ✅ 加上這個參數
+
+  const ResetPasswordPage({
+    super.key,
+    required this.userId,
+    required this.isManUser,
+  });
 
   @override
   State<ResetPasswordPage> createState() => _ResetPasswordPageState();
@@ -66,20 +77,79 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 // 修改密碼按鈕
                 SizedBox(
                   width: screenWidth * 0.6,
-                  child: _buildCustomButton("修改密碼", onPressed: () {
-                    final newPassword = _passwordController.text.trim();
-                    if (newPassword.isEmpty) {
-                      _showDialog("錯誤", "請輸入新密碼");
-                    } else {
-                      // TODO: 將 newPassword 傳送到後端 API
-                      _showDialog("成功", "密碼已成功修改！");
-                    }
-                  }),
+                  child: _buildCustomButton("修改密碼", onPressed: _handleChangePassword),
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _handleChangePassword() async {
+    final newPassword = _passwordController.text.trim();
+    if (newPassword.isEmpty) {
+      _showDialog("錯誤", "請輸入新密碼");
+      return;
+    }
+
+    final String collection = widget.isManUser ? 'Man_users' : 'users';
+
+    try {
+      // 🔹1. 更新 Firebase 密碼欄位
+      await FirebaseFirestore.instance
+          .collection(collection)
+          .doc(widget.userId)
+          .update({'密碼': newPassword});
+
+      // 🔹2. 更新 SQL 後端
+     final response = await http.post(
+  Uri.parse(widget.isManUser
+      ? "http://163.13.201.85:3000/man_users"
+      : "http://163.13.201.85:3000/users"),
+  headers: {"Content-Type": "application/json"},
+  body: jsonEncode(widget.isManUser
+      ? {
+          "man_user_id": widget.userId,
+          "man_user_password": newPassword,
+        }
+      : {
+          "user_id": widget.userId,
+          "user_password": newPassword,
+        }),
+);
+
+      if (response.statusCode == 200) {
+        _showDialog("成功", "密碼已成功修改！");
+      } else {
+        _showDialog("錯誤", "後端更新失敗（${response.statusCode}）");
+      }
+    } catch (e) {
+      _showDialog("錯誤", "更新過程出現錯誤：$e");
+    }
+  }
+
+  void _showDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            child: const Text("確認"),
+            onPressed: () {
+              Navigator.pop(context);
+              if (title == "成功") {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SucPassWidget()),
+                );
+              }
+            },
+          ),
+        ],
       ),
     );
   }
@@ -108,22 +178,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             fontSize: 16,
           ),
         ),
-      ),
-    );
-  }
-
-  void _showDialog(String title, String content) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            child: const Text("確認"),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
       ),
     );
   }

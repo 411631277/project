@@ -6,7 +6,7 @@ import 'dart:math' as math;
 import 'fa_home_screen.dart';
 import 'home_screen.dart';
 import 'language.dart';
-import 'notify.dart';
+//import 'notify.dart';
 import 'phone.dart';
 import 'sign_out.dart';
 import 'privacy.dart';
@@ -83,7 +83,7 @@ class SettingWidgetState extends State<SettingWidget> {
               ),
             ),
             // 通知按鈕
-            Positioned(
+            /*Positioned(
               top: screenHeight * 0.18,
               left: screenWidth * 0.45,
               child: GestureDetector(
@@ -123,10 +123,11 @@ class SettingWidgetState extends State<SettingWidget> {
                   ),
                 ),
               ),
-            ),
+            ),  */
+
             // 個人基本資料按鈕
             Positioned(
-              top: screenHeight * 0.28,
+              top: screenHeight * 0.18,
               left: screenWidth * 0.45,
               child: GestureDetector(
                 onTap: () {
@@ -153,7 +154,7 @@ class SettingWidgetState extends State<SettingWidget> {
               ),
             ),
             Positioned(
-              top: screenHeight * 0.28,
+              top: screenHeight * 0.18,
               left: screenWidth * 0.1,
               child: Container(
                 width: screenWidth * 0.1,
@@ -168,7 +169,7 @@ class SettingWidgetState extends State<SettingWidget> {
             ),
             // 院內電話查詢按鈕
             Positioned(
-              top: screenHeight * 0.38,
+              top: screenHeight * 0.28,
               left: screenWidth * 0.45,
               child: GestureDetector(
                 onTap: () {
@@ -192,7 +193,7 @@ class SettingWidgetState extends State<SettingWidget> {
               ),
             ),
             Positioned(
-              top: screenHeight * 0.38,
+              top: screenHeight * 0.28,
               left: screenWidth * 0.1,
               child: Container(
                 width: screenWidth * 0.1,
@@ -207,7 +208,7 @@ class SettingWidgetState extends State<SettingWidget> {
             ),
             // 配偶分享碼按鈕
             Positioned(
-              top: screenHeight * 0.48,
+              top: screenHeight * 0.38,
               left: screenWidth * 0.45,
               child: GestureDetector(
                 onTap: () {
@@ -234,7 +235,7 @@ class SettingWidgetState extends State<SettingWidget> {
               ),
             ),
             Positioned(
-              top: screenHeight * 0.43,
+              top: screenHeight * 0.33,
               left: screenWidth * 0.1,
               child: Container(
                 width: screenWidth * 0.12,
@@ -249,7 +250,7 @@ class SettingWidgetState extends State<SettingWidget> {
             ),
             // 隱私權政策按鈕
             Positioned(
-              top: screenHeight * 0.58,
+              top: screenHeight * 0.48,
               left: screenWidth * 0.45,
               child: GestureDetector(
                 onTap: () {
@@ -273,7 +274,7 @@ class SettingWidgetState extends State<SettingWidget> {
               ),
             ),
             Positioned(
-              top: screenHeight * 0.58,
+              top: screenHeight * 0.48,
               left: screenWidth * 0.1,
               child: Container(
                 width: screenWidth * 0.1,
@@ -288,7 +289,7 @@ class SettingWidgetState extends State<SettingWidget> {
             ),
             // 登出按鈕
             Positioned(
-              top: screenHeight * 0.68,
+              top: screenHeight * 0.58,
               left: screenWidth * 0.45,
               child: GestureDetector(
                 onTap: () {
@@ -314,7 +315,7 @@ class SettingWidgetState extends State<SettingWidget> {
               ),
             ),
             Positioned(
-              top: screenHeight * 0.68,
+              top: screenHeight * 0.58,
               left: screenWidth * 0.1,
               child: Container(
                 width: screenWidth * 0.1,

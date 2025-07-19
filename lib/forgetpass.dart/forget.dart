@@ -1,9 +1,9 @@
+import 'package:doctor_2/forgetpass.dart/password.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
 import 'package:flutter/services.dart'; 
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -18,19 +18,19 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _birthdayController = TextEditingController();
  
   Future<void> _pickDate() async {
-  final DateTime? picked = await showDatePicker(
-    context: context,
-    initialDate: DateTime(2000, 1, 1),
-    firstDate: DateTime(1900),
-    lastDate: DateTime.now(),
-    helpText: '選擇生日',
-  );
-  if (picked != null) {
-    setState(() {
-      _birthdayController.text = DateFormat("yyyy年MM月dd日").format(picked);
-    });
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2000, 1, 1),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      helpText: '選擇生日',
+    );
+    if (picked != null) {
+      setState(() {
+        _birthdayController.text = DateFormat("yyyy年MM月dd日").format(picked);
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -75,34 +75,34 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
                 // 生日
                 GestureDetector(
-  onTap: _pickDate,
-  child: AbsorbPointer(
-    child: TextField(
-      controller: _birthdayController,
-      decoration: const InputDecoration(
-        labelText: "生日",
-        border: OutlineInputBorder(),
-        suffixIcon: Icon(Icons.calendar_today),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-    ),
-  ),
-),
+                  onTap: _pickDate,
+                  child: AbsorbPointer(
+                    child: TextField(
+                      controller: _birthdayController,
+                      decoration: const InputDecoration(
+                        labelText: "生日",
+                        border: OutlineInputBorder(),
+                        suffixIcon: Icon(Icons.calendar_today),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
                 SizedBox(height: spacing),
 
                 // 電話
                 TextField(
-  controller: _phoneController,
-  decoration: const InputDecoration(
-    labelText: "電話號碼",
-    border: OutlineInputBorder(),
-    filled: true,
-    fillColor: Colors.white,
-  ),
-  keyboardType: TextInputType.phone,
-  inputFormatters: [LengthLimitingTextInputFormatter(10)],
-),
+                  controller: _phoneController,
+                  decoration: const InputDecoration(
+                    labelText: "電話號碼",
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [LengthLimitingTextInputFormatter(10)],
+                ),
                 SizedBox(height: spacing * 2),
 
                 // ✅ 按鈕：作為 ScrollView 內容的一部分
@@ -112,10 +112,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     _buildCustomButton("返回", onPressed: () {
                       Navigator.pop(context);
                     }, width: screenWidth * 0.35),
-                     _buildCustomButton("確認資料", onPressed: _checkUserData, width: screenWidth * 0.35),
+                    _buildCustomButton("確認資料", onPressed: _checkUserData, width: screenWidth * 0.35),
                   ],
                 ),
-                SizedBox(height: spacing), // 增加下方留白
+                SizedBox(height: spacing),
               ],
             ),
           ),
@@ -155,16 +155,82 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   void _showDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('確定'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+ Future<void> _checkUserData() async {
+  final name = _nameController.text.trim();
+  final phone = _phoneController.text.trim();
+  final birthdayText = _birthdayController.text.trim();
+
+  if (name.isEmpty || phone.isEmpty || birthdayText.isEmpty) {
+    _showDialog("資料不完整", "請確認資料是否全部填寫");
+    return;
+  }
+
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  Future<String?> checkCollection(String collectionName) async {
+    final snapshot = await firestore
+        .collection(collectionName)
+        .where('名字', isEqualTo: name)
+        .where('生日', isEqualTo: birthdayText)
+        .where('手機號碼', isEqualTo: phone)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      return snapshot.docs.first.id; // 回傳 userId
+    }
+    return null;
+  }
+
+  final userIdFromUsers = await checkCollection("users");
+  final userIdFromManUsers = await checkCollection("Man_users");
+
+  if (userIdFromUsers != null) {
+    _showSuccessDialog(userIdFromUsers, false);
+  } else if (userIdFromManUsers != null) {
+    _showSuccessDialog(userIdFromManUsers, true);
+  } else {
+    _showDialog("查無資料", "請確認資料是否正確");
+  }
+}
+void _showSuccessDialog(String matchedId, bool isManUser) {
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: Text(title),
-        content: Text(message),
+        title: const Text("驗證成功"),
+        content: const Text("您的資料已確認，請繼續後續操作"),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('確定'),
+            onPressed: () {
+              Navigator.pop(context); // 關閉對話框
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ResetPasswordPage(
+                    userId: matchedId,
+                    isManUser: isManUser,
+                  ),
+                ),
+              );
+            },
+            child: const Text("確定"),
           ),
         ],
       );
@@ -172,54 +238,4 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   );
 }
 
-  Future<void> _checkUserData() async {
-  final name = _nameController.text.trim();
-  final phone = _phoneController.text.trim();
-  final birthdayText = _birthdayController.text.trim();
-
-  if (birthdayText.isEmpty) {
-  _showDialog("資料不完整", "請確認資料是否全部填寫");
-  return;
-}
-
-// 將 "2003年12月23日" 轉換為 DateTime
-final birthdayDate = DateFormat("yyyy年MM月dd日").parse(birthdayText);
-// 再轉為 "2003-12-23"
-final formattedBirthday = DateFormat("yyyy-MM-dd").format(birthdayDate);
-
-final Map<String, String> payload = {
-  "user_name": name,
-  "user_birthdate": formattedBirthday,
-  "user_phone": phone,
-};
-
-
-  // 發送兩個 API
-  final responses = await Future.wait([
-    http.post(
-      Uri.parse("http://163.13.201.85:3000/users"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(payload),
-    ),
-    http.post(
-      Uri.parse("http://163.13.201.85:3000/man_users"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(payload),
-    ),
-  ]);
-
-  // 解析結果
-  for (final response in responses) {
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data["matched"] == true) {
-        _showDialog("驗證成功", "您的資料已確認，請繼續後續操作");
-        return;
-      }
-    }
-  }
-
-  // 都沒成功
-  _showDialog("查無資料", "請確認資料是否正確");
-}
 }
