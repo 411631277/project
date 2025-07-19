@@ -34,35 +34,31 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final base = math.min(screenWidth, screenHeight);
-    final startHeight = screenHeight * 0.2;
-    final spacing = screenHeight * 0.1;
+    final spacing = screenHeight * 0.08;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5EFE4),
-      body: Stack(
-        children: [
-          // 內容區
-          SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              base * 0.08,
-              startHeight,
-              base * 0.08,
-              screenHeight * 0.2,
-            ),
+      resizeToAvoidBottomInset: true,
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                SizedBox(height: screenHeight * 0.15),
                 Text(
-                  "請輸入以下資料以重設密碼：",
+                  "請輸入註冊時的資料以重設密碼：",
                   style: TextStyle(
-                    fontSize: base * 0.045,
+                    fontSize: base * 0.05,
                     color: Colors.black87,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: spacing),
 
-                // 姓名欄位
+                // 姓名
                 TextField(
                   controller: _nameController,
                   decoration: const InputDecoration(
@@ -74,7 +70,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
                 SizedBox(height: spacing),
 
-                // 生日欄位
+                // 生日
                 GestureDetector(
                   onTap: _pickDate,
                   child: AbsorbPointer(
@@ -85,7 +81,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         suffixIcon: const Icon(Icons.calendar_today),
                         hintText: _selectedDate == null
                             ? "點選選擇生日"
-                            : DateFormat("yyyy年MM月dd日").format(_selectedDate!),
+                            : DateFormat("yyyy年MM月dd日")
+                                .format(_selectedDate!),
                         filled: true,
                         fillColor: Colors.white,
                       ),
@@ -94,7 +91,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
                 SizedBox(height: spacing),
 
-                // 電話欄位
+                // 電話
                 TextField(
                   controller: _phoneController,
                   decoration: const InputDecoration(
@@ -105,26 +102,25 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ),
                   keyboardType: TextInputType.phone,
                 ),
+                SizedBox(height: spacing * 2),
+
+                // ✅ 按鈕：作為 ScrollView 內容的一部分
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildCustomButton("返回", onPressed: () {
+                      Navigator.pop(context);
+                    }, width: screenWidth * 0.35),
+                    _buildCustomButton("確認資料", onPressed: () {
+                      // TODO: 資料確認
+                    }, width: screenWidth * 0.35),
+                  ],
+                ),
+                SizedBox(height: spacing), // 增加下方留白
               ],
             ),
           ),
-
-          // 固定下方按鈕
-          Positioned(
-            left: base * 0.05,
-            bottom: base * 0.05,
-            child: _buildCustomButton("返回", onPressed: () {
-              Navigator.pop(context);
-            }, width: screenWidth * 0.35),
-          ),
-          Positioned(
-            right: base * 0.05,
-            bottom: base * 0.05,
-            child: _buildCustomButton("確認資料", onPressed: () {
-              // TODO: 確認邏輯
-            }, width: screenWidth * 0.35),
-          ),
-        ],
+        ),
       ),
     );
   }
