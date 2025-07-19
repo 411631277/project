@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_2/home/home_screen.dart';
-import 'package:doctor_2/login/forget.dart';
+import 'package:doctor_2/forgetpass.dart/forget.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:doctor_2/home/fa_home_screen.dart';
@@ -200,7 +200,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ForgetWidget(),
+                        builder: (context) => ForgotPasswordPage(),
                       ),
                     );
                   },
