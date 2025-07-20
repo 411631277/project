@@ -704,10 +704,10 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                 ),
               ),
 
-              // 🔹 TGOS 地圖按鈕
+              // 地圖按鈕
               Positioned(
-                top: screenHeight * 0.83,
-                left: screenWidth * 0.08,
+                top: screenHeight * 0.86,
+                left: screenWidth * 0.06,
                 child: GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -716,11 +716,11 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
                     );
                   },
                   child: Container(
-                    width: screenWidth * 0.35,
-                    height: screenHeight * 0.25,
+                    width: screenWidth * 0.20,
+                    height: screenHeight * 0.15,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage('assets/images/tgos.png'),
+                        image: AssetImage('assets/images/map.png'),
                         fit: BoxFit.fitWidth,
                       ),
                     ),

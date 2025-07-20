@@ -74,6 +74,7 @@ flutter:
     - assets/images/bluetooth.png
     - assets/images/tgos.png
     - assets/images/momandbaby.png
+    - assets/images/map.png
     - assets/tgos_map.html
     - assets/tgos_map.html
     - assets/map.json

@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/fa_question.dart';
+import 'package:doctor_2/home/maptest.dart';
 import 'package:doctor_2/home/robot.dart';
 import 'package:doctor_2/home/setting.dart';
-import 'package:doctor_2/home/tgos.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -402,25 +402,25 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
                     ),
                   ),
                 ),
-                //tgos
+                //地圖
                 Positioned(
-                  top: screenHeight * 0.83,
-                  left: screenWidth * 0.08,
+                  top: screenHeight * 0.86,
+                  left: screenWidth * 0.06,
                   child: GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TgosMapPage(),
+                          builder: (context) => MapTestPage(),
                         ),
                       );
                     },
                     child: Container(
-                      width: screenWidth * 0.35,
-                      height: screenHeight * 0.25,
+                      width: screenWidth * 0.20,
+                      height: screenHeight * 0.15,
                       decoration: const BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage('assets/images/tgos.png'),
+                          image: AssetImage('assets/images/map.png'),
                           fit: BoxFit.fitWidth,
                         ),
                       ),
