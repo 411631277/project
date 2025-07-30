@@ -449,22 +449,19 @@ class RegisterWidgetState extends State<RegisterWidget> {
   }
 
   /// 儲存使用者資料：原子性處理 Firestore + MySQL
-  Future<String?> _saveUserData() async {
-    // 1. 計算新 userId
-    final snapshot = await FirebaseFirestore.instance
+ Future<String?> _saveUserData() async {
+  try {
+    // 🔢 取得目前總筆數，計算新的 userId
+    AggregateQuerySnapshot countSnapshot = await FirebaseFirestore.instance
         .collection('users')
-        .orderBy('userId', descending: true)
-        .limit(1)
+        .count()
         .get();
 
-    final lastId = snapshot.docs.isNotEmpty
-        ? int.tryParse(snapshot.docs.first.id) ?? 0
-        : 0;
+    int newId = (countSnapshot.count ?? 0) + 1;
+    String userId = newId.toString();
 
-    final userId = (lastId + 1).toString();
-    final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
     final pairingCode = generatePairingCode();
-    // 2. 準備資料
+
     final Map<String, dynamic> data = {
       'userId': userId,
       '帳號': accountController.text,
@@ -477,7 +474,10 @@ class RegisterWidgetState extends State<RegisterWidget> {
       '手機號碼': phoneController.text,
       '婚姻狀況': maritalStatus,
       '是否為新手媽咪': isNewMom,
-      '聯絡偏好': {'email': isEmailPreferred, 'phone': isPhonePreferred},
+      '聯絡偏好': {
+        'email': isEmailPreferred,
+        'phone': isPhonePreferred,
+      },
       '是否會嚼食檳榔': answers['是否會嚼食檳榔'],
       '是否會吸菸': answers['是否會吸菸?'],
       '是否會喝酒': answers['是否會喝酒?'],
@@ -494,21 +494,25 @@ class RegisterWidgetState extends State<RegisterWidget> {
       '配對碼已使用': false,
     };
 
-    try {
-      // ✅ 改：先送 MySQL
-      final bool sqlOK = await sendDataToMySQL(userId, pairingCode);
-      if (!sqlOK) throw Exception('MySQL 同步失敗');
+    // ✅ 儲存到 MySQL
+    final bool sqlOK = await sendDataToMySQL(userId, pairingCode);
+    if (!sqlOK) throw Exception('MySQL 同步失敗');
 
-      // ✅ 再寫 Firebase
-      await docRef.set(data);
-      logger.i('✅ Firestore 已寫入，用戶ID：$userId');
+    // ✅ 寫入 Firebase
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .set(data);
 
-      return userId;
-    } catch (e) {
-      logger.e('❌ 註冊流程失敗：$e');
-      return null;
-    }
+    logger.i('✅ Firestore 已寫入，用戶ID：$userId');
+
+    return userId;
+  } catch (e) {
+    logger.e('❌ 註冊流程失敗：$e');
+    return null;
   }
+}
+
 
   /// 同步到 MySQL，回傳是否成功
   Future<bool> sendDataToMySQL(String userId, String pairingCode) async {
