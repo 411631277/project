@@ -13,7 +13,7 @@ final Logger logger = Logger();
 class SleepWidget extends StatefulWidget {
   final String userId;
   final bool isManUser;
-  const SleepWidget({super.key, required this.userId , required this.isManUser});
+  const SleepWidget({super.key, required this.userId, required this.isManUser});
 
   @override
   State<SleepWidget> createState() => _SleepWidgetState();
@@ -28,8 +28,7 @@ class _SleepWidgetState extends State<SleepWidget> {
     for (var i = 0; i < 5; i++) i: TextEditingController()
   };
 
-final Map<int, String> amPmSelections = {0: '上午', 2: '上午'};
-
+  final Map<int, String> amPmSelections = {0: '上午', 2: '上午'};
 
   final List<Map<String, dynamic>> _q1 = [
     {
@@ -167,204 +166,209 @@ final Map<int, String> amPmSelections = {0: '上午', 2: '上午'};
         canPop: false,
 // ignore: deprecated_member_use
         onPopInvoked: (didPop) {
-         if (widget.isManUser) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FaQuestionWidget(
-          userId: widget.userId,
-          isManUser: true,
-        ),
-      ),
-    );
-  } else {
-    Navigator.pushReplacementNamed(
-      context,
-      '/QuestionWidget',
-      arguments: {
-        'userId': widget.userId,
-        'isManUser': false,
-      },
-    );
-  }
-},
+          if (widget.isManUser) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FaQuestionWidget(
+                  userId: widget.userId,
+                  isManUser: true,
+                ),
+              ),
+            );
+          } else {
+            Navigator.pushReplacementNamed(
+              context,
+              '/QuestionWidget',
+              arguments: {
+                'userId': widget.userId,
+                'isManUser': false,
+              },
+            );
+          }
+        },
         child: Scaffold(
-          body: Container(
-            color: const Color.fromRGBO(233, 227, 213, 1),
-            padding: const EdgeInsets.all(16),
-            child: SingleChildScrollView(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ==== 第一部分 ==== //
-                    Text(
-                      "睡眠評估問卷",
-                      style: TextStyle(
-                        fontSize: base * 0.05,
-                        fontWeight: FontWeight.bold,
-                        color: const Color.fromRGBO(147, 129, 108, 1),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...List.generate(_q1.length, (i) {
-                      final q = _q1[i];
-                      if (q['type'] == 'fill') {
-                        return _buildFillQuestion(q, base);
-                      } else {
-                        return _buildChoiceQuestion(i, q, base);
-                      }
-                    }),
-
-                    const Divider(
-                        height: 32, thickness: 1, color: Colors.brown),
-
-                    // ==== 第二部分 ==== //
-                    Text(
-                      "在過去一個月內，以下哪些因素讓您難以入眠、保持睡眠或影響睡眠品質?",
-                      style: TextStyle(
-                        fontSize: base * 0.05,
-                        fontWeight: FontWeight.bold,
-                        color: const Color.fromRGBO(147, 129, 108, 1),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Column(
+            backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
+            body: SafeArea(
+              child: Container(
+                color: const Color.fromRGBO(233, 227, 213, 1),
+                padding: const EdgeInsets.all(16),
+                child: SingleChildScrollView(
+                  child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: List.generate(_q2.length, (i) {
-                        return _buildSecondChoiceQuestion(i, _q2[i], base);
-                      }),
-                    ),
-
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            if (widget.isManUser) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FaQuestionWidget(
-          userId: widget.userId,
-          isManUser: true,
-        ),
-      ),
-    );
-  } else {
-    Navigator.pushReplacementNamed(
-      context,
-      '/QuestionWidget',
-      arguments: {
-        'userId': widget.userId,
-        'isManUser': false,
-      },
-    );
-  }
-},
-                          child: Transform.rotate(
-                            angle: math.pi,
-                            child: Image.asset('assets/images/back.png',
-                                width: w * 0.15),
+                        // ==== 第一部分 ==== //
+                        Text(
+                          "睡眠評估問卷",
+                          style: TextStyle(
+                            fontSize: base * 0.05,
+                            fontWeight: FontWeight.bold,
+                            color: const Color.fromRGBO(147, 129, 108, 1),
                           ),
                         ),
-                        if (_isAllAnswered)
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 15),
-                              backgroundColor: Colors.brown.shade400,
-                            ),
-                            onPressed: _handleSubmit,
-                            child: Text("提交完成",
-                            
-                                style: TextStyle(
-                                    fontSize: base * 0.045,
-                                    color: Colors.white)),
-                                    
+                        const SizedBox(height: 12),
+                        ...List.generate(_q1.length, (i) {
+                          final q = _q1[i];
+                          if (q['type'] == 'fill') {
+                            return _buildFillQuestion(q, base);
+                          } else {
+                            return _buildChoiceQuestion(i, q, base);
+                          }
+                        }),
+
+                        const Divider(
+                            height: 32, thickness: 1, color: Colors.brown),
+
+                        // ==== 第二部分 ==== //
+                        Text(
+                          "在過去一個月內，以下哪些因素讓您難以入眠、保持睡眠或影響睡眠品質?",
+                          style: TextStyle(
+                            fontSize: base * 0.05,
+                            fontWeight: FontWeight.bold,
+                            color: const Color.fromRGBO(147, 129, 108, 1),
                           ),
-                      ],
-                    ),
-                  ]),
-            ),
-          ),
-          
-        )
-        );
+                        ),
+                        const SizedBox(height: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: List.generate(_q2.length, (i) {
+                            return _buildSecondChoiceQuestion(i, _q2[i], base);
+                          }),
+                        ),
+
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                if (widget.isManUser) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => FaQuestionWidget(
+                                        userId: widget.userId,
+                                        isManUser: true,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    '/QuestionWidget',
+                                    arguments: {
+                                      'userId': widget.userId,
+                                      'isManUser': false,
+                                    },
+                                  );
+                                }
+                              },
+                              child: Transform.rotate(
+                                angle: math.pi,
+                                child: Image.asset('assets/images/back.png',
+                                    width: w * 0.15),
+                              ),
+                            ),
+                            if (_isAllAnswered)
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 40, vertical: 15),
+                                  backgroundColor: Colors.brown.shade400,
+                                ),
+                                onPressed: _handleSubmit,
+                                child: Text("提交完成",
+                                    style: TextStyle(
+                                        fontSize: base * 0.045,
+                                        color: Colors.white)),
+                              ),
+                          ],
+                        ),
+                      ]),
+                ),
+              ),
+            )));
   }
 
-Widget _buildFillQuestion(Map<String, dynamic> q, double base) {
-  final idx = q["index"] as int;
-  final hasHour = q["hasHour"] as bool;
-  final hasMinute = q["hasMinute"] as bool;
+  Widget _buildFillQuestion(Map<String, dynamic> q, double base) {
+    final idx = q["index"] as int;
+    final hasHour = q["hasHour"] as bool;
+    final hasMinute = q["hasMinute"] as bool;
 
-  final isAmPmRequired = (idx == 0 || idx == 2); // 第1和第3題顯示AM/PM
+    final isAmPmRequired = (idx == 0 || idx == 2); // 第1和第3題顯示AM/PM
 
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("${idx + 1}. ${q['question']}",
-            style: TextStyle(
-              fontSize: base * 0.04,
-              color: const Color.fromRGBO(147, 129, 108, 1),
-            )),
-        const SizedBox(height: 8),
-        Row(children: [
-          if (isAmPmRequired)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: DropdownButton<String>(
-                value: amPmSelections[idx],
-                items: ['上午', '下午']
-                    .map((v) => DropdownMenuItem(value: v, child: Text(v)))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() => amPmSelections[idx] = value!);
-                },
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("${idx + 1}. ${q['question']}",
+              style: TextStyle(
+                fontSize: base * 0.04,
+                color: const Color.fromRGBO(147, 129, 108, 1),
+              )),
+          const SizedBox(height: 8),
+          Row(children: [
+            if (isAmPmRequired)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: DropdownButton<String>(
+                  value: amPmSelections[idx],
+                  items: ['上午', '下午']
+                      .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() => amPmSelections[idx] = value!);
+                  },
+                ),
               ),
-            ),
-          if (hasHour) ...[
-            SizedBox(
-              width: 60,
-              child: TextField(
-                controller: hourControllers[idx],
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(border: UnderlineInputBorder()),
-                keyboardType: TextInputType.number,
-               onChanged: (value) {
-      if (idx == 0) _a1[0] = value; // 第1題：上床小時
-      if (idx == 2) _a1[2] = value; // 第3題：起床小時
-      setState(() {});
-    },
+            if (hasHour) ...[
+              SizedBox(
+                width: 60,
+                child: TextField(
+                  controller: hourControllers[idx],
+                  textAlign: TextAlign.center,
+                  decoration:
+                      const InputDecoration(border: UnderlineInputBorder()),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    if (idx == 0) _a1[0] = value; // 第1題：上床小時
+                    if (idx == 2) _a1[2] = value; // 第3題：起床小時
+                    setState(() {});
+                  },
+                ),
               ),
-            ),
-            Text("時", style: TextStyle(fontSize: base * 0.045, color: const Color.fromRGBO(147, 129, 108, 1))),
-          ],
-          if (hasMinute) ...[
-            const SizedBox(width: 12),
-            SizedBox(
-              width: 60,
-              child: TextField(
-                controller: minuteControllers[idx],
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(border: UnderlineInputBorder()),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-  if (idx == 0) _a1[1] = value;
-  if (idx == 2) _a1[3] = value;
-  setState(() {});
-}
+              Text("時",
+                  style: TextStyle(
+                      fontSize: base * 0.045,
+                      color: const Color.fromRGBO(147, 129, 108, 1))),
+            ],
+            if (hasMinute) ...[
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 60,
+                child: TextField(
+                    controller: minuteControllers[idx],
+                    textAlign: TextAlign.center,
+                    decoration:
+                        const InputDecoration(border: UnderlineInputBorder()),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      if (idx == 0) _a1[1] = value;
+                      if (idx == 2) _a1[3] = value;
+                      setState(() {});
+                    }),
               ),
-            ),
-            Text("分", style: TextStyle(fontSize: base * 0.045, color: const Color.fromRGBO(147, 129, 108, 1))),
-          ],
-        ])
-      ],
-    ),
-  );
-}
+              Text("分",
+                  style: TextStyle(
+                      fontSize: base * 0.045,
+                      color: const Color.fromRGBO(147, 129, 108, 1))),
+            ],
+          ])
+        ],
+      ),
+    );
+  }
 
   Widget _buildChoiceQuestion(
       int uiIndex, Map<String, dynamic> q, double base) {
@@ -407,61 +411,58 @@ Widget _buildFillQuestion(Map<String, dynamic> q, double base) {
         .collection("questions")
         .doc("SleepWidget");
 
+    int bedHour = int.tryParse(_a1[0] ?? '') ?? 0;
+    if (amPmSelections[0] == '下午' && bedHour < 12) {
+      bedHour += 12;
+    }
+    if (amPmSelections[0] == '上午' && bedHour == 12) {
+      bedHour = 0;
+    }
 
+    int wakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
+    if (amPmSelections[2] == '下午' && wakeHour < 12) {
+      wakeHour += 12;
+    }
+    if (amPmSelections[2] == '上午' && wakeHour == 12) {
+      wakeHour = 0;
+    }
 
-int bedHour = int.tryParse(_a1[0] ?? '') ?? 0;
-if (amPmSelections[0] == '下午' && bedHour < 12) {
-  bedHour += 12;
-}
-if (amPmSelections[0] == '上午' && bedHour == 12) {
-  bedHour = 0;
-}
+    final rawBedHour = int.tryParse(_a1[0] ?? '') ?? 0;
+    final rawWakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
 
-int wakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
-if (amPmSelections[2] == '下午' && wakeHour < 12) {
-  wakeHour += 12;
-}
-if (amPmSelections[2] == '上午' && wakeHour == 12) {
-  wakeHour = 0;
-}
+    if (rawBedHour >= 13 || rawWakeHour >= 13) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("小時填寫不可超過12，請再次確認填答內容")),
+      );
+      return;
+    }
 
+    final bedMinute = int.tryParse(_a1[1] ?? '') ?? 0;
+    final wakeMinute = int.tryParse(_a1[3] ?? '') ?? 0;
 
-final rawBedHour = int.tryParse(_a1[0] ?? '') ?? 0;
-final rawWakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
-
-if (rawBedHour >= 13 || rawWakeHour >= 13) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("小時填寫不可超過12，請再次確認填答內容")),
-  );
-  return;
-}
-
-final bedMinute = int.tryParse(_a1[1] ?? '') ?? 0;
-final wakeMinute = int.tryParse(_a1[3] ?? '') ?? 0;
-
-final sleepHour = int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0;
-final sleepMinute = int.tryParse(minuteControllers[3]?.text.trim() ?? '') ?? 0;
+    final sleepHour = int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0;
+    final sleepMinute =
+        int.tryParse(minuteControllers[3]?.text.trim() ?? '') ?? 0;
 
 // 計算時間總分鐘
-final bedTotalMinutes = bedHour * 60 + bedMinute;
-final wakeTotalMinutes = wakeHour * 60 + wakeMinute;
-final sleepTotalMinutes = sleepHour * 60 + sleepMinute;
+    final bedTotalMinutes = bedHour * 60 + bedMinute;
+    final wakeTotalMinutes = wakeHour * 60 + wakeMinute;
+    final sleepTotalMinutes = sleepHour * 60 + sleepMinute;
 
-int totalTimeInBed;
-if (wakeTotalMinutes < bedTotalMinutes) {
-  totalTimeInBed = (24 * 60 - bedTotalMinutes) + wakeTotalMinutes;
-} else {
-  totalTimeInBed = wakeTotalMinutes - bedTotalMinutes;
-}
+    int totalTimeInBed;
+    if (wakeTotalMinutes < bedTotalMinutes) {
+      totalTimeInBed = (24 * 60 - bedTotalMinutes) + wakeTotalMinutes;
+    } else {
+      totalTimeInBed = wakeTotalMinutes - bedTotalMinutes;
+    }
 
 // 驗證條件：實際睡眠時間 > 躺床時間
-if (sleepTotalMinutes > totalTimeInBed) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("第四題的回答有問題，請再次確認填答內容")),
-  );
-  return;
-}
-
+    if (sleepTotalMinutes > totalTimeInBed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("第四題的回答有問題，請再次確認填答內容")),
+      );
+      return;
+    }
 
     final formatted1 = <String, String>{};
     for (var i = 0; i < 4; i++) {
@@ -513,7 +514,8 @@ if (sleepTotalMinutes > totalTimeInBed) {
 
     bool sqlOk = await _sendAllToMySQL();
     if (!sqlOk) {
-      if (!mounted) return; {
+      if (!mounted) return;
+      {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('伺服器錯誤,請稍後再嘗試')),
         );
@@ -549,7 +551,7 @@ if (sleepTotalMinutes > totalTimeInBed) {
               "睡眠干擾分數": disturbanceScore,
               "藥物使用分數": medicationScore,
               "日間功能分數": daytimeScore,
-            }, 
+            },
           ),
         ),
       );
@@ -584,45 +586,45 @@ if (sleepTotalMinutes > totalTimeInBed) {
       'sleep_score_subjective_quality': _calculateSubjectiveSleepQualityScore(),
     };
 
-final Map<String, int> frequencyScoreMap = {
-  '從未發生': 0,
-  '每週少於一次': 1,
-  '每週一或兩次': 2,
-  '每週三次或以上': 3,
-};
+    final Map<String, int> frequencyScoreMap = {
+      '從未發生': 0,
+      '每週少於一次': 1,
+      '每週一或兩次': 2,
+      '每週三次或以上': 3,
+    };
 
-final Map<String, int> botherScoreMap = {
-  '完全沒有困擾': 0,
-  '很少困擾': 1,
-  '有些困擾': 2,
-  '有很大的困擾': 3,
-};
+    final Map<String, int> botherScoreMap = {
+      '完全沒有困擾': 0,
+      '很少困擾': 1,
+      '有些困擾': 2,
+      '有很大的困擾': 3,
+    };
 
-final Map<String, int> satisfactionScoreMap = {
-  '非常滿意': 0,
-  '還可以': 1,
-  '不滿意': 2,
-  '非常不滿意': 3,
-};
+    final Map<String, int> satisfactionScoreMap = {
+      '非常滿意': 0,
+      '還可以': 1,
+      '不滿意': 2,
+      '非常不滿意': 3,
+    };
 
     // 2) Q1 的選擇題（6–10）
-   for (var i = 4; i < _q1.length; i++) {
-  final answer = _a1[i];
-  int score = frequencyScoreMap[answer] ??
-              botherScoreMap[answer] ??
-              satisfactionScoreMap[answer] ??
-              0; // 預設 0 分
-  payload['sleep_answer_${i + 1}'] = score.toString();
-}
+    for (var i = 4; i < _q1.length; i++) {
+      final answer = _a1[i];
+      int score = frequencyScoreMap[answer] ??
+          botherScoreMap[answer] ??
+          satisfactionScoreMap[answer] ??
+          0; // 預設 0 分
+      payload['sleep_answer_${i + 1}'] = score.toString();
+    }
 
-for (var i = 0; i < _q2.length; i++) {
-  final answer = _a2[i];
-  int score = frequencyScoreMap[answer] ??
-              botherScoreMap[answer] ??
-              satisfactionScoreMap[answer] ??
-              0;
-  payload['sleep_answer_${9 + i}'] = score.toString();
-}
+    for (var i = 0; i < _q2.length; i++) {
+      final answer = _a2[i];
+      int score = frequencyScoreMap[answer] ??
+          botherScoreMap[answer] ??
+          satisfactionScoreMap[answer] ??
+          0;
+      payload['sleep_answer_${9 + i}'] = score.toString();
+    }
 
     payload['sleep_score_subjective_quality'] =
         _calculateSubjectiveSleepQualityScore();
@@ -756,42 +758,40 @@ for (var i = 0; i < _q2.length; i++) {
   }
 
   int _calculateSleepEfficiencyScore() {
-  // 先印出所有來源
- 
+    // 先印出所有來源
 
-  final sleepHour = int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0;
-int bedHour = int.tryParse(_a1[0] ?? '') ?? 0;
-if (amPmSelections[0] == '下午' && bedHour < 12) {
-  bedHour += 12;
-}
-if (amPmSelections[0] == '上午' && bedHour == 12) {
-  bedHour = 0;
-}
+    final sleepHour = int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0;
+    int bedHour = int.tryParse(_a1[0] ?? '') ?? 0;
+    if (amPmSelections[0] == '下午' && bedHour < 12) {
+      bedHour += 12;
+    }
+    if (amPmSelections[0] == '上午' && bedHour == 12) {
+      bedHour = 0;
+    }
 
-int wakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
-if (amPmSelections[2] == '下午' && wakeHour < 12) {
-  wakeHour += 12;
-}
-if (amPmSelections[2] == '上午' && wakeHour == 12) {
-  wakeHour = 0;
-}
+    int wakeHour = int.tryParse(_a1[2] ?? '') ?? 0;
+    if (amPmSelections[2] == '下午' && wakeHour < 12) {
+      wakeHour += 12;
+    }
+    if (amPmSelections[2] == '上午' && wakeHour == 12) {
+      wakeHour = 0;
+    }
 
-  int totalTimeInBed;
-  if (wakeHour < bedHour) {
-    totalTimeInBed = (24 - bedHour) + wakeHour;
-  } else {
-    totalTimeInBed = wakeHour - bedHour;
+    int totalTimeInBed;
+    if (wakeHour < bedHour) {
+      totalTimeInBed = (24 - bedHour) + wakeHour;
+    } else {
+      totalTimeInBed = wakeHour - bedHour;
+    }
+
+    if (totalTimeInBed == 0) return 3;
+
+    final efficiency = sleepHour / totalTimeInBed * 100;
+    if (efficiency >= 85) return 0;
+    if (efficiency >= 75) return 1;
+    if (efficiency >= 65) return 2;
+    return 3;
   }
-
-  if (totalTimeInBed == 0) return 3;
-
-  final efficiency = sleepHour / totalTimeInBed * 100;
-  if (efficiency >= 85) return 0;
-  if (efficiency >= 75) return 1;
-  if (efficiency >= 65) return 2;
-  return 3;
-}
-
 
   int _calculateSleepDisturbanceScore() {
     const scoreMap = {
@@ -859,6 +859,4 @@ if (amPmSelections[2] == '上午' && wakeHour == 12) {
         _calculateSleepMedicationScore() +
         _calculateSleepDaytimeFunctionScore();
   }
-
-  
 }

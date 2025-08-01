@@ -36,7 +36,6 @@ class _PromiseWidgetState extends State<PromiseWidget> {
     3: ["非常不同意", "不同意", "有點不同意", "有點同意", "同意", "非常同意"],
     4: ["非常不同意", "不同意", "有點不同意", "有點同意", "同意", "非常同意"],
     5: ["非常不同意", "不同意", "有點不同意", "有點同意", "同意", "非常同意"],
-  
   };
 
   /// 紀錄每題選擇的答案
@@ -49,100 +48,100 @@ class _PromiseWidgetState extends State<PromiseWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth  = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final double fontSize = screenWidth * 0.045; // 自適應字體大小
 
-     return PopScope(
-    canPop: false, // ❗這行就是鎖定返回鍵
-    child: Scaffold(
-      body: Container(
-        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-        decoration: const BoxDecoration(
-          color: Color.fromRGBO(233, 227, 213, 1),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: screenHeight * 0.02),
-            Text(
-              '承諾',
-              style: TextStyle(
-                fontSize: fontSize * 1.2,
-                fontWeight: FontWeight.bold,
-                color: const Color.fromRGBO(147, 129, 108, 1),
-              ),
-            ),
-            SizedBox(height: screenHeight * 0.02),
+    return PopScope(
+        canPop: false, // ❗這行就是鎖定返回鍵
+        child: Scaffold(
+            backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
+            body: SafeArea(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                decoration: const BoxDecoration(
+                  color: Color.fromRGBO(233, 227, 213, 1),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: screenHeight * 0.02),
+                    Text(
+                      '承諾',
+                      style: TextStyle(
+                        fontSize: fontSize * 1.2,
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromRGBO(147, 129, 108, 1),
+                      ),
+                    ),
+                    SizedBox(height: screenHeight * 0.02),
 
-            /// 顯示題目列表
-            Expanded(
-              child: ListView.builder(
-                itemCount: questions.length,
-                itemBuilder: (context, index) {
-                  return _buildQuestionRow(index, screenWidth, fontSize);
-                },
+                    /// 顯示題目列表
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: questions.length,
+                        itemBuilder: (context, index) {
+                          return _buildQuestionRow(
+                              index, screenWidth, fontSize);
+                        },
+                      ),
+                    ),
+
+                    /// 只有全部題目都回答後才顯示「下一步」按鈕
+                    if (_isAllQuestionsAnswered())
+                      Center(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.08,
+                              vertical: screenHeight * 0.015,
+                            ),
+                            backgroundColor: Colors.brown.shade400,
+                          ),
+                          onPressed: () async {
+                            // 1. 計算總分
+                            int totalScore = _calculateTotalScore();
+                            bool ok = await _savePromiseAndScore(totalScore);
+                            if (!ok) {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('伺服器錯誤,請稍後再嘗試')),
+                              );
+                              return;
+                            }
+                            final args = {
+                              'userId': widget.userId,
+                              'totalScore': totalScore,
+                            };
+                            // 3. 導頁
+                            if (!context.mounted) return;
+                            Navigator.pushNamed(
+                              context,
+                              '/Promisescore',
+                              arguments: args,
+                            );
+                          },
+                          child: Text(
+                            "填答完成",
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    SizedBox(height: screenHeight * 0.02),
+                  ],
+                ),
               ),
-            ),
-          
-                /// 只有全部題目都回答後才顯示「下一步」按鈕
-               if (_isAllQuestionsAnswered())
-               Center(
-    child: ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.08,
-        vertical:   screenHeight * 0.015,
-      ),
-      backgroundColor: Colors.brown.shade400,
-    ),
-    onPressed: () async {
-      // 1. 計算總分
-      int totalScore = _calculateTotalScore();
-      bool ok = await _savePromiseAndScore(totalScore);
-   if (!ok) {
-     if (!context.mounted) return;
-     ScaffoldMessenger.of(context).showSnackBar(
-       const SnackBar(content: Text('伺服器錯誤,請稍後再嘗試')),
-     );
-     return;
-   }
-     final args = {
-    'userId': widget.userId,
-     'totalScore': totalScore,
-     };
-    // 3. 導頁
-      if (!context.mounted) return;
-      Navigator.pushNamed(
-        context,
-        '/Promisescore',
-        arguments: args,
-      );
-    },
-    child: Text(
-      "填答完成",
-      style: TextStyle(
-        fontSize: fontSize,
-        color: Colors.white,
-      ),
-    ),
-  ),
-               ),
-              SizedBox(height: screenHeight * 0.02),
-               ],
-              
-            ),
-           
-          
-        ),
-    )
-    );
+            )));
   }
 
   /// 建立單題的選項 UI
-  Widget _buildQuestionRow(int questionIndex, double screenWidth, double fontSize) {
-    List<String> options =
-        questionOptions[questionIndex] ?? ["非常不同意", "不同意", "有點不同意", "有點同意", "同意", "非常同意"];
+  Widget _buildQuestionRow(
+      int questionIndex, double screenWidth, double fontSize) {
+    List<String> options = questionOptions[questionIndex] ??
+        ["非常不同意", "不同意", "有點不同意", "有點同意", "同意", "非常同意"];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,103 +188,104 @@ class _PromiseWidgetState extends State<PromiseWidget> {
   }
 
   /// 將作答結果儲存到 Firestore，並更新 melancholyCompleted = true
- Future<bool> _savePromiseAndScore(int totalScore) async {
-   bool sqlOk = await sendPromiseAnswersToMySQL(widget.userId, promise, totalScore);
-   if (!sqlOk) return false;
-  try {
-    final String documentName = "AttachmentWidget";
+  Future<bool> _savePromiseAndScore(int totalScore) async {
+    bool sqlOk =
+        await sendPromiseAnswersToMySQL(widget.userId, promise, totalScore);
+    if (!sqlOk) return false;
+    try {
+      final String documentName = "AttachmentWidget";
 
-    final Map<String, String> formattedPromise = promise.map(
-      (k, v) => MapEntry(k.toString(), v!),
-    );
+      final Map<String, String> formattedPromise = promise.map(
+        (k, v) => MapEntry(k.toString(), v!),
+      );
 
-    final docRef = FirebaseFirestore.instance
-        .collection("users")
-        .doc(widget.userId)
-        .collection("questions")
-        .doc(documentName);
+      final docRef = FirebaseFirestore.instance
+          .collection("users")
+          .doc(widget.userId)
+          .collection("questions")
+          .doc(documentName);
 
-    // 先取得舊資料
-    final docSnapshot = await docRef.get();
-    Map<String, dynamic> existingData = {};
+      // 先取得舊資料
+      final docSnapshot = await docRef.get();
+      Map<String, dynamic> existingData = {};
 
-    if (docSnapshot.exists) {
-      existingData = docSnapshot.data() ?? {};
-    }
+      if (docSnapshot.exists) {
+        existingData = docSnapshot.data() ?? {};
+      }
 
-    // 把新的 Promise 加進去，不會覆蓋掉舊的 close
-    existingData['Promise'] = formattedPromise;
-    existingData['PromiseTotalScore'] = totalScore;
-    existingData['timestamp'] = Timestamp.now();
+      // 把新的 Promise 加進去，不會覆蓋掉舊的 close
+      existingData['Promise'] = formattedPromise;
+      existingData['PromiseTotalScore'] = totalScore;
+      existingData['timestamp'] = Timestamp.now();
 
-    await docRef.set(existingData);
+      await docRef.set(existingData);
 
-    // 更新 attachmentCompleted
-    await FirebaseFirestore.instance
-        .collection("users")
-        .doc(widget.userId)
-        .update({"attachmentCompleted": true});
-    logger.i("✅ 問卷已成功合併並儲存！");
-    return true;
-  } catch (e) {
-    logger.e("❌ 儲存問卷時發生錯誤：$e");
-    return false;
-  }
-}
-
-/// 1〜6 分對應陣列索引 +1，計算所有題目的總分
-int _calculateTotalScore() {
-  return promise.entries.map((entry) {
-    // 找到該題答案在 options 陣列的索引，再＋1 成為分數
-    final score = questionOptions[entry.key]!
-                    .indexOf(entry.value!) + 1;
-    return score;
-  }).fold(0, (acc, element) => acc + element);
-}
-
-Future<bool> sendPromiseAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
-  final url = Uri.parse('http://163.13.201.85:3000/attachment');
-
-  final payload = {
-    'user_id': int.parse(userId),
-    'attachment_question_content': 'attachment',
-    'attachment_test_date': DateTime.now().toIso8601String().split('T')[0],
-    'attachment_score_c': totalScore,
-  };
-
-  // 將 Promise 答案寫入 attachment_answer_14~19
-  const int baseIndex = 13; // 因為從 answer_14 開始（index 13 + 1）
-  answers.forEach((index, answerText) {
-  if (answerText != null && answerText.isNotEmpty) {
-    final options = questionOptions[index] ?? [];
-    int optionIndex = options.indexOf(answerText);
-    int score = optionIndex >= 0 ? (optionIndex+1 ) : 0;
-    payload['attachment_answer_${baseIndex + index + 1}'] = score.toString();
-  }
-});
-
-  logger.i("📦 Promise payload: $payload");
-
-  try {
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(payload),
-    );
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final result = jsonDecode(response.body);
-      logger.i("✅ Promise 資料同步成功：${result['message']} (insertId: ${result['insertId']})");
+      // 更新 attachmentCompleted
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(widget.userId)
+          .update({"attachmentCompleted": true});
+      logger.i("✅ 問卷已成功合併並儲存！");
       return true;
-    } else {
-      logger.e("❌ Promise 資料同步失敗：${response.body}");
+    } catch (e) {
+      logger.e("❌ 儲存問卷時發生錯誤：$e");
       return false;
     }
-  } catch (e) {
-    logger.e("🔥 發送 Promise 時發生錯誤: $e");
-    return false;
   }
-}
 
+  /// 1〜6 分對應陣列索引 +1，計算所有題目的總分
+  int _calculateTotalScore() {
+    return promise.entries.map((entry) {
+      // 找到該題答案在 options 陣列的索引，再＋1 成為分數
+      final score = questionOptions[entry.key]!.indexOf(entry.value!) + 1;
+      return score;
+    }).fold(0, (acc, element) => acc + element);
+  }
 
+  Future<bool> sendPromiseAnswersToMySQL(
+      String userId, Map<int, String?> answers, int totalScore) async {
+    final url = Uri.parse('http://163.13.201.85:3000/attachment');
+
+    final payload = {
+      'user_id': int.parse(userId),
+      'attachment_question_content': 'attachment',
+      'attachment_test_date': DateTime.now().toIso8601String().split('T')[0],
+      'attachment_score_c': totalScore,
+    };
+
+    // 將 Promise 答案寫入 attachment_answer_14~19
+    const int baseIndex = 13; // 因為從 answer_14 開始（index 13 + 1）
+    answers.forEach((index, answerText) {
+      if (answerText != null && answerText.isNotEmpty) {
+        final options = questionOptions[index] ?? [];
+        int optionIndex = options.indexOf(answerText);
+        int score = optionIndex >= 0 ? (optionIndex + 1) : 0;
+        payload['attachment_answer_${baseIndex + index + 1}'] =
+            score.toString();
+      }
+    });
+
+    logger.i("📦 Promise payload: $payload");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final result = jsonDecode(response.body);
+        logger.i(
+            "✅ Promise 資料同步成功：${result['message']} (insertId: ${result['insertId']})");
+        return true;
+      } else {
+        logger.e("❌ Promise 資料同步失敗：${response.body}");
+        return false;
+      }
+    } catch (e) {
+      logger.e("🔥 發送 Promise 時發生錯誤: $e");
+      return false;
+    }
+  }
 }

@@ -832,6 +832,8 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     setState(() {
       _currentSteps = steps;
     });
+
+    await sendStepDataToMySQL();
   }
 
   Future<Map<String, int>> _loadStepHistory() async {
