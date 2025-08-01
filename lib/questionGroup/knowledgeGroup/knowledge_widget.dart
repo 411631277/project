@@ -57,7 +57,9 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
     return PopScope(
     canPop: false, // ❗這行就是鎖定返回鍵
     child: Scaffold(
-      body: Container(
+      backgroundColor: const Color.fromRGBO(233, 227, 213, 1),
+      body: SafeArea(
+      child: Container(
         color: const Color.fromRGBO(233, 227, 213, 1), //頁面背景顏色
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -208,7 +210,7 @@ child: const Text(
           ],
         ),
       ),
-    ));
+     ) ));
   }
 
   Widget _buildHeaderCell(String label) {
