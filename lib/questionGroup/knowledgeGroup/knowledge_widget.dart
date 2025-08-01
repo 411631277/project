@@ -1,4 +1,4 @@
-//母乳哺餵知識量表．
+//母乳哺餵知識量表
 import 'dart:convert';
 import 'package:doctor_2/questionGroup/knowledgeGroup/knowledge_score.dart';
 import 'package:flutter/material.dart';
