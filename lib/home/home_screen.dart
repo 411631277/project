@@ -138,34 +138,57 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
   /// 📌 載入使用者大頭貼
   Future<void> _loadProfilePicture() async {
-    try {
-      String downloadUrl = await FirebaseStorage.instance
-          .ref('profile_pictures/${widget.userId}.jpg')
-          .getDownloadURL();
+  try {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .get();
 
-      setState(() => _profileImageUrl = downloadUrl);
-    } catch (e) {
-      logger.e("❌ 無法載入圖片: $e");
+    if (doc.exists && doc.data()!.containsKey('profileImageUrl')) {
+      setState(() => _profileImageUrl = doc['profileImageUrl']);
+    } else {
       setState(() => _profileImageUrl = null);
     }
+  } catch (e) {
+    logger.e("❌ 載入 Firestore 頭像失敗: $e");
+    setState(() => _profileImageUrl = null);
   }
+}
 
   /// 📌 使用者選擇並上傳圖片
   Future<void> _pickAndUploadImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image == null) return;
+  final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+  if (image == null) return;
 
-    try {
-      File file = File(image.path);
-      await FirebaseStorage.instance
-          .ref('profile_pictures/${widget.userId}.jpg')
-          .putFile(file);
-      _loadProfilePicture();
-      logger.i("✅ 圖片上傳成功");
-    } catch (e) {
-      logger.e("❌ 上傳圖片失敗: $e");
-    }
+  try {
+    final file = File(image.path);
+    final ref = FirebaseStorage.instance
+        .ref('profile_pictures/users/${widget.userId}.jpg'); // ✅ 固定路徑
+
+    await ref.putFile(
+      file,
+      SettableMetadata(
+        contentType: 'image/jpeg',
+        cacheControl: 'no-cache, max-age=0, must-revalidate',
+      ),
+    );
+
+    // 取得最新下載連結
+    final url = await ref.getDownloadURL();
+
+    // 更新 Firestore
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .update({'profileImageUrl': url});
+
+    setState(() => _profileImageUrl = url);
+
+    logger.i("✅ 圖片上傳並更新 Firestore 成功");
+  } catch (e) {
+    logger.e("❌ 上傳圖片失敗: $e");
   }
+}
 
   /// 📌 顯示大頭貼預覽與更換對話框
   void _showProfilePreviewDialog() {

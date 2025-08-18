@@ -63,17 +63,30 @@ class _FaHomeScreenWidgetState extends State<FaHomeScreenWidget> {
   }
 
   /// 選擇圖片並上傳
-  Future<void> _pickAndUploadImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image == null) return; // 使用者取消選擇
+ Future<void> _pickAndUploadImage() async {
+  final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+  if (image == null) return;
 
-    try {
-      File file = File(image.path);
-      String userType = widget.isManUser ? 'man_users' : 'users';
-      String filePath = 'profile_pictures/$userType/${widget.userId}.jpg';
+  final filePath = 'profile_pictures/man_users/${widget.userId}.jpg'; // ✅ man_users
+  try {
+    // 1) 上傳到 man_users 的 Storage 路徑
+    final ref = FirebaseStorage.instance.ref(filePath);
+    await ref.putFile(
+      File(image.path),
+      SettableMetadata(
+        contentType: 'image/jpeg',
+        cacheControl: 'no-cache, max-age=0, must-revalidate',
+      ),
+    );
 
-      // 上傳到 Firebase Storage
-      await FirebaseStorage.instance.ref(filePath).putFile(file);
+    // 2) 取 downloadURL
+    final url = await ref.getDownloadURL();
+
+    // 3) 只更新 man_users/{userId} 的文件（使用 set merge，避免 not-found）
+    await FirebaseFirestore.instance
+        .collection('man_users')                       // ✅ 僅此集合
+        .doc(widget.userId)
+        .set({'profileImageUrl': url}, SetOptions(merge: true));
 
       // 重新載入圖片
       _loadProfilePicture();
