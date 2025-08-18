@@ -62,6 +62,53 @@ class _LoadingDialogState extends State<_LoadingDialog> {
   }
 }
 
+class _AnimatedLoadingDialog extends StatefulWidget {
+  final String message;
+  const _AnimatedLoadingDialog({required this.message});
+
+  @override
+  State<_AnimatedLoadingDialog> createState() => _AnimatedLoadingDialogState();
+}
+
+class _AnimatedLoadingDialogState extends State<_AnimatedLoadingDialog> {
+  late String dots = '.';
+  late Timer timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+      setState(() {
+        if (dots.length >= 3) {
+          dots = '.';
+        } else {
+          dots += ' .';
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: Row(
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(width: 20),
+          Expanded(child: Text('${widget.message}$dots')),
+        ],
+      ),
+    );
+  }
+}
+
+
 class _MapTestPageState extends State<MapTestPage> {
   final MapController _mapController = MapController();
   final List<NamedMarker> _namedMarkers = [];
@@ -187,12 +234,19 @@ class _MapTestPageState extends State<MapTestPage> {
                       Text('緯度：$lat'),
                     ],
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('關閉'),
-                    ),
-                  ],
+                 actions: [
+                 TextButton(
+                  onPressed: () {
+                      Navigator.pop(context);
+                     _navigateToLocation(latLng, name); // 這個方法你會在下一步定義
+                      },
+                   child: const Text('導航此地點'),
+                            ),
+                  TextButton(
+                onPressed: () => Navigator.pop(context),
+                         child: const Text('關閉'),
+                   ),
+                   ],
                 ),
               );
             },
@@ -210,6 +264,56 @@ class _MapTestPageState extends State<MapTestPage> {
 
     setState(() => _markers = markers);
   }
+
+   void _navigateToLocation(LatLng destination, String placeName) async {
+  _showLoadingDialog(message: '正在為您導航此地點');
+
+  final userPos = await Geolocator.getCurrentPosition();
+  final userLatLng = LatLng(userPos.latitude, userPos.longitude);
+
+  const orsApiKey = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjAzYjk3NDdkYjBlMDQ4MzNiMzVmMjdiMTNiNGQ4YTYwIiwiaCI6Im11cm11cjY0In0=';
+  final url = Uri.parse(
+    'https://api.openrouteservice.org/v2/directions/foot-walking/geojson',
+  );
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Authorization': orsApiKey,
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      'coordinates': [
+        [userLatLng.longitude, userLatLng.latitude],
+        [destination.longitude, destination.latitude],
+      ],
+    }),
+  );
+
+  if (!mounted) return;
+  Navigator.of(context, rootNavigator: true).pop(); // 關閉 loadingDialog
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    final coords = data['features'][0]['geometry']['coordinates'] as List;
+    final points = coords.map((c) => LatLng(c[1], c[0])).toList();
+
+    setState(() {
+      _routePoints = points;
+    });
+
+    final centerLat = (userLatLng.latitude + destination.latitude) / 2;
+    final centerLng = (userLatLng.longitude + destination.longitude) / 2;
+    _mapController.move(LatLng(centerLat, centerLng), 17);
+
+    _showBottomSheetWithPlaceName(placeName);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('導航失敗，請稍後再試')),
+    );
+  }
+}
+
 
   Future<void> _checkLocationPermission() async {
     bool enabled = await Geolocator.isLocationServiceEnabled();
@@ -306,13 +410,16 @@ class _MapTestPageState extends State<MapTestPage> {
     );
   }
 
-  void _showLoadingDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const _LoadingDialog(),
-    );
-  }
+  void _showLoadingDialog({String message = '正在為您導航最近的地點'}) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) {
+      return _AnimatedLoadingDialog(message: message);
+    },
+  );
+}
+
 
   Widget _buildLegend() {
     return Container(
