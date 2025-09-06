@@ -44,7 +44,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   // 🔹 使用者名稱與寶寶暱稱
   String userName = "載入中...";
   String babyName = "寶寶資料填寫";
-
+  static const String _kStepHistoryKey = 'stepHistory';
   // 🔹 圖片與圖片選擇器
   String? _profileImageUrl;
   final ImagePicker _picker = ImagePicker();
@@ -55,6 +55,7 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   int _currentSteps = 0;
   int _dailyOffset = 0;
   String _lastDate = "";
+  bool _setBaselineOnFirstReadingToday = false;
 
   double getCaloriesBurned() {
     return _todaySteps * 0.03;
@@ -92,31 +93,41 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     });
   }
 
-  void _showHistoryDialog() async {
-    Map<String, int> history = await _loadStepHistory();
-    if (!mounted) return;
-
-    var sortedKeys = history.keys.toList()..sort();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("歷史步數"),
-        content: history.isEmpty
-            ? const Text("目前沒有紀錄")
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children:
-                    sortedKeys.map((k) => Text("$k：${history[k]} 步")).toList(),
-              ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("關閉"),
-          ),
-        ],
-      ),
-    );
+void _showHistoryDialog() async {
+  // 先抓後端
+  Map<String, int> history = await _fetchServerStepHistory();
+  // 後端若空，退回本機
+  if (history.isEmpty) {
+    history = await _loadStepHistory();
   }
+  // 只顯示最近5筆、且不含今天
+  history = _selectRecentHistory(history, n: 5);
+
+  if (!mounted) return;
+  final sortedKeys = history.keys.toList()..sort();
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text("歷史步數"),
+      content: history.isEmpty
+          ? const Text("目前沒有紀錄")
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: sortedKeys
+                  .map((k) => Text("$k：${history[k]} 步"))
+                  .toList(),
+            ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text("關閉"),
+        ),
+      ],
+    ),
+  );
+}
 
   /// 📌 取得使用者名稱
   Future<void> _loadUserName() async {
@@ -757,6 +768,63 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     );
   }
 
+  
+  Future<Map<String, int>> _fetchServerStepHistory() async {
+  final url = Uri.parse('http://163.13.201.85:3000/steps?user_id=${widget.userId}');
+  try {
+    final res = await http.get(url, headers: {'Accept': 'application/json'});
+    if (res.statusCode != 200) {
+      logger.e('GET /steps 非 200：${res.statusCode} ${res.body}');
+      return {};
+    }
+
+    final contentType = (res.headers['content-type'] ?? '').toLowerCase();
+
+    // ---- JSON 回應 ----
+    if (contentType.contains('application/json')) {
+      final body = jsonDecode(res.body);
+      final List<dynamic> rows =
+          body is List ? body : (body['data'] ?? body['rows'] ?? []);
+      final map = <String, int>{};
+      for (final e in rows) {
+        if (e is! Map) continue;
+        final rawDate = (e['step_date'] ?? e['date'] ?? e['日期'])?.toString();
+        final rawSteps = (e['steps'] ?? e['today_steps'] ?? e['今日步數']);
+        if (rawDate == null || rawSteps == null) continue;
+        final key = rawDate.replaceAll('/', '-'); // 正規化成 yyyy-MM-dd
+        final steps = rawSteps is num ? rawSteps.toInt() : int.tryParse(rawSteps.toString()) ?? 0;
+        map[key] = steps;
+      }
+      return map;
+    }
+
+    // ---- HTML 回應（你用瀏覽器看到的表格）----
+    final html = res.body;
+    final rowRe = RegExp(r'<tr[^>]*>(.*?)</tr>', dotAll: true, caseSensitive: false);
+    final cellRe = RegExp(r'<t[dh][^>]*>(.*?)</t[dh]>', dotAll: true, caseSensitive: false);
+    final map = <String, int>{};
+
+    final rows = rowRe.allMatches(html).toList();
+    for (final m in rows.skip(1)) { // 跳過表頭列
+      final cells = cellRe.allMatches(m.group(1) ?? '').map((x) => x.group(1) ?? '').toList();
+      if (cells.length < 2) continue;
+      final dateStr = _stripHtml(cells[0]).trim(); // 日期
+      final stepsStr = _stripHtml(cells[1]).trim(); // 今日步數
+      if (!RegExp(r'^\d{4}[/-]\d{2}[/-]\d{2}$').hasMatch(dateStr)) continue;
+      final key = dateStr.replaceAll('/', '-');
+      final steps = int.tryParse(stepsStr.replaceAll(',', '')) ?? 0;
+      map[key] = steps;
+    }
+    return map;
+  } catch (e) {
+    logger.e('讀取後端步數失敗：$e');
+    return {};
+  }
+}
+
+String _stripHtml(String s) => s.replaceAll(RegExp(r'<[^>]+>'), '');
+
+
   Future<void> _initPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -786,10 +854,10 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
     }
 
     if (_lastDate != today && savedSteps > 0 && savedOffset != null) {
-      int yesterdaySteps = savedSteps - savedOffset;
-      if (yesterdaySteps >= 0) {
-        Map<String, int> history = await _loadStepHistory();
-        history[_lastDate] = yesterdaySteps;
+  final yesterdaySteps = savedSteps - savedOffset;
+  if (yesterdaySteps >= 0) {
+    final history = await _loadStepHistory();
+    history[_lastDate] = yesterdaySteps;
 
         if (history.length > 5) {
           var sortedKeys = history.keys.toList()..sort();
@@ -799,14 +867,16 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
           }
         }
 
-        await prefs.setString('stepHistory', jsonEncode(history));
+        await _saveStepHistory(history);
       }
 
-      _lastDate = today;
-      _dailyOffset = savedSteps;
-      await prefs.setString('lastDate', today);
-      await prefs.setInt('dailyOffset', _dailyOffset);
-      _currentSteps = _dailyOffset;
+       _lastDate = today;
+  _setBaselineOnFirstReadingToday = true; 
+  await prefs.setString('lastDate', today);
+
+  
+  _dailyOffset = savedSteps;   
+  _currentSteps = _dailyOffset;
     } else {
       _dailyOffset = savedOffset ?? 0;
       _currentSteps = savedSteps;
@@ -817,62 +887,162 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
   }
 
   void _startStepMonitoring() {
-    stepCountStream = Pedometer.stepCountStream;
-    stepCountStream.listen((event) async {
-      int steps = event.steps;
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('lastRawSteps', steps);
-      _onStepCount(steps);
-    }, onError: (error) => setState(() => _currentSteps = 0));
-  }
+  stepCountStream = Pedometer.stepCountStream;
+  stepCountStream.listen((event) {
+    _onStepCount(event.steps);  // 由 _onStepCount 內部在最後寫入 lastRawSteps
+  }, onError: (error) => setState(() => _currentSteps = 0));
+}
 
   void _onStepCount(int steps) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  final prefs = await SharedPreferences.getInstance();
+  final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  // 取上一次事件的 raw 累積（跨日結算要用它，而不是用這次 step）
+  final lastRaw = prefs.getInt('lastRawSteps') ?? steps;
+  
+   
+  if (_setBaselineOnFirstReadingToday) {
+    _dailyOffset = steps;
+    await prefs.setInt('dailyOffset', _dailyOffset);
+    _setBaselineOnFirstReadingToday = false;
+  }
+  
+  // ========== 1) 跨日處理 ==========
+  if (_lastDate != today && _lastDate.isNotEmpty) {
+    // 昨日總步數 = 昨日最後raw - 昨日offset
+    final yesterdaySteps = math.max(0, lastRaw - _dailyOffset);
 
-    if (_lastDate != today) {
-      int yesterdaySteps = steps - _dailyOffset;
-      if (yesterdaySteps >= 0) {
-        Map<String, int> history = await _loadStepHistory();
-        history[_lastDate] = yesterdaySteps;
+    // 寫入歷史
+    final history = await _loadStepHistory();
+    history[_lastDate] = yesterdaySteps;
 
-        if (history.length > 5) {
-          var sortedKeys = history.keys.toList()..sort();
-          int removeCount = history.length - 5;
-          for (int i = 0; i < removeCount; i++) {
-            history.remove(sortedKeys[i]);
-          }
-        }
-        await prefs.setString('stepHistory', jsonEncode(history));
+    // 若中間跳了好幾天，都補 0（避免圖表斷層）
+    final last = DateTime.parse(_lastDate);
+    final nowDate = DateTime.now();
+    final gap = DateTime(nowDate.year, nowDate.month, nowDate.day)
+        .difference(DateTime(last.year, last.month, last.day))
+        .inDays - 1;
+    if (gap > 0) {
+      for (int i = 1; i <= gap; i++) {
+        final d = last.add(Duration(days: i));
+        final key = DateFormat('yyyy-MM-dd').format(d);
+        history[key] = history[key] ?? 0;
       }
-
-      _lastDate = today;
-      _dailyOffset = steps;
-      await prefs.setString('lastDate', _lastDate);
-      await prefs.setInt('dailyOffset', _dailyOffset);
     }
 
-    setState(() {
-      _currentSteps = steps;
-    });
+    // 只保留最近 5 天（你原本的做法）
+    if (history.length > 5) {
+      final keys = history.keys.toList()..sort();
+      final removeCount = history.length - 5;
+      for (int i = 0; i < removeCount; i++) {
+        history.remove(keys[i]);
+      }
+    }
+    await _saveStepHistory(history);
 
-    await sendStepDataToMySQL();
+    // 跨到新的一天：把 offset 重設為「今天的起點 raw」
+    _dailyOffset = steps;          // 新日的基準 = 目前raw
+    _lastDate = today;
+    await prefs.setString('lastDate', _lastDate);
+    await prefs.setInt('dailyOffset', _dailyOffset);
   }
 
-  Future<Map<String, int>> _loadStepHistory() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? jsonString = prefs.getString('stepHistory');
-    if (jsonString == null) return {};
-    Map<String, dynamic> map = jsonDecode(jsonString);
-    return map.map((key, value) => MapEntry(key, value as int));
+  // ========== 2) 感測器重置偵測（同一天內 raw 變小） ==========
+  // 目標：維持「今日已累計」不跳水
+  // 今日已累計（事件前） = _currentSteps - _dailyOffset
+  int todaySoFar = _currentSteps - _dailyOffset;
+  if (todaySoFar < 0) todaySoFar = 0;
+
+  if (steps < _dailyOffset) {
+    // raw 變小，感測器重置：調整 offset 以維持今日已累計不變
+    _dailyOffset = steps - todaySoFar;
+    if (_dailyOffset < 0) _dailyOffset = 0;
+    await prefs.setInt('dailyOffset', _dailyOffset);
   }
 
-  Future<void> _requestPermission() async {
-    var status = await Permission.activityRecognition.status;
-    if (!status.isGranted) {
-      await Permission.activityRecognition.request();
+  // ========== 3) 非負增量，更新畫面 ==========
+  // （實際上今日顯示 = _currentSteps - _dailyOffset）
+  setState(() {
+    _currentSteps = steps;  // 保持 raw
+  });
+
+  // 落盤 raw 以便下次跨日用
+  await prefs.setInt('lastRawSteps', steps);
+
+  // 同步到後端（你的 API 會上傳 _todaySteps）
+  await sendStepDataToMySQL();
+}
+
+Future<void> _requestPermission() async {
+  final status = await Permission.activityRecognition.status;
+  if (!status.isGranted) {
+    await Permission.activityRecognition.request();
+  }
+}
+
+ Future<Map<String, int>> _loadStepHistory() async {
+  final prefs = await SharedPreferences.getInstance();
+  final raw = prefs.getString(_kStepHistoryKey);
+  if (raw == null || raw.isEmpty) return <String, int>{};
+
+  try {
+    final Map<String, dynamic> decoded = jsonDecode(raw);
+    // 確保所有值都是 int
+    return decoded.map((k, v) => MapEntry(k, (v as num).toInt()));
+  } catch (_) {
+    // 解析失敗就回空，避免整個流程壞掉
+    return <String, int>{};
+  }
+}
+
+/// 儲存歷史資料；會自動只保留最近 keepDays 天（依 key = yyyy-MM-dd 排序）
+Future<void> _saveStepHistory(Map<String, int> history, {int keepDays = 5}) async {
+  final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  // 排除今天
+  history.remove(today);
+
+  // 去負值保護
+  history.updateAll((_, v) => v < 0 ? 0 : v);
+
+  // 只保留最近 keepDays 天（依 yyyy-MM-dd 排序）
+  if (keepDays > 0 && history.length > keepDays) {
+    final keys = history.keys.toList()..sort();
+    final toRemove = history.length - keepDays;
+    for (int i = 0; i < toRemove; i++) {
+      history.remove(keys[i]);
     }
   }
 
-  int get _todaySteps => _currentSteps - _dailyOffset;
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString(_kStepHistoryKey, jsonEncode(history));
+}
+
+
+Map<String, int> _selectRecentHistory(Map<String, int> all, {int n = 5}) {
+  // 正規化 key 成 yyyy-MM-dd
+  final Map<String, int> normalized = {};
+  all.forEach((k, v) {
+    final key = k.replaceAll('/', '-');
+    normalized[key] = v < 0 ? 0 : v; // 非負保護；v 已是 int，不用再做型別判斷
+  });
+
+  final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+  // 排除今天，按時間排序
+  final keys = normalized.keys
+      .where((d) => d != today)
+      .toList()
+    ..sort(); // yyyy-MM-dd 可直接字串排序
+
+  // 只取最後 n 筆
+  final start = (keys.length - n).clamp(0, keys.length);
+  final picked = keys.sublist(start);
+
+  final Map<String, int> result = {};
+  for (final k in picked) {
+    result[k] = normalized[k]!;
+  }
+  return result;
+}
+
+  int get _todaySteps => math.max(0, _currentSteps - _dailyOffset);
 }
