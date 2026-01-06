@@ -1,11 +1,11 @@
-import 'dart:convert';
 import 'package:doctor_2/home/webview.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'dart:async';
+
+import 'package:doctor_2/services/robot/robot_api.dart';
 
 final Logger logger = Logger();
 
@@ -36,7 +36,13 @@ class _RobotWidgetState extends State<RobotWidget> {
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String>> _messages = [];
   final ScrollController _scrollController = ScrollController();
-  final String apiUrl = "http://163.13.202.126:8000/query";
+
+  late final RobotApi _robotApi;
+
+  // ✅ 可取消的串流訂閱（修掉 setState after dispose 的關鍵）
+  StreamSubscription<String>? _robotSub;
+
+  bool _isRequestInFlight = false;
 
   /// 第一組快速回覆
   final List<String> _quickReplies = [
@@ -61,17 +67,28 @@ class _RobotWidgetState extends State<RobotWidget> {
     "媽媽手冊-產後篇",
   ];
 
-  /// 用來記錄「何時顯示第二組快速回覆」的位置
   final List<int> _secondCardAfterIndexes = [];
   final List<int> _manualCardAfterIndexes = [];
+
   @override
   void initState() {
     super.initState();
+
+    _robotApi = RobotApi(apiUrl: "http://163.13.202.126:8000/query");
 
     _messages.add({
       'sender': 'chatgpt',
       'text': '你好，請問有需要幫助什麼嗎？',
     });
+  }
+
+  @override
+  void dispose() {
+    _robotSub?.cancel();
+    _robotApi.dispose();
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _scrollToBottom() {
@@ -86,14 +103,16 @@ class _RobotWidgetState extends State<RobotWidget> {
     });
   }
 
-  /// 發送訊息給後端或顯示「其他資訊」
-  Future<void> _sendMessage(String userInput,
-      {bool sendToBackend = true, bool manualVisible = true}) async {
+  Future<void> _sendMessage(
+    String userInput, {
+    bool sendToBackend = true,
+    bool manualVisible = true,
+  }) async {
     if (userInput.trim().isEmpty) return;
-
     _messageController.clear();
 
     if (!sendToBackend) {
+      if (!mounted) return;
       setState(() {
         _messages.add({'sender': 'user', 'text': userInput});
         _messages.add({'sender': 'chatgpt', 'text': '下列是有關其他衛教資訊'});
@@ -104,6 +123,7 @@ class _RobotWidgetState extends State<RobotWidget> {
     }
 
     if (!manualVisible) {
+      if (!mounted) return;
       setState(() {
         _messages.add({'sender': 'user', 'text': userInput});
         _messages.add({'sender': 'chatgpt', 'text': '下列是有關媽媽手冊的資訊'});
@@ -113,78 +133,53 @@ class _RobotWidgetState extends State<RobotWidget> {
       return;
     }
 
+    // ✅ 送出新問題：取消上一個串流（避免疊加 + 避免 setState after dispose）
+    await _robotSub?.cancel();
+    _robotSub = null;
+
+    if (!mounted) return;
     setState(() {
+      _isRequestInFlight = true;
       _messages.add({'sender': 'user', 'text': userInput});
-      _messages.add({'sender': 'chatgpt', 'text': '正在思考...'}); // 立即顯示
+      _messages.add({'sender': 'chatgpt', 'text': '正在思考...'});
     });
     _scrollToBottom();
 
-    try {
-      final request = http.Request("POST", Uri.parse(apiUrl));
-      request.headers['Content-Type'] = 'application/json';
-      request.body = jsonEncode({
-        'message': userInput,
-        'user_id': widget.userId,
-        'is_man_user': widget.isManUser,
-      });
+    String buffer = '';
 
-      final response = await request.send();
-
-      if (response.statusCode == 200) {
-        String buffer = '';
-        final completer = Completer<void>();
-
-        response.stream
-            .transform(utf8.decoder)
-            .transform(const LineSplitter())
-            .listen((line) {
-          if (line.startsWith("data: ")) {
-            final jsonPart = line.replaceFirst("data: ", "");
-            if (jsonPart.trim() == "[DONE]") {
-              completer.complete();
-              return;
-            }
-
-            try {
-              final Map<String, dynamic> data = jsonDecode(jsonPart);
-              final chunk = data['data'] ?? '';
-
-              buffer += chunk;
-
-              setState(() {
-                _messages.last['text'] = buffer; // 更新思考中的氣泡
-              });
-              _scrollToBottom();
-            } catch (e) {
-              logger.e("解析失敗: $e");
-            }
-          }
-        }, onDone: () {
-          completer.complete();
-        }, onError: (e) {
-          logger.e("SSE錯誤: $e");
-          setState(() {
-            _messages.last['text'] = '發生錯誤，請稍後再試。';
-          });
-        });
-
-        await completer.future;
-      } else {
+    _robotSub = _robotApi
+        .queryStream(
+          message: userInput,
+          userId: widget.userId,
+          isManUser: widget.isManUser,
+        )
+        .listen(
+      (chunk) {
+        buffer += chunk;
+        if (!mounted) return;
         setState(() {
-          _messages.last['text'] = '伺服器錯誤，請稍後再試。';
+          _messages.last['text'] = buffer;
         });
-      }
-    } catch (e) {
-      logger.e("發送錯誤: $e");
-      setState(() {
-        _messages.last['text'] = '無法連接到伺服器，請檢查網路或稍後再試。';
-      });
-    }
-
-    _scrollToBottom();
+        _scrollToBottom();
+      },
+      onError: (e) {
+        logger.e("Robot 發送/串流錯誤: $e");
+        if (!mounted) return;
+        setState(() {
+          _messages.last['text'] = '發生錯誤，請稍後再試。';
+          _isRequestInFlight = false;
+        });
+      },
+      onDone: () {
+        if (!mounted) return;
+        setState(() {
+          _isRequestInFlight = false;
+        });
+      },
+      cancelOnError: true,
+    );
   }
 
-  /// 建立快速回覆按鈕群組
   Widget _buildQuickReplyCards(List<String> replies) {
     return Container(
       margin: const EdgeInsets.only(top: 5, bottom: 10, left: 40),
@@ -201,15 +196,17 @@ class _RobotWidgetState extends State<RobotWidget> {
             child: SizedBox(
               width: 200,
               child: ElevatedButton(
-                onPressed: () {
-                  if (text.trim() == "其他") {
-                    _sendMessage(text, sendToBackend: false);
-                  } else if (text.trim() == "媽媽手冊") {
-                    _sendMessage(text, manualVisible: false);
-                  } else {
-                    _sendMessage(text);
-                  }
-                },
+                onPressed: _isRequestInFlight
+                    ? null
+                    : () {
+                        if (text.trim() == "其他") {
+                          _sendMessage(text, sendToBackend: false);
+                        } else if (text.trim() == "媽媽手冊") {
+                          _sendMessage(text, manualVisible: false);
+                        } else {
+                          _sendMessage(text);
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 240, 238, 239),
                   foregroundColor: Colors.black,
@@ -259,9 +256,8 @@ class _RobotWidgetState extends State<RobotWidget> {
                     children: [
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: isUser
-                            ? MainAxisAlignment.end
-                            : MainAxisAlignment.start,
+                        mainAxisAlignment:
+                            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
                         children: [
                           if (!isUser)
                             Container(
@@ -282,18 +278,14 @@ class _RobotWidgetState extends State<RobotWidget> {
                                     : Colors.brown.shade100,
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: _buildMessageText(
-                                message['text'] ?? '',
-                              ),
+                              child: _buildMessageText(message['text'] ?? ''),
                             ),
                           ),
                         ],
                       ),
 
-                      // **第一則訊息後顯示 _quickReplies**
                       if (index == 0) _buildQuickReplyCards(_quickReplies),
 
-                      // **在 _secondCardAfterIndexes 指定位置後顯示 _secondCardReplies**
                       if (_secondCardAfterIndexes.contains(index + 1))
                         _buildQuickReplyCards(_secondCardReplies),
 
@@ -316,14 +308,14 @@ class _RobotWidgetState extends State<RobotWidget> {
                         hintText: "輸入訊息",
                         border: InputBorder.none,
                       ),
-                      onSubmitted: _sendMessage,
+                      onSubmitted: _isRequestInFlight ? null : _sendMessage,
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.send, color: Colors.brown),
-                    onPressed: () {
-                      _sendMessage(_messageController.text);
-                    },
+                    onPressed: _isRequestInFlight
+                        ? null
+                        : () => _sendMessage(_messageController.text),
                   ),
                 ],
               ),
@@ -335,7 +327,7 @@ class _RobotWidgetState extends State<RobotWidget> {
   }
 
   Widget _buildMessageText(String rawText) {
-    String cleanedText = cleanTextForLinkify(rawText);
+    final cleanedText = cleanTextForLinkify(rawText);
 
     return Linkify(
       text: cleanedText,

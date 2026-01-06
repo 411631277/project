@@ -1,12 +1,11 @@
-import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_2/forgetpass.dart/suc_repass.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String userId;
-  final bool isManUser; // ✅ 加上這個參數
+  final bool isManUser;
 
   const ResetPasswordPage({
     super.key,
@@ -21,6 +20,13 @@ class ResetPasswordPage extends StatefulWidget {
 class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
+  bool _isSaving = false;
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +83,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 // 修改密碼按鈕
                 SizedBox(
                   width: screenWidth * 0.6,
-                  child: _buildCustomButton("修改密碼", onPressed: _handleChangePassword),
+                  child: _buildCustomButton(
+                    _isSaving ? "更新中..." : "修改密碼",
+                    onPressed: _isSaving ? () {} : _handleChangePassword,
+                  ),
                 ),
               ],
             ),
@@ -94,39 +103,31 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       return;
     }
 
+    setState(() => _isSaving = true);
+
     final String collection = widget.isManUser ? 'Man_users' : 'users';
 
     try {
-      // 🔹1. 更新 Firebase 密碼欄位
+      // 1) 更新 Firebase Firestore
       await FirebaseFirestore.instance
           .collection(collection)
           .doc(widget.userId)
           .update({'密碼': newPassword});
 
-      // 🔹2. 更新 SQL 後端
-     final response = await http.post(
-  Uri.parse(widget.isManUser
-      ? "http://163.13.201.85:3000/man_users"
-      : "http://163.13.201.85:3000/users"),
-  headers: {"Content-Type": "application/json"},
-  body: jsonEncode(widget.isManUser
-      ? {
-          "man_user_id": widget.userId,
-          "man_user_password": newPassword,
-        }
-      : {
-          "user_id": widget.userId,
-          "user_password": newPassword,
-        }),
-);
+      // 2) 更新 SQL 後端（集中管理的 API）
+      await Backend3000.userApi.updatePassword(
+        isManUser: widget.isManUser,
+        userId: widget.userId,
+        newPassword: newPassword,
+      );
 
-      if (response.statusCode == 200) {
-        _showDialog("成功", "密碼已成功修改！");
-      } else {
-        _showDialog("錯誤", "後端更新失敗（${response.statusCode}）");
-      }
+      if (!mounted) return;
+      _showDialog("成功", "密碼已更新");
     } catch (e) {
-      _showDialog("錯誤", "更新過程出現錯誤：$e");
+      if (!mounted) return;
+      _showDialog("錯誤", "更新失敗：$e");
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
