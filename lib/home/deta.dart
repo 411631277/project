@@ -1,11 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final Logger logger = Logger();
 
@@ -404,70 +403,77 @@ class _DetaWidgetState extends State<DetaWidget> {
   }
 
 
-  Future<void> _updateUserDataToMySQL() async {
-   final url = Uri.parse(widget.isManUser
-    ? 'http://163.13.201.85:3000/man_users'
-    : 'http://163.13.201.85:3000/users');
+ Future<void> _updateUserDataToMySQL() async {
+  final isMan = widget.isManUser;
 
-final isMan = widget.isManUser;
+  final Map<String, dynamic> payload = {
+    isMan ? 'man_user_id' : 'user_id': int.parse(widget.userId),
+  };
 
-final Map<String, dynamic> payload = {
-  isMan ? 'man_user_id' : 'user_id': int.parse(widget.userId),
-};
+  if (heightController.text.isNotEmpty) {
+    String cleanHeight =
+        heightController.text.replaceAll(RegExp(r'[^0-9.]'), '');
+    payload[isMan ? 'man_user_height' : 'user_height'] =
+        int.tryParse(cleanHeight) ?? 0;
+  }
 
+  if (weightController.text.isNotEmpty) {
+    String cleanWeight =
+        weightController.text.replaceAll(RegExp(r'[^0-9.]'), '');
+    payload[isMan ? 'man_current_weight' : 'current_weight'] =
+        double.tryParse(cleanWeight) ?? 0;
+  }
 
-if (heightController.text.isNotEmpty) {
-  String cleanHeight = heightController.text.replaceAll(RegExp(r'[^0-9.]'), '');
-  payload[isMan ? 'man_user_height' : 'user_height'] = int.tryParse(cleanHeight) ?? 0;
-}
+  if (nameController.text.isNotEmpty) {
+    payload[isMan ? 'man_user_name' : 'user_name'] = nameController.text;
+  }
 
-if (weightController.text.isNotEmpty) {
-  String cleanWeight = weightController.text.replaceAll(RegExp(r'[^0-9.]'), '');
-  payload[isMan ? 'man_current_weight' : 'current_weight'] = double.tryParse(cleanWeight) ?? 0;
-}
+  if (birthDateController.text.isNotEmpty) {
+    payload[isMan ? 'man_user_birthdate' : 'user_birthdate'] =
+        birthDateController.text;
+  }
 
-if (nameController.text.isNotEmpty) {
-  payload[isMan ? 'man_user_name' : 'user_name'] = nameController.text;
-}
+  if (emergencyName1.text.isNotEmpty) {
+    payload[isMan ? 'man_emergency_contact_name' : 'emergency_contact_name'] =
+        emergencyName1.text;
+  }
+  if (emergencyRelation1.text.isNotEmpty) {
+    payload[
+            isMan ? 'man_emergency_contact_relation' : 'emergency_contact_relation'] =
+        emergencyRelation1.text;
+  }
+  if (emergencyPhone1.text.isNotEmpty) {
+    payload[isMan ? 'man_emergency_contact_phone' : 'emergency_contact_phone'] =
+        emergencyPhone1.text;
+  }
 
-if (birthDateController.text.isNotEmpty) {
-  payload[isMan ? 'man_user_birthdate' : 'user_birthdate'] = birthDateController.text;
-}
-
-if (emergencyName1.text.isNotEmpty) {
-  payload[isMan ? 'man_emergency_contact_name' : 'emergency_contact_name'] = emergencyName1.text;
-}
-if (emergencyRelation1.text.isNotEmpty) {
-  payload[isMan ? 'man_emergency_contact_relation' : 'emergency_contact_relation'] = emergencyRelation1.text;
-}
-if (emergencyPhone1.text.isNotEmpty) {
-  payload[isMan ? 'man_emergency_contact_phone' : 'emergency_contact_phone'] = emergencyPhone1.text;
-}
-if (emergencyName2.text.isNotEmpty) {
-  payload[isMan ? 'man_emergency_contact_name2' : 'emergency_contact_name2'] = emergencyName2.text;
-}
-if (emergencyRelation2.text.isNotEmpty) {
-  payload[isMan ? 'man_emergency_contact_relation2' : 'emergency_contact_relation2'] = emergencyRelation2.text;
-}
-if (emergencyPhone2.text.isNotEmpty) {
-  payload[isMan ? 'man_emergency_contact_phone2' : 'emergency_contact_phone2'] = emergencyPhone2.text;
-}
-
+  if (emergencyName2.text.isNotEmpty) {
+    payload[
+            isMan ? 'man_emergency_contact_name2' : 'emergency_contact_name2'] =
+        emergencyName2.text;
+  }
+  if (emergencyRelation2.text.isNotEmpty) {
+    payload[isMan
+            ? 'man_emergency_contact_relation2'
+            : 'emergency_contact_relation2'] =
+        emergencyRelation2.text;
+  }
+  if (emergencyPhone2.text.isNotEmpty) {
+    payload[isMan
+            ? 'man_emergency_contact_phone2'
+            : 'emergency_contact_phone2'] =
+        emergencyPhone2.text;
+  }
 
   try {
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(payload),
+    await Backend3000.userApi.postUser(
+      isManUser: widget.isManUser,
+      payload: payload,
     );
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      logger.i("✅ MySQL 更新成功");
-    } else {
-      logger.e("❌ MySQL 更新失敗: ${response.body}");
-    }
+    logger.i("✅ MySQL 更新成功");
   } catch (e) {
     logger.e("❌ MySQL 通訊錯誤: $e");
+    rethrow; 
   }
 }
 
