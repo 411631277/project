@@ -32,7 +32,11 @@ class MouseDraggableScrollBehavior extends MaterialScrollBehavior {
       };
 }
 
+
 class _RobotWidgetState extends State<RobotWidget> {
+  StreamSubscription<String>? _sseSub;
+  Completer<void>? _sseCompleter;
+  bool _isDisposed = false;
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String>> _messages = [];
   final ScrollController _scrollController = ScrollController();
@@ -75,16 +79,23 @@ class _RobotWidgetState extends State<RobotWidget> {
   }
 
   void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!mounted || _isDisposed) return;
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  });
+}
+
+
+void _safeSetState(VoidCallback fn) {
+  if (!mounted || _isDisposed) return;
+  setState(fn);
+}
 
   /// 發送訊息給後端或顯示「其他資訊」
   Future<void> _sendMessage(String userInput,
@@ -94,7 +105,7 @@ class _RobotWidgetState extends State<RobotWidget> {
     _messageController.clear();
 
     if (!sendToBackend) {
-      setState(() {
+      _safeSetState(() {
         _messages.add({'sender': 'user', 'text': userInput});
         _messages.add({'sender': 'chatgpt', 'text': '下列是有關其他衛教資訊'});
         _secondCardAfterIndexes.add(_messages.length);
@@ -104,7 +115,7 @@ class _RobotWidgetState extends State<RobotWidget> {
     }
 
     if (!manualVisible) {
-      setState(() {
+      _safeSetState(() {
         _messages.add({'sender': 'user', 'text': userInput});
         _messages.add({'sender': 'chatgpt', 'text': '下列是有關媽媽手冊的資訊'});
         _manualCardAfterIndexes.add(_messages.length);
@@ -113,7 +124,7 @@ class _RobotWidgetState extends State<RobotWidget> {
       return;
     }
 
-    setState(() {
+    _safeSetState(() {
       _messages.add({'sender': 'user', 'text': userInput});
       _messages.add({'sender': 'chatgpt', 'text': '正在思考...'}); // 立即顯示
     });
@@ -131,52 +142,61 @@ class _RobotWidgetState extends State<RobotWidget> {
       final response = await request.send();
 
       if (response.statusCode == 200) {
-        String buffer = '';
-        final completer = Completer<void>();
+String buffer = '';
 
-        response.stream
-            .transform(utf8.decoder)
-            .transform(const LineSplitter())
-            .listen((line) {
-          if (line.startsWith("data: ")) {
-            final jsonPart = line.replaceFirst("data: ", "");
-            if (jsonPart.trim() == "[DONE]") {
-              completer.complete();
-              return;
-            }
+// ✅ 先取消前一次 SSE（避免連按多次）
+await _sseSub?.cancel();
+_sseCompleter = Completer<void>();
 
-            try {
-              final Map<String, dynamic> data = jsonDecode(jsonPart);
-              final chunk = data['data'] ?? '';
+_sseSub = response.stream
+    .transform(utf8.decoder)
+    .transform(const LineSplitter())
+    .listen((line) {
+  if (_isDisposed) return;
 
-              buffer += chunk;
+  if (line.startsWith("data: ")) {
+    final jsonPart = line.replaceFirst("data: ", "");
+    if (jsonPart.trim() == "[DONE]") {
+      _sseCompleter?.complete();
+      return;
+    }
 
-              setState(() {
-                _messages.last['text'] = buffer; // 更新思考中的氣泡
-              });
-              _scrollToBottom();
-            } catch (e) {
-              logger.e("解析失敗: $e");
-            }
-          }
-        }, onDone: () {
-          completer.complete();
-        }, onError: (e) {
-          logger.e("SSE錯誤: $e");
-          setState(() {
-            _messages.last['text'] = '發生錯誤，請稍後再試。';
-          });
-        });
+    try {
+      final Map<String, dynamic> data = jsonDecode(jsonPart);
+      final chunk = data['data'] ?? '';
+      buffer += chunk;
 
-        await completer.future;
+      _safeSetState(() {
+        if (_messages.isNotEmpty) {
+          _messages.last['text'] = buffer;
+        }
+      });
+      _scrollToBottom();
+    } catch (e) {
+      logger.e("解析失敗: $e");
+    }
+  }
+}, onDone: () {
+  _sseCompleter?.complete();
+}, onError: (e) {
+  logger.e("SSE錯誤: $e");
+  _safeSetState(() {
+    if (_messages.isNotEmpty) {
+      _messages.last['text'] = '發生錯誤，請稍後再試。';
+    }
+  });
+});
+
+// ✅ 等待 SSE 結束；如果你返回上一頁，dispose() 會 complete，不會卡住
+await _sseCompleter!.future;
       } else {
-        setState(() {
+        _safeSetState(() {
           _messages.last['text'] = '伺服器錯誤，請稍後再試。';
         });
       }
     } catch (e) {
       logger.e("發送錯誤: $e");
-      setState(() {
+      _safeSetState(() {
         _messages.last['text'] = '無法連接到伺服器，請檢查網路或稍後再試。';
       });
     }
@@ -227,6 +247,16 @@ class _RobotWidgetState extends State<RobotWidget> {
       ),
     );
   }
+
+@override
+void dispose() {
+  _isDisposed = true;
+  _sseSub?.cancel();
+  _sseCompleter?.complete(); // 避免 await 卡住
+  _messageController.dispose();
+  _scrollController.dispose();
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {

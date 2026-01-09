@@ -10,8 +10,10 @@
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     
     <uses-feature android:name="android.hardware.camera" />
 
@@ -19,6 +21,8 @@
         android:label="育兒導航星"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        
+
          <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCtQYXAaiNsFncVY-RhQyuVd5IHpECG-NE" />
@@ -44,6 +48,15 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <service
+        android:name=".StepWorker"
+        android:enabled="true"
+        android:exported="false"/>
+         <!-- 換日鬧鐘觸發 Receiver -->
+    <receiver
+        android:name=".StepResetReceiver"
+        android:exported="true"/>
+    
     </application>
 
     <queries>

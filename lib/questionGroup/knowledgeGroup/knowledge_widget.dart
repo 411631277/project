@@ -84,7 +84,7 @@ class _KnowledgeWidgetState extends State<KnowledgeWidget> {
                     2: FlexColumnWidth(1),
                     3: FlexColumnWidth(1),
                   },
-                  border: const TableBorder.symmetric(
+                  border: TableBorder.symmetric(
                     inside: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
                   ),
                   children: [
