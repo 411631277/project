@@ -1,11 +1,10 @@
-import 'dart:convert';
 import 'package:doctor_2/home/webview.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'dart:async';
+import 'package:doctor_2/services/robot/robot_api.dart';
 
 final Logger logger = Logger();
 
@@ -40,7 +39,7 @@ class _RobotWidgetState extends State<RobotWidget> {
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String>> _messages = [];
   final ScrollController _scrollController = ScrollController();
-  final String apiUrl = "http://163.13.202.126:8000/query";
+  late final RobotApi _robotApi;
 
   /// 第一組快速回覆
   final List<String> _quickReplies = [
@@ -71,6 +70,8 @@ class _RobotWidgetState extends State<RobotWidget> {
   @override
   void initState() {
     super.initState();
+
+_robotApi = RobotApi(apiUrl: "http://163.13.202.126:8000/query");
 
     _messages.add({
       'sender': 'chatgpt',
@@ -130,78 +131,41 @@ void _safeSetState(VoidCallback fn) {
     });
     _scrollToBottom();
 
-    try {
-      final request = http.Request("POST", Uri.parse(apiUrl));
-      request.headers['Content-Type'] = 'application/json';
-      request.body = jsonEncode({
-        'message': userInput,
-        'user_id': widget.userId,
-        'is_man_user': widget.isManUser,
-      });
+    String buffer = '';
 
-      final response = await request.send();
-
-      if (response.statusCode == 200) {
-String buffer = '';
-
-// ✅ 先取消前一次 SSE（避免連按多次）
+// 取消上一個 SSE，避免疊加
 await _sseSub?.cancel();
 _sseCompleter = Completer<void>();
 
-_sseSub = response.stream
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
-    .listen((line) {
-  if (_isDisposed) return;
+_sseSub = _robotApi
+    .queryStream(
+      message: userInput,
+      userId: widget.userId,
+      isManUser: widget.isManUser,
+    )
+    .listen(
+  (chunk) {
+    if (_isDisposed) return;
 
-  if (line.startsWith("data: ")) {
-    final jsonPart = line.replaceFirst("data: ", "");
-    if (jsonPart.trim() == "[DONE]") {
-      _sseCompleter?.complete();
-      return;
-    }
-
-    try {
-      final Map<String, dynamic> data = jsonDecode(jsonPart);
-      final chunk = data['data'] ?? '';
-      buffer += chunk;
-
-      _safeSetState(() {
-        if (_messages.isNotEmpty) {
-          _messages.last['text'] = buffer;
-        }
-      });
-      _scrollToBottom();
-    } catch (e) {
-      logger.e("解析失敗: $e");
-    }
-  }
-}, onDone: () {
-  _sseCompleter?.complete();
-}, onError: (e) {
-  logger.e("SSE錯誤: $e");
-  _safeSetState(() {
-    if (_messages.isNotEmpty) {
-      _messages.last['text'] = '發生錯誤，請稍後再試。';
-    }
-  });
-});
-
-// ✅ 等待 SSE 結束；如果你返回上一頁，dispose() 會 complete，不會卡住
-await _sseCompleter!.future;
-      } else {
-        _safeSetState(() {
-          _messages.last['text'] = '伺服器錯誤，請稍後再試。';
-        });
-      }
-    } catch (e) {
-      logger.e("發送錯誤: $e");
-      _safeSetState(() {
-        _messages.last['text'] = '無法連接到伺服器，請檢查網路或稍後再試。';
-      });
-    }
-
+    buffer += chunk;
+    _safeSetState(() {
+      _messages.last['text'] = buffer;
+    });
     _scrollToBottom();
+  },
+  onDone: () {
+    _sseCompleter?.complete();
+  },
+  onError: (e) {
+    logger.e("Robot SSE 錯誤: $e");
+    _safeSetState(() {
+      _messages.last['text'] = '發生錯誤，請稍後再試。';
+    });
+    _sseCompleter?.complete();
+  },
+);
+
+await _sseCompleter!.future;
   }
 
   /// 建立快速回覆按鈕群組
@@ -255,6 +219,7 @@ void dispose() {
   _sseCompleter?.complete(); // 避免 await 卡住
   _messageController.dispose();
   _scrollController.dispose();
+  _robotApi.dispose();
   super.dispose();
 }
 
