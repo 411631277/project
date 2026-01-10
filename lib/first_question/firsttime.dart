@@ -3,8 +3,7 @@ import 'package:doctor_2/first_question/breastfeeding_duration.dart';
 import 'package:doctor_2/first_question/finish.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final Logger logger = Logger();
 
@@ -165,22 +164,22 @@ class _FirsttimeWidgetState extends State<FirsttimeWidget> {
     }
   }
 
- Future<void> sendFirstTimeDeliveryToMySQL(String userId, String answer) async {
-  final url = Uri.parse('http://163.13.201.85:3000/user_question');
+Future<void> sendFirstTimeDeliveryToMySQL(
+  String userId,
+  String answer,
+) async {
+  try {
+    await Backend3000.userQuestionApi.updateUserQuestion(
+      userId: int.parse(userId),
+      fields: {
+        'first_time_delivery': answer == 'yes' ? '是' : '否',
+      },
+    );
 
-  final response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'user_id': int.parse(userId),
-       'first_time_delivery': firstTimeAnswer == 'yes' ? '是' : '否', 
-    }),
-  );
-
-    if (response.statusCode == 200) {
-      logger.i("✅ 是否第一次生產同步 MySQL 成功");
-    } else {
-      logger.e("❌ 是否第一次生產同步 MySQL 失敗: ${response.body}");
-    }
+    logger.i("✅ 是否第一次生產同步 MySQL 成功");
+  } catch (e, stack) {
+    logger.e("❌ 是否第一次生產同步 MySQL 失敗", error: e, stackTrace: stack);
   }
 }
+}
+

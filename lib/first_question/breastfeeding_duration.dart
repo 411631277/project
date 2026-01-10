@@ -2,8 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_2/first_question/stop.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final Logger logger = Logger(); // ✅ 確保 Logger 存在
 
@@ -157,21 +156,23 @@ class _BreastfeedingDurationWidgetState
   }
 
   Future<void> sendBreastfeedingToMySQL(
-      String userId, String selectedDuration) async {
-    final url = Uri.parse('http://163.13.201.85:3000/user_question');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': int.parse(userId),
-        'previous_breastfeeding_duration_months':  int.parse(selectedDuration.replaceAll('個月', '')),
-      }),
+  String userId,
+  String selectedDuration,
+) async {
+  try {
+    await Backend3000.userQuestionApi.updateUserQuestion(
+      userId: int.parse(userId),
+      fields: {
+        // ⚠️ 完全沿用你原本的欄位與轉換邏輯
+        'previous_breastfeeding_duration_months':
+            int.parse(selectedDuration.replaceAll('個月', '')),
+      },
     );
 
-    if (response.statusCode == 200) {
-      logger.i("✅ 哺乳時長同步到 MySQL 成功");
-    } else {
-      logger.e("❌ 哺乳時長同步 MySQL 失敗: ${response.body}");
-    }
+    logger.i("✅ 哺乳時長同步到 MySQL 成功");
+  } catch (e, stack) {
+    logger.e("❌ 哺乳時長同步 MySQL 失敗", error: e, stackTrace: stack);
   }
+}
+
 }

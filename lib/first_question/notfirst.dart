@@ -2,8 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_2/first_question/first_breastfeeding.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final Logger logger = Logger();
 
@@ -266,23 +265,19 @@ class _NotfirstWidgetState extends State<NotfirstWidget> {
 
   Future<void> sendNotFirstDataToMySQL(String userId, String painIndex,
       String brokenSkin, String selectedDuration) async {
-    final url = Uri.parse('http://163.13.201.85:3000/user_question');
+    try {
+      await Backend3000.userQuestionApi.updateUserQuestion(
+        userId: int.parse(userId),
+        fields: {
+          'previous_nipple_pain_level': painIndex,
+          'nipple_cracking': brokenSkin == 'yes' ? '是' : '否',
+          'previous_breastfeeding_selectedDuration_months': int.parse(selectedDuration),
+        },
+      );
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': int.parse(userId),
-        'previous_nipple_pain_level': painIndex,
-        'nipple_cracking': brokenSkin == 'yes' ? '是'  : '否',
-        'previous_breastfeeding_selectedDuration_months': int.parse(selectedDuration),
-      }),
-    );
-
-    if (response.statusCode == 200) {
       logger.i("✅ 哺乳經驗同步至 MySQL 成功");
-    } else {
-      logger.e("❌ 同步至 MySQL 失敗: ${response.body}");
+    } catch (e, stack) {
+      logger.e("❌ 同步至 MySQL 失敗", error: e, stackTrace: stack);
     }
   }
 }

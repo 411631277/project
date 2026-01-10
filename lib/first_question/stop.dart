@@ -2,8 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctor_2/first_question/finish.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final Logger logger = Logger(); // ✅ 確保 Logger 存在
 
@@ -144,22 +143,23 @@ class _StopWidgetState extends State<StopWidget> {
     ));
   }
 
-  Future<void> sendStopReasonToMySQL(String userId, String reason) async {
-    final url = Uri.parse('http://163.13.201.85:3000/user_question');
-
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': int.parse(userId),
+  Future<void> sendStopReasonToMySQL(
+  String userId,
+  String reason,
+) async {
+  try {
+    await Backend3000.userQuestionApi.updateUserQuestion(
+      userId: int.parse(userId),
+      fields: {
+    
         'breastfeeding_stop_reason': reason,
-      }),
+      },
     );
 
-    if (response.statusCode == 200) {
-      logger.i("✅ 停止哺乳原因同步 MySQL 成功");
-    } else {
-      logger.e("❌ 停止哺乳原因同步失敗: ${response.body}");
-    }
+    logger.i("✅ 停止哺乳原因同步 MySQL 成功");
+  } catch (e, stack) {
+    logger.e("❌ 停止哺乳原因同步失敗", error: e, stackTrace: stack);
   }
+}
+
 }

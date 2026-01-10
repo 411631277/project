@@ -2,8 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:doctor_2/first_question/finish.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final Logger logger = Logger(); // 🔹 Firestore 更新記錄
 
@@ -168,36 +167,35 @@ if (selectedDuration == '未考慮') {
   }
 
   Future<void> sendFirstBreastfeedingToMySQL(
-      String userId, String duration) async {
-    final url = Uri.parse('http://163.13.201.85:3000/user_question');
-     
+  String userId,
+  String duration,
+) async {
+  try {
     dynamic convertedValue;
-  if (duration == '未考慮') {
-    convertedValue = '目前還未考慮過';
-  } else if (duration == '前六個月純母乳哺餵') {
-    convertedValue = '前六個月純母乳哺餵';
-  } else if (duration == '前六個月配合使用配方奶') {
-    convertedValue = '前六個月配合使用配方奶';
-  } else if (duration == '目前不打算餵母乳') {
-    convertedValue = '目前不打算餵母乳';
-  } else {
-    convertedValue = int.parse(duration.replaceAll('個月', ''));
-  }
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': int.parse(userId),
-        "expected_breastfeeding_months":
-        convertedValue ,
-      }),
+    if (duration == '未考慮') {
+      convertedValue = '目前還未考慮過';
+    } else if (duration == '前六個月純母乳哺餵') {
+      convertedValue = '前六個月純母乳哺餵';
+    } else if (duration == '前六個月配合使用配方奶') {
+      convertedValue = '前六個月配合使用配方奶';
+    } else if (duration == '目前不打算餵母乳') {
+      convertedValue = '目前不打算餵母乳';
+    } else {
+      convertedValue = int.parse(duration.replaceAll('個月', ''));
+    }
+
+    await Backend3000.userQuestionApi.updateUserQuestion(
+      userId: int.parse(userId),
+      fields: {
+        'expected_breastfeeding_months': convertedValue,
+      },
     );
 
-    if (response.statusCode == 200) {
-      logger.i("✅ 預期哺乳時長同步 MySQL 成功");
-    } else {
-      logger.e("❌ 預期哺乳時長同步 MySQL 失敗: ${response.body}");
-    }
+    logger.i("✅ 預期哺乳時長同步 MySQL 成功");
+  } catch (e, stack) {
+    logger.e("❌ 預期哺乳時長同步 MySQL 失敗", error: e, stackTrace: stack);
   }
+}
+
 }

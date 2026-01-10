@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final Logger logger = Logger();
 
@@ -178,24 +177,21 @@ class WeekPregnancyState extends State<WeekPregnancy> {
   }
 
   Future<void> _sendWeekDataToMySQL() async {
-    final url = Uri.parse('http://163.13.201.85:3000/user_question');
-    logger.i("📡 正在傳送 MySQL 資料到 $url");
-
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': int.parse(widget.userId),
+  try {
+    await Backend3000.userQuestionApi.updateUserQuestion(
+      userId: int.parse(widget.userId),
+      fields: {
+        // ⚠️ 完全沿用你原本的字串格式
         'pregnancy_week': "$selectedWeek 週 $selectedDay 天",
         'due_date':
             "${yearController.text}-${monthController.text}-${dayController.text}",
-      }),
+      },
     );
 
-    if (response.statusCode == 200) {
-      logger.i("✅ 懷孕週數同步 MySQL 成功");
-    } else {
-      logger.e("❌ 懷孕週數同步 MySQL 失敗: ${response.statusCode} - ${response.body}");
-    }
+    logger.i("✅ 懷孕週數同步 MySQL 成功");
+  } catch (e, stack) {
+    logger.e("❌ 懷孕週數同步 MySQL 失敗", error: e, stackTrace: stack);
   }
+}
+
 }
