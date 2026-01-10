@@ -1,13 +1,12 @@
-import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:doctor_2/function/main.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/services/firestore_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 //註解已完成
 
@@ -691,86 +690,101 @@ class FaRegisterWidgetState extends State<FaRegisterWidget> {
     }
   }
 
-  Future<bool> sendDataToMySQL(String userId) async {
-    final url = Uri.parse('http://163.13.201.85:3000/man_users');
+ Future<bool> sendDataToMySQL(String userId) async {
+  String betelNutHabitValue;
+  String smokingHabitValue;
+  String drinkingHabitValue;
 
-    String betelNutHabitValue;
+  if (answers['是否會嚼食檳榔?'] == 'true') {
+    betelNutHabitValue = "是";
+  } else if (answers['是否會嚼食檳榔?'] == 'false') {
+    betelNutHabitValue = "從未";
+  } else {
+    betelNutHabitValue = "曾經有，已戒掉";
+  }
 
-    if (answers['是否會嚼食檳榔?'] == 'true') {
-      betelNutHabitValue = "是";
-    } else if (answers['是否會嚼食檳榔?'] == 'false') {
-      betelNutHabitValue = "從未";
-    } else {
-      betelNutHabitValue = "曾經有，已戒掉";
-    }
-    String smokinghabitValue;
-    if (answers['是否會吸菸?'] == 'true') {
-      smokinghabitValue = "是";
-    } else if (answers['是否會吸菸?'] == 'false') {
-      smokinghabitValue = "從未";
-    } else {
-      smokinghabitValue = "曾經有，已戒掉";
-    }
-    String drinkinghabitvalue;
-    if (answers['是否會喝酒?'] == 'true') {
-      drinkinghabitvalue = "是";
-    } else if (answers['是否會喝酒?'] == 'false') {
-      drinkinghabitvalue = "從未";
-    } else {
-      drinkinghabitvalue = "曾經有，已戒掉";
-    }
+  if (answers['是否會吸菸?'] == 'true') {
+    smokingHabitValue = "是";
+  } else if (answers['是否會吸菸?'] == 'false') {
+    smokingHabitValue = "從未";
+  } else {
+    smokingHabitValue = "曾經有，已戒掉";
+  }
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'man_user_name': nameController.text,
-        'man_user_id': int.parse(userId),
-        'man_user_gender': "男",
-        'man_user_salutation': isNewMom == true ? "是" : "否",
-        'man_user_birthdate': formatBirthForMySQL(birthController.text),
-        'man_user_phone': phoneController.text,
-        'man_user_height': double.tryParse(
-                heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
-            0.0,
-        'man_current_weight': double.tryParse(
-                weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
-            0.0,
-        'man_emergency_contact_name': "",
-        'man_emergency_contact_phone': "",
-        'man_betel_nut_habit': betelNutHabitValue,
-        'man_smoking_habit': smokinghabitValue,
-        'man_drinking_habit': drinkinghabitvalue,
-        'man_marital_status': maritalStatus ?? '未婚',
-        'man_contact_preference': [
-          if (isEmailPreferred) 'e-mail',
-          if (isPhonePreferred) '電話',
-        ].join(','),
-        'man_chronic_illness': hasChronicDisease == true
-            ? [
-                ...chronicDiseaseOptions.entries
-                    .where((entry) => entry.value && entry.key != "其他")
-                    .map((entry) => entry.key),
-                if (chronicDiseaseOptions["其他"] == true) '其他',
-              ].join(',')
-            : '無',
-        'man_chronic_illness_details': otherDiseaseController.text.isNotEmpty
-            ? otherDiseaseController.text
-            : '',
-        'man_user_account': accountController.text,
-        'man_user_password': passwordController.text,
-        'man_pairing_code': pairingCodeController.text.trim(),
-      }),
+  if (answers['是否會喝酒?'] == 'true') {
+    drinkingHabitValue = "是";
+  } else if (answers['是否會喝酒?'] == 'false') {
+    drinkingHabitValue = "從未";
+  } else {
+    drinkingHabitValue = "曾經有，已戒掉";
+  }
+
+  final Map<String, dynamic> payload = {
+    // ✅ id
+    'man_user_id': int.tryParse(userId) ?? userId,
+
+    // ✅ 基本資料
+    'man_user_name': nameController.text,
+    'man_user_gender': '男',
+    'man_user_salutation': isNewMom == true ? '是' : '否',
+    'man_user_birthdate': formatBirthForMySQL(birthController.text),
+    'man_user_phone': phoneController.text,
+
+    // ✅ 帳號密碼
+    'man_user_account': accountController.text,
+    'man_user_password': passwordController.text,
+
+    // ✅ 身高體重
+    'man_user_height': double.tryParse(
+            heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+        0.0,
+    'man_current_weight': double.tryParse(
+            weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+        0.0,
+
+    // ✅ 緊急聯絡人（你原本固定空字串）
+    'man_emergency_contact_name': '',
+    'man_emergency_contact_phone': '',
+
+    // ✅ 習慣
+    'man_betel_nut_habit': betelNutHabitValue,
+    'man_smoking_habit': smokingHabitValue,
+    'man_drinking_habit': drinkingHabitValue,
+
+    // ✅ 婚姻與偏好
+    'man_marital_status': maritalStatus ?? '未婚',
+    'man_contact_preference': [
+      if (isEmailPreferred) 'e-mail',
+      if (isPhonePreferred) '電話',
+    ].join(','),
+
+    // ✅ 慢性病
+    'man_chronic_illness': hasChronicDisease == true
+        ? [
+            ...chronicDiseaseOptions.entries
+                .where((e) => e.value && e.key != '其他')
+                .map((e) => e.key),
+            if (chronicDiseaseOptions['其他'] == true) '其他',
+          ].join(',')
+        : '無',
+    'man_chronic_illness_details': otherDiseaseController.text,
+    'pairing_code': pairingCodeController.text.trim(),
+  };
+
+  // ===== 3️⃣ 送到集中 API（/man_users）=====
+  try {
+    await Backend3000.userApi.postUser(
+      isManUser: true,
+      payload: payload,
     );
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      logger.i("✅ 爸爸資料同步至 MySQL 成功");
-      return true;
-    } else {
-      logger.e("❌ 爸爸同步 MySQL 失敗: ${response.body}");
-      return false;
-    }
+    logger.i('✅ 爸爸資料同步至 MySQL 成功');
+    return true;
+  } catch (e) {
+    logger.e('❌ 爸爸同步 MySQL 失敗: $e');
+    return false;
   }
+}
 
   //輸入框設定
   InputDecoration _inputDecoration() => const InputDecoration(

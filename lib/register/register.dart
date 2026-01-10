@@ -1,14 +1,13 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:doctor_2/function/main.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:doctor_2/services/firestore_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final FirestoreService firestoreService = FirestoreService();
 final Logger logger = Logger();
@@ -544,57 +543,58 @@ class RegisterWidgetState extends State<RegisterWidget> {
     } else {
       drinkinghabitvalue = "曾經有，已戒掉";
     }
-    final url = Uri.parse('http://163.13.201.85:3000/users');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_name': nameController.text,
-        'user_gender': widget.role == '媽媽' ? '女' : '男',
-        'user_salutation': isNewMom == true ? '是' : '否',
-        'user_birthdate': formatBirthForMySQL(birthController.text),
-        'user_phone': phoneController.text,
-        'user_account': accountController.text,
-        'user_password': passwordController.text,
-        'user_height': double.tryParse(
-                heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
-            0.0,
-        'current_weight': double.tryParse(
-                weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
-            0.0,
-        'emergency_contact_name': '',
-        'emergency_contact_phone': '',
-        'betel_nut_habit': betelNutHabitValue,
-        'smoking_habit': smokinghabitValue,
-        'drinking_habit': drinkinghabitvalue,
-        'pre_pregnancy_weight': double.tryParse(prePregnancyWeightController
-                .text
-                .replaceAll(RegExp(r'[^0-9.]'), '')) ??
-            0.0,
-        'marital_status': maritalStatus ?? '未婚',
-        'contact_preference': [
-          if (isEmailPreferred) 'e-mail',
-          if (isPhonePreferred) '電話'
-        ].join(','),
-        'chronic_illness': hasChronicDisease == true
-            ? [
-                ...chronicDiseaseOptions.entries
-                    .where((e) => e.value && e.key != '其他')
-                    .map((e) => e.key),
-                if (chronicDiseaseOptions['其他'] == true) '其他'
-              ].join(',')
-            : '無',
-        'chronic_illness_details': otherDiseaseController.text,
-        'pairing_code': pairingCode,
-      }),
-    );
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      logger.i('✅ 同步資料到 MySQL 成功');
-      return true;
-    } else {
-      logger.e('❌ 同步 MySQL 失敗: ${response.body}');
-      return false;
-    }
+    final payload = {
+  'user_name': nameController.text,
+  'user_gender': widget.role == '媽媽' ? '女' : '男',
+  'user_salutation': isNewMom == true ? '是' : '否',
+  'user_birthdate': formatBirthForMySQL(birthController.text),
+  'user_phone': phoneController.text,
+  'user_account': accountController.text,
+  'user_password': passwordController.text,
+  'user_height': double.tryParse(
+          heightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+      0.0,
+  'current_weight': double.tryParse(
+          weightController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+      0.0,
+  'emergency_contact_name': '',
+  'emergency_contact_phone': '',
+  'betel_nut_habit': betelNutHabitValue,
+  'smoking_habit': smokinghabitValue,
+  'drinking_habit': drinkinghabitvalue,
+  'pre_pregnancy_weight': double.tryParse(prePregnancyWeightController.text
+          .replaceAll(RegExp(r'[^0-9.]'), '')) ??
+      0.0,
+  'marital_status': maritalStatus ?? '未婚',
+  'contact_preference': [
+    if (isEmailPreferred) 'e-mail',
+    if (isPhonePreferred) '電話'
+  ].join(','),
+  'chronic_illness': hasChronicDisease == true
+      ? [
+          ...chronicDiseaseOptions.entries
+              .where((e) => e.value && e.key != '其他')
+              .map((e) => e.key),
+          if (chronicDiseaseOptions['其他'] == true) '其他'
+        ].join(',')
+      : '無',
+  'chronic_illness_details': otherDiseaseController.text,
+  'pairing_code': pairingCode,
+};
+
+try {
+  // ✅ 集中管理：送到 /users
+  await Backend3000.userApi.postUser(
+    isManUser: false, // 這段是 /users（媽媽/一般用戶）
+    payload: payload,
+  );
+
+  logger.i('✅ 同步資料到 MySQL 成功');
+  return true;
+} catch (e) {
+  logger.e('❌ 同步 MySQL 失敗: $e');
+  return false;
+}
   }
 
   String formatBirthForMySQL(String text) {
