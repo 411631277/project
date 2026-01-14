@@ -1,8 +1,7 @@
 //2..親職適應
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 import 'package:logger/logger.dart';
 
 final Logger logger = Logger();
@@ -248,8 +247,6 @@ class _AdaptWidgetState extends State<AdaptWidget> {
 
   Future<bool> sendAdaptAnswersToMySQL(
       String userId, Map<int, String?> answers, int totalScore) async {
-    final url = Uri.parse('http://163.13.201.85:3000/attachment');
-
     final payload = {
       'user_id': int.parse(userId),
       'attachment_question_content': 'attachment',
@@ -272,24 +269,12 @@ class _AdaptWidgetState extends State<AdaptWidget> {
     logger.i("📦 Adapt payload: $payload");
 
     try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
-      );
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final result = jsonDecode(response.body);
-        logger.i(
-            "✅ Adapt 資料同步成功：${result['message']} (insertId: ${result['insertId']})");
-        return true;
-      } else {
-        logger.e("❌ Adapt 資料同步失敗: ${response.body}");
-        return false;
-      }
-    } catch (e) {
-      logger.e("🔥 發送 Adapt 時錯誤: $e");
-      return false;
-    }
+  final result = await Backend3000.attachmentApi.submitAttachment(payload);
+  logger.i("✅ Adapt 同步成功：${result['message'] ?? ''} (insertId: ${result['insertId'] ?? ''})");
+  return true;
+} catch (e, stack) {
+  logger.e("🔥 發送 Adapt 時發生錯誤", error: e, stackTrace: stack);
+  return false;
+}
   }
 }

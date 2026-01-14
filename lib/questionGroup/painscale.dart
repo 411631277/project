@@ -1,7 +1,6 @@
 //產後傷口疼痛量表
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 import 'dart:math' as math;
 import 'package:logger/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -330,58 +329,52 @@ class _PainScaleWidgetState extends State<PainScaleWidget> {
   }
 
   Future<bool> sendPainScaleToMySQL(String userId) async {
-    final url = Uri.parse('http://163.13.201.85:3000/painscale');
-    var birthTypeValue = isNaturalBirth
-        ? 0
-        : isCSection
-            ? 1
-            : -1;
-    final now = DateTime.now();
-    final formattedDate =
-        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+  var birthTypeValue = isNaturalBirth
+      ? 0
+      : isCSection
+          ? 1
+          : -1;
 
-    if (isNaturalBirth) {
-      birthTypeValue = 0;
-    } else if (isCSection) {
-      birthTypeValue = 1;
-    } else {
-      logger.e('請選擇分娩方式（自然產或剖腹產）');
-      return false; // 中斷傳送，避免傳入 null
-    }
+  final now = DateTime.now();
+  final formattedDate =
+      "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-    final painControl = isCSection
-        ? (usedSelfPainControl
-            ? "是"
-            : notUsedSelfPainControl
-                ? "否"
-                : '')
-        : '';
-
-    http.Response response;
-    try {
-      response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'user_id': int.parse(userId),
-          'painscale_question_content': "產後傷口疼痛分數",
-          'painscale_test_date': formattedDate,
-          'childbirth_method': birthTypeValue,
-          'pain_level': painLevel.toInt(),
-          'used_self_controlled_pain_relief': painControl,
-        }),
-      );
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        logger.i("✅ 疼痛分數已同步到 MySQL！");
-        return true;
-      } else {
-        logger.e("❌ 疼痛分數同步 MySQL 失敗: ${response.body}");
-        return false;
-      }
-    } on Exception catch (e) {
-      logger.e("🔥 MySQL 同步例外: $e");
-      return false;
-    }
+  if (isNaturalBirth) {
+    birthTypeValue = 0;
+  } else if (isCSection) {
+    birthTypeValue = 1;
+  } else {
+    logger.e('請選擇分娩方式（自然產或剖腹產）');
+    return false;
   }
+
+  final painControl = isCSection
+      ? (usedSelfPainControl
+          ? "是"
+          : notUsedSelfPainControl
+              ? "否"
+              : '')
+      : '';
+
+  final payload = <String, dynamic>{
+    'user_id': int.parse(userId),
+    'painscale_question_content': "產後傷口疼痛分數",
+    'painscale_test_date': formattedDate,
+    'childbirth_method': birthTypeValue,
+    'pain_level': painLevel.toInt(),
+    'used_self_controlled_pain_relief': painControl,
+  };
+
+  logger.i("📦 painscale payload: $payload");
+
+  try {
+    await Backend3000.painScaleApi.submitPainScale(payload);
+    logger.i("✅ 疼痛分數已同步到 MySQL！");
+    return true;
+  } catch (e, stack) {
+    logger.e("❌ 疼痛分數同步 MySQL 失敗", error: e, stackTrace: stack);
+    return false;
+  }
+}
+
 }

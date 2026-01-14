@@ -1,12 +1,11 @@
 // sleep_combined.dart
-import 'dart:convert';
 import 'dart:math' as math;
 import 'package:doctor_2/home/fa_question.dart';
 import 'package:doctor_2/questionGroup/sleepGroup/sleepscore.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final Logger logger = Logger();
 
@@ -559,113 +558,104 @@ class _SleepWidgetState extends State<SleepWidget> {
   }
 
   Future<bool> _sendAllToMySQL() async {
-    final url = Uri.parse('http://163.13.201.85:3000/sleep');
-    final now = DateTime.now();
-    final date =
-        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-    final String idKey = widget.isManUser ? 'man_user_id' : 'user_id';
-    // 1) 先組固定欄位 & Q1 填空題（1–5）
-    final Map<String, dynamic> payload = {
-      idKey: int.parse(widget.userId),
-      'sleep_question_content': "睡眠品質量表",
-      'sleep_test_date': date,
-      'sleep_answer_1_am_pm': amPmSelections[0],
-      'sleep_answer_1_a':
-          int.tryParse(hourControllers[0]?.text.trim() ?? '') ?? 0,
-      'sleep_answer_1_b':
-          int.tryParse(minuteControllers[0]?.text.trim() ?? '') ?? 0,
-      'sleep_answer_2':
-          int.tryParse(minuteControllers[1]?.text.trim() ?? '') ?? 0,
-      'sleep_answer_3_am_pm': amPmSelections[2],
-      'sleep_answer_3_a':
-          int.tryParse(hourControllers[2]?.text.trim() ?? '') ?? 0,
-      'sleep_answer_3_b':
-          int.tryParse(minuteControllers[2]?.text.trim() ?? '') ?? 0,
-      'sleep_answer_4':
-          int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0,
-      'sleep_score_subjective_quality': _calculateSubjectiveSleepQualityScore(),
-    };
+  final now = DateTime.now();
+  final date =
+      "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+  final String idKey = widget.isManUser ? 'man_user_id' : 'user_id';
 
-    final Map<String, int> frequencyScoreMap = {
-      '從未發生': 0,
-      '每週少於一次': 1,
-      '每週一或兩次': 2,
-      '每週三次或以上': 3,
-    };
+  // 1) 先組固定欄位 & Q1 填空題（1–5）
+  final Map<String, dynamic> payload = {
+    idKey: int.parse(widget.userId),
+    'sleep_question_content': "睡眠品質量表",
+    'sleep_test_date': date,
+    'sleep_answer_1_am_pm': amPmSelections[0],
+    'sleep_answer_1_a': int.tryParse(hourControllers[0]?.text.trim() ?? '') ?? 0,
+    'sleep_answer_1_b':
+        int.tryParse(minuteControllers[0]?.text.trim() ?? '') ?? 0,
+    'sleep_answer_2':
+        int.tryParse(minuteControllers[1]?.text.trim() ?? '') ?? 0,
+    'sleep_answer_3_am_pm': amPmSelections[2],
+    'sleep_answer_3_a': int.tryParse(hourControllers[2]?.text.trim() ?? '') ?? 0,
+    'sleep_answer_3_b':
+        int.tryParse(minuteControllers[2]?.text.trim() ?? '') ?? 0,
+    'sleep_answer_4':
+        int.tryParse(hourControllers[3]?.text.trim() ?? '') ?? 0,
+    'sleep_score_subjective_quality': _calculateSubjectiveSleepQualityScore(),
+  };
 
-    final Map<String, int> botherScoreMap = {
-      '完全沒有困擾': 0,
-      '很少困擾': 1,
-      '有些困擾': 2,
-      '有很大的困擾': 3,
-    };
+  final Map<String, int> frequencyScoreMap = {
+    '從未發生': 0,
+    '每週少於一次': 1,
+    '每週一或兩次': 2,
+    '每週三次或以上': 3,
+  };
 
-    final Map<String, int> satisfactionScoreMap = {
-      '非常滿意': 0,
-      '還可以': 1,
-      '不滿意': 2,
-      '非常不滿意': 3,
-    };
+  final Map<String, int> botherScoreMap = {
+    '完全沒有困擾': 0,
+    '很少困擾': 1,
+    '有些困擾': 2,
+    '有很大的困擾': 3,
+  };
 
-    // 2) Q1 的選擇題（6–10）
-    for (var i = 4; i < _q1.length; i++) {
-      final answer = _a1[i];
-      int score = frequencyScoreMap[answer] ??
-          botherScoreMap[answer] ??
-          satisfactionScoreMap[answer] ??
-          0; // 預設 0 分
-      payload['sleep_answer_${i + 1}'] = score.toString();
-    }
+  final Map<String, int> satisfactionScoreMap = {
+    '非常滿意': 0,
+    '還可以': 1,
+    '不滿意': 2,
+    '非常不滿意': 3,
+  };
 
-    for (var i = 0; i < _q2.length; i++) {
-      final answer = _a2[i];
-      int score = frequencyScoreMap[answer] ??
-          botherScoreMap[answer] ??
-          satisfactionScoreMap[answer] ??
-          0;
-      payload['sleep_answer_${9 + i}'] = score.toString();
-    }
-
-    payload['sleep_score_subjective_quality'] =
-        _calculateSubjectiveSleepQualityScore();
-    payload['sleep_score_sleep_difficulty'] = _calculateSleepDifficultyScore();
-    payload['sleep_score_duration'] = _calculateSleepDurationScore();
-    payload['sleep_score_efficiency'] = _calculateSleepEfficiencyScore();
-    payload['sleep_score_disturbance'] = _calculateSleepDisturbanceScore();
-    payload['sleep_score_medication'] = _calculateSleepMedicationScore();
-    payload['sleep_score_daytime_function'] =
-        _calculateSleepDaytimeFunctionScore();
-    payload['sleep_score_total'] = _calculateSleepTotalScore();
-    // 4) payload 檢查：列出哪些欄位是 'none'
-    final noneKeys = payload.entries
-        .where((e) => e.value == 'none')
-        .map((e) => e.key)
-        .toList();
-    if (noneKeys.isNotEmpty) {
-      logger.w("⚠️ payload 中有 'none' 值: $noneKeys");
-    }
-    // 5) 顯示最終 payload
-    logger.i("📦 最終送出 payload: $payload");
-
-    // 6) 發 HTTP
-    try {
-      final resp = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
-      );
-      if (resp.statusCode >= 200 && resp.statusCode < 300) {
-        logger.i("✅ MySQL 同步成功");
-        return true;
-      } else {
-        logger.e("❌ MySQL 同步失敗: ${resp.body}");
-        return false;
-      }
-    } catch (e) {
-      logger.e("🔥 MySQL 同步例外: $e");
-      return false;
-    }
+  // 2) Q1 的選擇題（6–10）
+  for (var i = 4; i < _q1.length; i++) {
+    final answer = _a1[i];
+    int score = frequencyScoreMap[answer] ??
+        botherScoreMap[answer] ??
+        satisfactionScoreMap[answer] ??
+        0; // 預設 0 分
+    payload['sleep_answer_${i + 1}'] = score.toString();
   }
+
+  for (var i = 0; i < _q2.length; i++) {
+    final answer = _a2[i];
+    int score = frequencyScoreMap[answer] ??
+        botherScoreMap[answer] ??
+        satisfactionScoreMap[answer] ??
+        0;
+    payload['sleep_answer_${9 + i}'] = score.toString();
+  }
+
+  payload['sleep_score_subjective_quality'] =
+      _calculateSubjectiveSleepQualityScore();
+  payload['sleep_score_sleep_difficulty'] = _calculateSleepDifficultyScore();
+  payload['sleep_score_duration'] = _calculateSleepDurationScore();
+  payload['sleep_score_efficiency'] = _calculateSleepEfficiencyScore();
+  payload['sleep_score_disturbance'] = _calculateSleepDisturbanceScore();
+  payload['sleep_score_medication'] = _calculateSleepMedicationScore();
+  payload['sleep_score_daytime_function'] = _calculateSleepDaytimeFunctionScore();
+  payload['sleep_score_total'] = _calculateSleepTotalScore();
+
+  // 4) payload 檢查：列出哪些欄位是 'none'
+  final noneKeys = payload.entries
+      .where((e) => e.value == 'none')
+      .map((e) => e.key)
+      .toList();
+  if (noneKeys.isNotEmpty) {
+    logger.w("⚠️ payload 中有 'none' 值: $noneKeys");
+  }
+
+  // 5) 顯示最終 payload
+  logger.i("📦 最終送出 payload: $payload");
+
+  // ✅ 6) 改成集中 API（POST /sleep）
+  try {
+    await Backend3000.sleepApi.submitSleep(payload);
+    logger.i("✅ MySQL 同步成功");
+    return true;
+  } catch (e, stack) {
+    logger.e("❌ MySQL 同步失敗", error: e, stackTrace: stack);
+    return false;
+  }
+}
+
 
   Widget _buildSecondChoiceQuestion(
       int i, Map<String, dynamic> q, double base) {

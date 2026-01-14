@@ -13,7 +13,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
 // 🔹 專案內頁面
@@ -21,7 +20,7 @@ import 'package:doctor_2/home/baby.dart';
 import 'package:doctor_2/home/question.dart';
 import 'package:doctor_2/home/robot.dart';
 import 'package:doctor_2/home/setting.dart';
-//import 'package:doctor_2/home/tgos.dart';
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 // 🔹 全域 Logger
 final Logger logger = Logger();
@@ -130,59 +129,29 @@ class _HomeScreenWidgetState extends State<HomeScreenWidget> {
 
 
 Future<Map<String, int>> _fetchServerStepHistory() async {
-  final url = Uri.parse('http://163.13.201.85:3000/steps?user_id=${widget.userId}');
   try {
-    final res = await http.get(url, headers: {'Accept': 'application/json'});
-    if (res.statusCode != 200) {
-      logger.e('GET /steps 非 200：${res.statusCode} ${res.body}');
-      return {};
-    }
+    final body = await Backend3000.stepsApi.fetchStepsHistory(userId: widget.userId);
 
-    final contentType = (res.headers['content-type'] ?? '').toLowerCase();
+    final List<dynamic> rows =
+        body is List ? body : (body['data'] ?? body['rows'] ?? []);
 
-    // ---- JSON 回應 ----
-    if (contentType.contains('application/json')) {
-      final body = jsonDecode(res.body);
-      final List<dynamic> rows =
-          body is List ? body : (body['data'] ?? body['rows'] ?? []);
-      final map = <String, int>{};
-      for (final e in rows) {
-        if (e is! Map) continue;
-        final rawDate = (e['step_date'] ?? e['date'] ?? e['日期'])?.toString();
-        final rawSteps = (e['steps'] ?? e['today_steps'] ?? e['今日步數']);
-        if (rawDate == null || rawSteps == null) continue;
-        final key = rawDate.replaceAll('/', '-'); // 正規化成 yyyy-MM-dd
-        final steps = rawSteps is num ? rawSteps.toInt() : int.tryParse(rawSteps.toString()) ?? 0;
-        map[key] = steps;
-      }
-      return map;
-    }
-
-    // ---- HTML 回應（你用瀏覽器看到的表格）----
-    final html = res.body;
-    final rowRe = RegExp(r'<tr[^>]*>(.*?)</tr>', dotAll: true, caseSensitive: false);
-    final cellRe = RegExp(r'<t[dh][^>]*>(.*?)</t[dh]>', dotAll: true, caseSensitive: false);
     final map = <String, int>{};
+    for (final e in rows) {
+      if (e is! Map) continue;
+      final rawDate = (e['step_date'] ?? e['date'] ?? e['日期'])?.toString();
+      final rawSteps = (e['steps'] ?? e['today_steps'] ?? e['今日步數']);
+      if (rawDate == null || rawSteps == null) continue;
 
-    final rows = rowRe.allMatches(html).toList();
-    for (final m in rows.skip(1)) { // 跳過表頭列
-      final cells = cellRe.allMatches(m.group(1) ?? '').map((x) => x.group(1) ?? '').toList();
-      if (cells.length < 2) continue;
-      final dateStr = _stripHtml(cells[0]).trim(); // 日期
-      final stepsStr = _stripHtml(cells[1]).trim(); // 今日步數
-      if (!RegExp(r'^\d{4}[/-]\d{2}[/-]\d{2}$').hasMatch(dateStr)) continue;
-      final key = dateStr.replaceAll('/', '-');
-      final steps = int.tryParse(stepsStr.replaceAll(',', '')) ?? 0;
+      final key = rawDate.replaceAll('/', '-');
+      final steps = rawSteps is num ? rawSteps.toInt() : int.tryParse(rawSteps.toString()) ?? 0;
       map[key] = steps;
     }
     return map;
-  } catch (e) {
-    logger.e('讀取後端步數失敗：$e');
+  } catch (e, stack) {
+    logger.e("❌ 取得步數歷史失敗", error: e, stackTrace: stack);
     return {};
   }
 }
-
-String _stripHtml(String s) => s.replaceAll(RegExp(r'<[^>]+>'), '');
 
   /// 📌 取得使用者名稱
   Future<void> _loadUserName() async {
@@ -382,33 +351,25 @@ String _stripHtml(String s) => s.replaceAll(RegExp(r'<[^>]+>'), '');
   }
 
   /// 📌 將步數傳送至遠端 MySQL
-  Future<void> sendStepDataToMySQL() async {
-    final url = Uri.parse('http://163.13.201.85:3000/steps');
-    final now = DateTime.now();
-    final formattedDate =
-        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+ Future<void> sendStepDataToMySQL() async {
+  final now = DateTime.now();
+  final formattedDate =
+      "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'user_id': int.parse(widget.userId),
-          'step_date': formattedDate,
-          'steps': _todaySteps,
-          'goal': _targetSteps,
-        }),
-      );
+  final payload = {
+    'user_id': int.parse(widget.userId),
+    'step_date': formattedDate,
+    'steps': _todaySteps,
+    'goal': _targetSteps,
+  };
 
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        logger.i("✅ 步數資料已同步至 MySQL");
-      } else {
-        logger.e("❌ 同步失敗: ${response.body}");
-      }
-    } catch (e) {
-      logger.e("❌ 發送 MySQL 錯誤: $e");
-    }
+  try {
+    await Backend3000.stepsApi.submitSteps(payload);
+    logger.i("✅ 步數資料已同步至 MySQL");
+  } catch (e, stack) {
+    logger.e("❌ 發送 MySQL 錯誤", error: e, stackTrace: stack);
   }
+}
 
   /// 📌 離開確認視窗
   Future<bool> _showExitDialog(BuildContext context) async {

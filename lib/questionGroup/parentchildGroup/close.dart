@@ -1,11 +1,8 @@
 //1.親近
-//import 'dart:convert';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
-//import 'package:http/http.dart' as http;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 import 'package:logger/logger.dart';
 
 final Logger logger = Logger();
@@ -247,7 +244,6 @@ class _CloseWidgetState extends State<CloseWidget> {
 
   Future<bool> sendCloseAnswersToMySQL(
       String userId, Map<int, String?> answers, int totalScore) async {
-    final url = Uri.parse('http://163.13.201.85:3000/attachment'); // ✅ 同一個表
 
     final Map<String, dynamic> payload = {
       'user_id': int.parse(userId),
@@ -275,23 +271,13 @@ class _CloseWidgetState extends State<CloseWidget> {
 
     logger.i("📦 Close payload: $payload");
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
-      );
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        logger.i("✅ Close 同步成功");
-        return true;
-      } else {
-        logger.e("❌ Close 同步失敗: ${response.body}");
-        return false;
-      }
-    } catch (e) {
-      logger.e("🔥 發送 Close 時錯誤: $e");
-      return false;
-    }
+  try {
+  final result = await Backend3000.attachmentApi.submitAttachment(payload);
+  logger.i("✅ Close 同步成功：${result['message'] ?? ''} (insertId: ${result['insertId'] ?? ''})");
+  return true;
+} catch (e, stack) {
+  logger.e("🔥 發送 Close 時發生錯誤", error: e, stackTrace: stack);
+  return false;
+}
   }
 }

@@ -1,10 +1,9 @@
 //親子同室情況
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:math' as math;
 import 'package:logger/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final Logger logger = Logger();
 
@@ -254,37 +253,28 @@ class _RoommateWidgetState extends State<RoommateWidget> {
     }
   }
  Future<bool> sendRoommateAnswersToMySQL(String userId) async {
-  final url = Uri.parse('http://163.13.201.85:3000/roommate');
-
   final now = DateTime.now();
   final formattedDate =
       "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-  http.Response response;
-    try {
-      response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'user_id': int.parse(userId),
-      'roommate_question_content': "親子同室問卷",
-      'roommate_test_date': formattedDate,
-      'roommate_answer_1': isRoomingIn24Hours == true ? 1 : 0,
-      'roommate_answer_2': isLivingInPostpartumCenter == true ? 1 : 0,
-    }),
-  
+  final payload = <String, dynamic>{
+    'user_id': int.parse(userId),
+    'roommate_question_content': "親子同室問卷",
+    'roommate_test_date': formattedDate,
+    'roommate_answer_1': isRoomingIn24Hours == true ? 1 : 0,
+    'roommate_answer_2': isLivingInPostpartumCenter == true ? 1 : 0,
+  };
 
-  );
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        logger.i("✅ 親子同室問卷已同步到 MySQL！");
-        return true;
-      } else {
-        logger.e("❌ 同步 MySQL 失敗: ${response.body}");
-        return false;
-      }
-    } catch (e) {
-      logger.e("🔥 MySQL 同步例外: $e");
-      return false;
-    }
+  logger.i("📦 roommate payload: $payload");
+
+  try {
+    await Backend3000.roommateApi.submitRoommate(payload);
+    logger.i("✅ 親子同室問卷已同步到 MySQL！");
+    return true;
+  } catch (e, stack) {
+    logger.e("❌ 親子同室問卷同步 MySQL 失敗", error: e, stackTrace: stack);
+    return false;
   }
+}
+
   }

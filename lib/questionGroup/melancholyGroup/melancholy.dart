@@ -1,11 +1,10 @@
 //憂鬱量表
-import 'dart:convert';
 import 'dart:math' as math;
 import 'package:doctor_2/home/fa_question.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final Logger logger = Logger();
 
@@ -303,51 +302,41 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
   }
 
   Future<bool> sendMelancholyAnswersToMySQL(
-      String userId, Map<int, String?> answers, int totalScore) async {
-    final url = Uri.parse('http://163.13.201.85:3000/dour');
+    String userId, Map<int, String?> answers, int totalScore) async {
+  // 取得今天日期（格式：YYYY-MM-DD）
+  final now = DateTime.now();
+  final formattedDate =
+      "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-    // 取得今天日期（格式：2025-04-19）
-    final now = DateTime.now();
-    final formattedDate =
-        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-    final String idKey = widget.isManUser ? 'man_user_id' : 'user_id';
+  final String idKey = widget.isManUser ? 'man_user_id' : 'user_id';
 
-    final Map<String, dynamic> payload = {
-      idKey: int.parse(userId),
-      "dour_question_content": "憂鬱量表",
-      'dour_test_date': formattedDate,
-      'dour_score': totalScore, // 🔥 新增總分
-    };
+  final Map<String, dynamic> payload = {
+    idKey: int.parse(userId),
+    "dour_question_content": "憂鬱量表",
+    'dour_test_date': formattedDate,
+    'dour_score': totalScore,
+  };
 
-    for (int i = 0; i < 10; i++) {
-      final selectedText = answers[i];
-      final answerScore = getScore(i, selectedText!);
-      payload['dour_answer_${i + 1}'] = answerScore.toString();
-    }
-
-    logger.i("📦 準備送出憂鬱量表資料 payload：$payload");
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
-      );
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final result = jsonDecode(response.body);
-        logger.i(
-            "✅ 憂鬱問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
-        return true;
-      } else {
-        logger.e("❌ 憂鬱問卷同步失敗：${response.body}");
-        return false;
-      }
-    } catch (e) {
-      logger.e("❌ 發送憂鬱問卷到MySQL時出錯：$e");
-      return false;
-    }
+  for (int i = 0; i < 10; i++) {
+    final selectedText = answers[i];
+    final answerScore = getScore(i, selectedText!);
+    payload['dour_answer_${i + 1}'] = answerScore.toString();
   }
+
+  logger.i("📦 準備送出憂鬱量表資料 payload：$payload");
+
+  try {
+    final result = await Backend3000.dourApi.submitDour(payload);
+
+    logger.i(
+      "✅ 憂鬱問卷同步成功：${result['message']} (insertId: ${result['insertId']})",
+    );
+    return true;
+  } catch (e) {
+    logger.e("❌ 發送憂鬱問卷到MySQL時出錯：$e");
+    return false;
+  }
+}
 
   int getScore(int questionIndex, String answerText) {
     if (questionIndex >= 0 && questionIndex <= 2) {
@@ -365,7 +354,7 @@ class _MelancholyWidgetState extends State<MelancholyWidget> {
         '有時候這樣': 2,
         '相當多時候這樣': 3,
         '大部分時候我都不能應付': 3,
-        '有時候不能像平常時候應付得好': 2,
+        '有時候我不能像平常時候應付得好': 2,
         '大部分時候我都能像平常時候應付得好': 1,
         '我一直都能應付得好': 0,
       };

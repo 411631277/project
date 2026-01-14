@@ -1,11 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
 
 final Logger logger = Logger();
 
@@ -542,8 +541,6 @@ class _BabyWidgetState extends State<BabyWidget> {
     required bool hasSpecialCondition,
     String? babySolutionDetails,
   }) async {
-    final uri = Uri.parse('http://163.13.201.85:3000/baby');
-
     final payload = <String, dynamic>{
       'baby_name': babyName,
       'baby_birthdate': formatBirthForMySQL(babyBirth),
@@ -572,20 +569,11 @@ class _BabyWidgetState extends State<BabyWidget> {
       payload['user_id'] = idInt;
     }
 
-    try {
-      final resp = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
-      );
-
-      if (resp.statusCode >= 200 && resp.statusCode < 300) {
-        logger.i("✅ 後端同步成功：${resp.body}");
-      } else {
-        logger.e("❌ 後端同步失敗 (${resp.statusCode})：${resp.body}");
-      }
-    } catch (e) {
-      logger.e("🔥 sendBabyDataToMySQL 發生錯誤：$e");
-    }
+   try {
+  await Backend3000.babyApi.submitBaby(payload);
+  logger.i("✅ 後端同步成功");
+} catch (e, stack) {
+  logger.e("❌ 後端同步失敗", error: e, stackTrace: stack);
+}
   }
 }

@@ -1,11 +1,11 @@
 //母乳哺餵知識量表
-import 'dart:convert';
 import 'package:doctor_2/questionGroup/knowledgeGroup/knowledge_score.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:math' as math;
+import 'package:doctor_2/services/backend3000/backend3000.dart';
+
 
 final Logger logger = Logger(); 
 
@@ -307,9 +307,11 @@ final Map<int, String> correctAnswers = {
 
 
 
- Future<bool> sendKnowledgeAnswersToMySQL(String userId, Map<int, String?> answers, int totalScore) async {
-  final url = Uri.parse('http://163.13.201.85:3000/knowledge');
-
+ Future<bool> sendKnowledgeAnswersToMySQL(
+  String userId,
+  Map<int, String?> answers,
+  int totalScore,
+) async {
   final answerMap = {
     "正確": 1,
     "錯誤": 0,
@@ -334,27 +336,14 @@ final Map<int, String> correctAnswers = {
   logger.i("📦 知識問卷送出 payload: $payload");
 
   try {
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(payload),
-    );
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final result = jsonDecode(response.body);
-      logger.i("✅ 知識問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
-      return true;  // ⭐️ 成功回傳 true
-    } else {
-      logger.e("❌ 知識問卷同步失敗：${response.body}");
-      return false; // ⭐️ 失敗回傳 false
-    }
+    final result = await Backend3000.knowledgeApi.submitKnowledge(payload);
+    logger.i("✅ 知識問卷同步成功：${result['message']} (insertId: ${result['insertId']})");
+    return true;
   } catch (e) {
-    logger.e("❌ 知識問卷發生例外錯誤：$e");
-    return false; // ⭐️ 發生錯誤也回傳 false
+    logger.e("❌ 知識問卷同步失敗：$e");
+    return false;
   }
 }
-
-
 
  int _calculateTotalScore() {
   int totalScore = 0;
